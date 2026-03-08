@@ -1,0 +1,56 @@
+name: timerevo
+description: Local desktop time tracking (Flutter + drift + SQLite).
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ">=3.10.8 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # State management
+  flutter_riverpod: ^2.6.1
+
+  # Persistence
+  drift: ^2.25.0
+  drift_flutter: ^0.2.4
+  sqlite3_flutter_libs: ^0.5.24
+  path: ^1.9.1
+  path_provider: ^2.1.5
+
+  # Export
+  archive: ^4.0.0
+  file_selector: ^1.0.3
+  pdf: ^3.11.0
+
+  # Utils
+  table_calendar: ^3.2.0
+  crypto: ^3.0.6
+  cryptography: ^2.9.0
+  flutter_markdown: ^0.7.4
+  intl: ^0.20.2
+  shared_preferences: ^2.5.4
+  sqlite3: ^2.9.4
+
+dependency_overrides:
+  image: ^4.5.4
+
+dev_dependencies:
+  image: ^4.7.2
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  build_runner: ^2.4.14
+  drift_dev: ^2.25.2
+
+flutter:
+  generate: true
+  uses-material-design: true
+  assets:
+    - assets/legal/
+    - assets/fonts/Roboto-Regular.ttf
+    - assets/fonts/Roboto-Bold.ttf

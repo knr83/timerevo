@@ -1,0 +1,684 @@
+{
+  "@@locale": "en",
+
+  "appTitle": "Time Tracker",
+
+  "commonAdd": "Add",
+  "commonSave": "Save",
+  "commonCancel": "Cancel",
+  "commonClose": "Close",
+  "commonOngoing": "Ongoing",
+  "commonNotAvailable": "N/A",
+  "commonCreate": "Create",
+  "commonRename": "Rename",
+  "commonActivate": "Activate",
+  "commonDeactivate": "Deactivate",
+  "commonActive": "Active",
+  "commonInactive": "Inactive",
+  "commonNone": "None",
+  "commonUnknown": "Unknown",
+  "commonBack": "Back",
+  "commonRemove": "Remove",
+  "commonOk": "OK",
+  "commonErrorOccurred": "An error occurred.",
+  "commonFilterLabelWithValue": "{label}: {value}",
+  "@commonFilterLabelWithValue": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+
+  "initFailed": "Initialization failed: {error}",
+  "@initFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "initFailedGeneric": "Initialization failed. Please try again or reinstall.",
+
+  "initDbErrorTitle": "Database error",
+  "initDbErrorMessage": "The database could not be opened. Restore from a backup or reinitialize to continue.",
+  "initDbErrorRestore": "Restore from backup",
+  "initDbErrorReinitialize": "Reinitialize (loses all local data)",
+  "initDbErrorRetry": "Retry",
+
+  "terminalTitle": "Terminal",
+  "terminalAdmin": "Administration",
+  "terminalNoActiveEmployees": "No active employees.",
+  "terminalFailedLoadEmployees": "Failed to load employees: {error}",
+  "@terminalFailedLoadEmployees": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "terminalNoOpenSession": "No open session.",
+  "terminalStatusOnShift": "On shift",
+  "terminalOnShiftSince": "since {time}",
+  "@terminalOnShiftSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "terminalStatusReady": "Ready to clock in",
+  "terminalCurrentTime": "Now {time}",
+  "@terminalCurrentTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalSwitchEmployee": "Change employee",
+  "terminalSessionsToday": "Today",
+  "terminalSessionInProgress": "in progress",
+  "terminalSessionRange": "{start} – {end}",
+  "@terminalSessionRange": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "terminalNoSessionsToday": "No sessions today",
+  "terminalDurationLessThanOneMin": "< 1 min",
+  "terminalDurationMinutesOnly": "{m} min",
+  "@terminalDurationMinutesOnly": {
+    "placeholders": { "m": { "type": "int" } }
+  },
+  "terminalDurationHoursOnly": "{h} h",
+  "@terminalDurationHoursOnly": {
+    "placeholders": { "h": { "type": "int" } }
+  },
+  "terminalShowMoreSessions": "Show {count} more",
+  "@terminalShowMoreSessions": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "terminalTotalToday": "Total today",
+  "terminalTotalTodayWithValue": "Total today: {value}",
+  "@terminalTotalTodayWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "terminalErrorSessionAlreadyOpen": "Session is already open.",
+  "terminalErrorNoOpenSession": "No open session.",
+  "terminalErrorClockInBeforeStart": "Cannot clock in before working hours start.",
+  "terminalErrorClockInAfterEnd": "Cannot clock in after working hours end.",
+  "terminalErrorHasApprovedAbsence": "You have an approved absence today. Clock-in is not available.",
+  "terminalOpenSince": "OPEN session since {time}",
+  "@terminalOpenSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "terminalIn": "IN",
+  "terminalOut": "OUT",
+  "terminalSaved": "Saved.",
+  "terminalSuccessClockIn": "Have a good workday",
+  "terminalSuccessClockOut": "Enjoy your rest",
+  "terminalPinPromptTitle": "Enter PIN",
+  "terminalPinConfirm": "OK",
+  "terminalPinNotSet": "PIN is not set for this user. Contact the administrator.",
+  "terminalUnclosedSessionTitle": "Unclosed session",
+  "terminalUnclosedSessionMessage": "Session started at {startTime}. Enter the end date and time.",
+  "@terminalUnclosedSessionMessage": {
+    "placeholders": {
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalUnclosedSessionEndLabel": "End date and time",
+  "terminalUnclosedSessionSelectEnd": "Select date and time",
+  "terminalUnclosedSessionConfirm": "Close session",
+  "terminalUnclosedSessionErrorEndBeforeStart": "End must be after start.",
+  "terminalUnclosedSessionErrorEndInFuture": "End cannot be in the future.",
+  "terminalUnclosedSessionErrorEndAfterWorkingHours": "End time cannot exceed working hours.",
+  "terminalPolicyRequiredTitle": "Policy acknowledgment required",
+  "terminalPolicyRequiredMessage": "To continue, you must read and acknowledge the Privacy Policy and Terms.",
+  "terminalPolicyCheckboxText": "I have read and agree to the Privacy Policy and Terms",
+
+  "adminTitle": "Administration",
+  "adminNavEmployees": "Employees",
+  "adminNavSchedules": "Schedules",
+  "adminNavSessions": "Sessions",
+  "adminNavJournal": "Journal",
+  "adminNavReports": "Reports",
+  "adminNavSettings": "Settings",
+
+  "dashboardTitle": "Home",
+  "dashboardNavOverview": "Home",
+  "dashboardNowAtWork": "Now at work",
+  "dashboardNoOneAtWork": "No one at work yet",
+  "dashboardToday": "All employees for today",
+  "dashboardRecentActivity": "Recent activity",
+  "dashboardViewAllSessions": "All sessions",
+  "dashboardNoRecentActivity": "No recent activity",
+  "dashboardNoEmployeesToday": "No employees today",
+
+  "adminEnterPinToContinue": "Enter PIN to continue.",
+  "adminPinLabel": "PIN",
+  "adminUnlock": "Unlock",
+  "adminInvalidPin": "Invalid PIN.",
+  "adminPinInvalidFormat": "PIN must be digits only and at least 4 digits.",
+  "adminDefaultPinHint": "Default PIN: 0000",
+  "adminChangePin": "Change PIN",
+  "adminLock": "Lock",
+  "adminPinUpdated": "PIN updated.",
+
+  "changePinTitle": "Change PIN",
+  "changePinCurrentPin": "Current PIN",
+  "changePinNewPin": "New PIN",
+  "changePinConfirmNewPin": "Confirm new PIN",
+  "changePinNewPinRequired": "New PIN is required.",
+  "changePinConfirmationMismatch": "PIN confirmation does not match.",
+  "changePinCurrentInvalid": "Current PIN is invalid.",
+  "changePinInvalidFormat": "PIN must be digits only and at least 4 digits.",
+
+  "employeesTitle": "Employees",
+  "employeesNoEmployeesYet": "No employees yet.",
+  "employeesAddEmployee": "Add",
+  "employeesInactiveHiddenHint": "Inactive employees are hidden in the Terminal.",
+
+  "employeeDialogAddTitle": "Add employee",
+  "employeeDialogEditTitle": "Edit employee",
+  "employeeFirstName": "First name",
+  "employeeLastName": "Last name",
+  "employeeDefaultSchedule": "Default schedule",
+  "employeeActiveLabel": "Active",
+  "employeeFirstLastRequired": "First name and last name are required.",
+  "employeeCreateFailed": "Failed to create employee: {error}",
+  "@employeeCreateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "employeeUpdateFailed": "Failed to update employee: {error}",
+  "@employeeUpdateFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "employeeSaved": "Saved.",
+
+  "employeeDefaultScheduleSubtitle": "Default schedule: {name}",
+  "@employeeDefaultScheduleSubtitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "employeeScheduleButtonLabel": "Schedule: {name}",
+  "@employeeScheduleButtonLabel": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "employeeChangeScheduleTooltip": "Change schedule",
+  "employeeId": "Employee ID",
+  "employeeCode": "Employee Code",
+  "employeeCodeHint": "E001",
+  "employeeHireDate": "Hire Date",
+  "employeeStatus": "Status",
+  "employeeRole": "Role",
+  "employeeRoleFieldLabel": "Employee / Manager",
+  "employeeUsePin": "Enable PIN",
+  "employeeUseNfc": "Enable NFC",
+  "employeeAccessToken": "Access Token",
+  "employeePinStatus": "PIN Status",
+  "employeePinStatusWithValue": "PIN Status: {value}",
+  "@employeePinStatusWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeAccessNote": "Access Notes",
+  "employeeAccessTokenRequiredWhenNfc": "Required when NFC enabled.",
+  "employeeEmploymentType": "Employment Type",
+  "employeeWeeklyHours": "Weekly Hours",
+  "employeeWeeklyHoursHint": "40",
+  "employeeEmail": "Email",
+  "employeePhone": "Phone",
+  "employeeDepartment": "Department",
+  "employeeJobTitle": "Job Title",
+  "employeeInternalComment": "Internal Comment",
+  "employeePolicyAcknowledged": "Policy Acknowledged",
+  "employeePolicyAcknowledgedAt": "Acknowledged At",
+  "employeePolicyAcknowledgedAtWithValue": "Acknowledged: {value}",
+  "@employeePolicyAcknowledgedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeDataRetentionPolicy": "Data Retention Policy",
+  "employeeCreatedAt": "Created At",
+  "employeeCreatedAtWithValue": "Created: {value}",
+  "@employeeCreatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeUpdatedAt": "Updated At",
+  "employeeUpdatedAtWithValue": "Updated: {value}",
+  "@employeeUpdatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeCreatedBy": "Created By",
+  "employeeUpdatedBy": "Updated By",
+  "employeePinStatusSet": "Set",
+  "employeePinStatusNotSet": "Not set",
+  "employeeRoleEmployee": "Employee",
+  "employeeRoleManager": "Manager",
+  "employeeEmploymentTypeFullTime": "Full time",
+  "employeeEmploymentTypePartTime": "Part time",
+  "employeeEmploymentTypeMinijob": "Minijob",
+  "employeeEmploymentTypeCustom": "Custom",
+  "employeeTerminalAccessDisabled": "Terminal access disabled",
+  "employeeInactive": "Employee is inactive",
+  "employeeCodeAlreadyExists": "Employee code already exists",
+  "employeePolicyText": "Employee has acknowledged the Privacy Policy and Terms",
+  "employeePolicyPrefix": "Employee has acknowledged the ",
+  "employeePolicyLinkPrivacy": "Privacy Policy",
+  "employeePolicyMiddle": " and ",
+  "employeePolicyLinkTerms": "Terms",
+  "employeeSetPin": "Set PIN",
+  "employeeResetPin": "Reset PIN",
+  "employeeSectionIdentity": "Identity",
+  "employeeSectionEmployment": "Employment",
+  "employeeSectionContact": "Contact",
+  "employeeSectionAccess": "Terminal Access",
+  "employeeSectionSchedule": "Schedule",
+  "employeeSectionPolicy": "Policy & Compliance",
+  "employeeSectionAudit": "Record",
+
+  "schedulesEmptyHint": "Create a schedule template.",
+  "schedulesFailedLoad": "Failed to load schedules: {error}",
+  "@schedulesFailedLoad": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "schedulesTitle": "Schedules",
+  "schedulesAddTemplateTooltip": "Add template",
+  "schedulesNoTemplates": "No templates.",
+  "schedulesCreateTemplateTitle": "Create template",
+  "schedulesRenameTemplateTitle": "Rename template",
+  "schedulesTemplateNameLabel": "Name",
+  "schedulesWeekEditorTitle": "Week editor",
+  "schedulesFailedLoadTemplate": "Failed to load template: {error}",
+  "@schedulesFailedLoadTemplate": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "schedulesDayOff": "Day off",
+  "schedulesNoIntervals": "No intervals.",
+  "schedulesAddInterval": "Add interval",
+  "schedulesSaved": "Saved.",
+  "schedulesCopiedTo": "Copied to {weekday}.",
+  "@schedulesCopiedTo": {
+    "placeholders": {
+      "weekday": { "type": "String" }
+    }
+  },
+  "schedulesInvalidInput": "Invalid input.",
+  "schedulesBreadcrumb": "Admin / Schedules",
+  "schedulesNewSchedule": "New schedule",
+  "schedulesEditIntervalTitle": "Edit interval",
+  "schedulesAddIntervalTitle": "Add interval",
+  "schedulesStartTimeLabel": "Start time",
+  "schedulesEndTimeLabel": "End time",
+  "schedulesDiscardChanges": "Discard",
+  "schedulesUnsavedChangesTitle": "Unsaved changes",
+  "schedulesUnsavedChangesMessage": "You have unsaved changes. Save, discard, or cancel?",
+  "schedulesSaveFailed": "Could not save: {reason}",
+  "@schedulesSaveFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesTotalHours": "Total {hours}h",
+  "@schedulesTotalHours": {
+    "placeholders": {
+      "hours": { "type": "String" }
+    }
+  },
+  "schedulesIntervalOverlapError": "This interval overlaps with another.",
+  "schedulesIntervalEndBeforeStartError": "End time must be after start time.",
+  "schedulesScheduleActiveSuffix": " (Active)",
+  "schedulesScheduleInactiveSuffix": " (Inactive)",
+  "schedulesRenameScheduleTooltip": "Rename schedule",
+  "schedulesNameAlreadyExistsError": "Name already exists.",
+  "schedulesNameRequiredError": "Name is required.",
+  "schedulesDeleteScheduleTooltip": "Delete schedule",
+  "schedulesDeleteScheduleTitle": "Delete schedule?",
+  "schedulesDeleteScheduleMessage": "This will remove the schedule template. Employees assigned to it will have no default schedule.",
+  "schedulesDeleteScheduleButton": "Delete",
+  "schedulesDeleteFailed": "Could not delete: {reason}",
+  "@schedulesDeleteFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesDeleteBlockedAssignedTitle": "Cannot delete",
+  "schedulesDeleteBlockedAssignedMessage": "This schedule is assigned to employees. Unassign it before deleting.",
+
+  "intervalStart": "Start: {time}",
+  "@intervalStart": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "intervalEnd": "End: {time}",
+  "@intervalEnd": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "intervalRemoveTooltip": "Remove",
+
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday",
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday",
+
+  "settingsTitle": "Settings",
+  "settingsLanguageLabel": "Language",
+  "settingsLanguageSystem": "System default",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageRussian": "Русский",
+  "settingsLanguageEnglish": "English",
+  "settingsThemeLabel": "Theme",
+  "settingsThemeSystem": "System default",
+  "settingsThemeLight": "Light",
+  "settingsThemeDark": "Dark",
+  "settingsThemeHighContrastLight": "High contrast (light)",
+  "settingsThemeHighContrastDark": "High contrast (dark)",
+  "settingsWorkingHoursLabel": "Allowed working time",
+  "settingsWorkingHoursFrom": "From",
+  "settingsWorkingHoursTo": "To",
+  "settingsWorkingHoursInvalidRange": "From must be before To",
+  "settingsWorkingHoursFromWithValue": "From: {value}",
+  "@settingsWorkingHoursFromWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsWorkingHoursToWithValue": "To: {value}",
+  "@settingsWorkingHoursToWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsPrivacyPolicy": "Privacy Policy",
+  "settingsCreateBackup": "Create backup",
+  "settingsBackupCreated": "Backup created: {path}",
+  "settingsBackupSuccessTitle": "Backup created successfully",
+  "settingsRestoreCompletedTitle": "Database restored",
+  "settingsRestoreCompletedMessage": "The database was restored from a backup. Press OK to continue.",
+  "@settingsBackupCreated": {
+    "placeholders": {
+      "path": { "type": "String" }
+    }
+  },
+  "settingsBackupErrorPermissionDenied": "Cannot access the file or folder.",
+  "settingsBackupErrorNotFound": "File or folder not found.",
+  "settingsBackupErrorInvalidArchive": "Invalid backup file.",
+  "settingsBackupErrorIoFailure": "A file operation failed.",
+  "settingsBackupErrorDbFailure": "Database error.",
+  "settingsBackupErrorUnknown": "An unknown error occurred.",
+  "settingsRestoreFromBackup": "Restore from backup",
+  "settingsRestoreConfirmTitle": "Restore",
+  "settingsRestoreConfirmMessage": "Current data will be completely replaced by data from the selected file. Continue?",
+  "settingsRestoreCreated": "Restore complete. Refresh the screen if needed.",
+  "settingsRestoreScheduledRestart": "Restore scheduled. Please restart the application to complete.",
+  "settingsRestoreErrorPermissionDenied": "Cannot access the file or folder.",
+  "settingsRestoreErrorNotFound": "File or folder not found.",
+  "settingsRestoreErrorInvalidArchive": "Invalid backup file.",
+  "settingsRestoreErrorIoFailure": "A file operation failed.",
+  "settingsRestoreErrorDbFailure": "Database error.",
+  "settingsRestoreErrorUnknown": "An unknown error occurred.",
+  "settingsRestoreSchemaError": "File was created in another app version. Restore is not possible.",
+  "settingsExportDiagnostics": "Export diagnostics",
+  "settingsExportDiagnosticsSuccess": "Diagnostics exported successfully",
+  "settingsExportDiagnosticsFailed": "Diagnostics export failed: {error}",
+  "@settingsExportDiagnosticsFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "legalTerms": "Terms / Disclaimer",
+  "helpTitle": "Help",
+  "aboutTitle": "About",
+  "legalNoticeWelcomeTitle": "Welcome",
+  "legalNoticeWelcomeText": "Please review Privacy Policy and Terms.",
+  "legalNoticeOpenPrivacy": "Open Privacy Policy",
+  "legalNoticeOpenTerms": "Open Terms",
+  "legalNoticeClose": "Close",
+  "legalCopy": "Copy",
+  "legalCopiedToClipboard": "Copied to clipboard.",
+  "legalFailedToCopy": "Failed to copy.",
+
+  "sessionsTitle": "Sessions",
+  "sessionsEmployeeFilter": "Employee",
+  "sessionsEmployeeAll": "All",
+  "sessionsNoEmployeesAvailable": "No employees available.",
+  "sessionsFailedLoadEmployees": "Failed to load employees: {error}",
+  "@sessionsFailedLoadEmployees": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "sessionsFilterFrom": "From",
+  "sessionsFilterTo": "To",
+  "sessionsFilterAny": "Any",
+  "sessionsNoSessions": "No sessions.",
+  "sessionsFailedLoadSessions": "Failed to load sessions: {error}",
+  "@sessionsFailedLoadSessions": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "sessionsTableEmployee": "Employee",
+  "sessionsTableStart": "Start",
+  "sessionsTableEnd": "End",
+  "sessionsTableDuration": "Duration",
+  "sessionsDurationWithValue": "Duration: {value}",
+  "@sessionsDurationWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "sessionsTableStatus": "Status",
+  "sessionsTableNote": "Note",
+  "sessionsTableActions": "Actions",
+  "sessionsEdit": "Edit",
+  "sessionsEditDialogTitle": "Edit session",
+  "sessionsEmployeePrefix": "Employee: {name}",
+  "@sessionsEmployeePrefix": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "sessionsStartPrefix": "Start: {value}",
+  "@sessionsStartPrefix": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "sessionsEndPrefix": "End: {value}",
+  "@sessionsEndPrefix": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "sessionsOpenSessionLabel": "Open session (end is empty)",
+  "sessionsSetEndNow": "Set end = now",
+  "sessionsClearEnd": "Clear end",
+  "sessionsUpdateReason": "Update reason",
+  "sessionsEmployeeCannotChangeHint": "Employee cannot be changed.",
+  "sessionsUpdateReasonRequired": "Update reason is required.",
+  "sessionsErrorSameDayRequired": "Session must start and end on the same day.",
+  "journalTitle": "Journal",
+  "journalFilterFrom": "From",
+  "journalFilterTo": "To",
+  "journalFilterAny": "Any",
+  "journalFilterStatusAll": "All",
+  "journalFilterStatusOpen": "Open",
+  "journalFilterStatusClosed": "Closed",
+  "journalFilterSearch": "Search",
+  "journalPresetToday": "Today",
+  "journalPresetWeek": "Week",
+  "journalPresetMonth": "Month",
+  "journalPresetLastMonth": "Last month",
+  "journalEndEmpty": "—",
+  "journalEditDialogTitle": "Edit session",
+  "journalCloseNow": "Close now",
+  "journalErrorEndBeforeStart": "End time must be after start time.",
+  "journalErrorCrossDay": "Start and end must be on the same day.",
+  "journalUpdateReasonHint": "Required when changing start or end time",
+  "journalSaved": "Saved.",
+  "durationHm": "{hours}h {minutes}m",
+  "@durationHm": {
+    "placeholders": {
+      "hours": { "type": "int" },
+      "minutes": { "type": "int" }
+    }
+  },
+
+  "reportsTitle": "Reports",
+  "reportsNoData": "No data.",
+  "reportsFailedLoad": "Failed to load report: {error}",
+  "@reportsFailedLoad": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "reportsOnlyClosedHint": "Only CLOSED sessions are included in totals.",
+  "reportsTableEmployee": "Employee",
+  "reportsTableTotal": "Total",
+  "reportsTableNorm": "Norm",
+  "reportsTableDelta": "Delta",
+  "reportsTableSessions": "Sessions",
+  "reportsExportPdf": "Export PDF",
+  "reportsPdfFileType": "PDF files",
+  "reportsExported": "Exported.",
+  "reportsTableWorked": "Worked",
+  "reportsTablePlanned": "Planned",
+  "reportsTableBalance": "Balance (+/−)",
+  "reportsPlannedNoSchedule": "No schedule",
+  "reportsPeriodLabel": "Period",
+  "reportsPeriodPresetToday": "Today",
+  "reportsPeriodPresetWeek": "Week",
+  "reportsPeriodPresetMonth": "Month",
+  "reportsPeriodPresetLastMonth": "Last month",
+  "reportsPeriodPresetCustom": "Custom",
+  "reportsEmployeeFilter": "Employee",
+  "reportsDetailsTitle": "Details",
+  "reportsExportEmployeePdf": "Export PDF",
+  "reportsDetailsClose": "Close",
+  "reportsTableDate": "Date",
+  "reportsPdfTitle": "Time report",
+  "reportsPdfPeriod": "Period: {from} — {to}",
+  "@reportsPdfPeriod": {
+    "placeholders": {
+      "from": { "type": "String" },
+      "to": { "type": "String" }
+    }
+  },
+  "reportsPdfGenerated": "Generated: {datetime}",
+  "@reportsPdfGenerated": {
+    "placeholders": {
+      "datetime": { "type": "String" }
+    }
+  },
+  "reportsPdfEmployee": "Employee: {name}",
+  "@reportsPdfEmployee": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "reportsPdfSort": "Sort: {column}",
+  "@reportsPdfSort": {
+    "placeholders": {
+      "column": { "type": "String" }
+    }
+  },
+  "reportsPdfFooterBrand": "Timerevo — offline report",
+  "reportsPdfFooterPage": "Page {current} / {total}",
+  "@reportsPdfFooterPage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "adminNavAbsences": "Absences",
+  "absencesTitle": "Absences",
+  "absencesAdd": "Add absence",
+  "absencesEmployee": "Employee",
+  "absencesType": "Type",
+  "absencesDateFrom": "From",
+  "absencesDateTo": "To",
+  "absencesStatus": "Status",
+  "absencesCreatedBy": "Created by",
+  "absencesActions": "Actions",
+  "absenceTypeVacation": "Annual leave",
+  "absenceTypeSickLeave": "Sick leave",
+  "absenceTypeUnpaidLeave": "Unpaid leave",
+  "absenceTypeParentalLeave": "Parental leave",
+  "absenceTypeStudyLeave": "Study leave",
+  "absenceTypeOther": "Other",
+  "absenceStatusPending": "Pending",
+  "absenceStatusApproved": "Approved",
+  "absenceStatusRejected": "Rejected",
+  "absenceApprove": "Approve",
+  "absenceReject": "Reject",
+  "absenceEdit": "Edit",
+  "absenceDelete": "Delete",
+  "absenceRejectReason": "Reject reason",
+  "terminalMyCalendar": "My work calendar",
+  "terminalMyPdf": "Time report (PDF)",
+  "terminalCalendarPageTitle": "Work calendar ({name})",
+  "@terminalCalendarPageTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "terminalCalendarSessions": "Sessions",
+  "terminalCalendarAbsences": "Absences",
+  "terminalCalendarNoData": "No data for this day",
+  "terminalCalendarNewAbsence": "New request",
+  "terminalCalendarFormatMonth": "Month",
+  "terminalCalendarFormatTwoWeeks": "2 weeks",
+  "terminalCalendarFormatWeek": "Week",
+  "absenceCreateTitle": "New absence request",
+  "absenceEditTitle": "Edit absence",
+  "absenceErrorOverlap": "Overlap with existing absence.",
+  "absenceErrorDateRestrictionVacation": "Vacation must start today or later.",
+  "absenceErrorDateRestrictionSickLeave": "Sick leave cannot start more than 3 days ago.",
+  "absencesEmpty": "No absences.",
+  "absencesEmptyHint": "No absences yet. Create your first request.",
+  "absenceDeleteConfirm": "Delete this absence request?",
+  "absenceApproveConfirm": "Approve this absence request?",
+  "absenceRejectConfirmHint": "The employee will see the reject reason.",
+  "absenceCreated": "Absence request created.",
+  "absenceUpdated": "Absence request updated.",
+  "absenceApproved": "Absence request approved.",
+  "absenceRejected": "Absence request rejected.",
+  "absenceDeleted": "Absence request deleted.",
+  "absencesApprovedBy": "Approved by",
+  "absencesApprovedAt": "Approved at",
+  "absenceErrorEditPendingOnly": "Can only edit pending absences.",
+  "absenceErrorDeletePendingOnly": "Can only delete pending absences.",
+  "absenceErrorApproveRejectPendingOnly": "Can only approve or reject pending absences.",
+  "absenceErrorRejectReasonRequired": "Reject reason is required.",
+  "absenceErrorDateOrder": "End date must be on or after start date.",
+  "absenceErrorEmployeeRequired": "Please select an employee.",
+  "absenceErrorDateRequired": "Please select From and To dates."
+}
+

@@ -1,0 +1,588 @@
+{
+  "@@locale": "ru",
+
+  "appTitle": "Учёт времени",
+
+  "commonAdd": "Добавить",
+  "commonSave": "Сохранить",
+  "commonCancel": "Отмена",
+  "commonClose": "Закрыть",
+  "commonOngoing": "Идёт",
+  "commonNotAvailable": "н/д",
+  "commonCreate": "Создать",
+  "commonRename": "Переименовать",
+  "commonActivate": "Активировать",
+  "commonDeactivate": "Деактивировать",
+  "commonActive": "Активный",
+  "commonInactive": "Неактивный",
+  "commonNone": "Нет",
+  "commonUnknown": "Неизвестно",
+  "commonBack": "Назад",
+  "commonRemove": "Удалить",
+  "commonOk": "ОК",
+  "commonErrorOccurred": "Произошла ошибка.",
+  "commonFilterLabelWithValue": "{label}: {value}",
+  "@commonFilterLabelWithValue": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+
+  "initFailed": "Ошибка инициализации: {error}",
+  "initFailedGeneric": "Ошибка инициализации. Попробуйте снова или переустановите приложение.",
+
+  "initDbErrorTitle": "Ошибка базы данных",
+  "initDbErrorMessage": "База данных не открывается. Восстановите из резервной копии или выполните переинициализацию.",
+  "initDbErrorRestore": "Восстановить из резервной копии",
+  "initDbErrorReinitialize": "Переинициализировать (все локальные данные будут удалены)",
+  "initDbErrorRetry": "Повторить",
+
+  "terminalTitle": "Терминал",
+  "terminalAdmin": "Администрирование",
+  "terminalNoActiveEmployees": "Нет активных сотрудников.",
+  "terminalFailedLoadEmployees": "Не удалось загрузить сотрудников: {error}",
+  "terminalNoOpenSession": "Нет открытой смены.",
+  "terminalStatusOnShift": "На смене",
+  "terminalOnShiftSince": "с {time}",
+  "@terminalOnShiftSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "terminalStatusReady": "Готов к отметке",
+  "terminalCurrentTime": "Сейчас {time}",
+  "@terminalCurrentTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalSwitchEmployee": "Сменить сотрудника",
+  "terminalSessionsToday": "Сегодня",
+  "terminalSessionInProgress": "идёт",
+  "terminalSessionRange": "{start} – {end}",
+  "@terminalSessionRange": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "terminalNoSessionsToday": "Нет смен за сегодня",
+  "terminalDurationLessThanOneMin": "< 1 мин",
+  "terminalDurationMinutesOnly": "{m} мин",
+  "@terminalDurationMinutesOnly": {
+    "placeholders": { "m": { "type": "int" } }
+  },
+  "terminalDurationHoursOnly": "{h} ч",
+  "@terminalDurationHoursOnly": {
+    "placeholders": { "h": { "type": "int" } }
+  },
+  "terminalShowMoreSessions": "Показать ещё {count}",
+  "@terminalShowMoreSessions": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "terminalTotalToday": "Всего за сегодня",
+  "terminalTotalTodayWithValue": "Всего за сегодня: {value}",
+  "@terminalTotalTodayWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "terminalErrorSessionAlreadyOpen": "Смена уже открыта.",
+  "terminalErrorNoOpenSession": "Нет открытой смены.",
+  "terminalErrorClockInBeforeStart": "Нельзя отмечаться до начала рабочего времени.",
+  "terminalErrorClockInAfterEnd": "Нельзя отмечаться после окончания рабочего времени.",
+  "terminalErrorHasApprovedAbsence": "Сегодня у вас одобренное отсутствие. Отметка прихода недоступна.",
+  "terminalOpenSince": "Открытая смена с {time}",
+  "terminalIn": "ПРИШЁЛ",
+  "terminalOut": "УШЁЛ",
+  "terminalSaved": "Сохранено.",
+  "terminalSuccessClockIn": "Хорошего рабочего дня",
+  "terminalSuccessClockOut": "Приятного отдыха",
+  "terminalPinPromptTitle": "Введите PIN",
+  "terminalPinConfirm": "OK",
+  "terminalPinNotSet": "Для пользователя не задан PIN. Обратитесь к администратору.",
+  "terminalUnclosedSessionTitle": "Незакрытая смена",
+  "terminalUnclosedSessionMessage": "Смена началась {startTime}. Укажите дату и время окончания.",
+  "@terminalUnclosedSessionMessage": {
+    "placeholders": {
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalUnclosedSessionEndLabel": "Конец смены",
+  "terminalUnclosedSessionSelectEnd": "Выбрать дату и время",
+  "terminalUnclosedSessionConfirm": "Закрыть смену",
+  "terminalUnclosedSessionErrorEndBeforeStart": "Время окончания должно быть позже начала.",
+  "terminalUnclosedSessionErrorEndInFuture": "Время окончания не может быть в будущем.",
+  "terminalUnclosedSessionErrorEndAfterWorkingHours": "Время окончания не может быть позже конца рабочего дня.",
+  "terminalPolicyRequiredTitle": "Требуется подтверждение политики",
+  "terminalPolicyRequiredMessage": "Для продолжения необходимо ознакомиться с Политикой конфиденциальности и Условиями использования и подтвердить их.",
+  "terminalPolicyCheckboxText": "Я ознакомился(ась) с Политикой конфиденциальности и Условиями использования",
+
+  "adminTitle": "Администрирование",
+  "adminNavEmployees": "Сотрудники",
+  "adminNavSchedules": "Расписания",
+  "adminNavSessions": "Смены",
+  "adminNavJournal": "Журнал",
+  "adminNavReports": "Отчёты",
+  "adminNavSettings": "Настройки",
+
+  "dashboardTitle": "Главная",
+  "dashboardNavOverview": "Главная",
+  "dashboardNowAtWork": "Сейчас на смене",
+  "dashboardNoOneAtWork": "Пока никого нет",
+  "dashboardToday": "Все сотрудники за сегодня",
+  "dashboardRecentActivity": "Недавняя активность",
+  "dashboardViewAllSessions": "Все сессии",
+  "dashboardNoRecentActivity": "Нет недавней активности",
+  "dashboardNoEmployeesToday": "Нет сотрудников за сегодня",
+
+  "adminEnterPinToContinue": "Введите PIN, чтобы продолжить.",
+  "adminPinLabel": "PIN",
+  "adminUnlock": "Открыть",
+  "adminInvalidPin": "Неверный PIN.",
+  "adminPinInvalidFormat": "PIN должен содержать только цифры, минимум 4.",
+  "adminDefaultPinHint": "PIN по умолчанию: 0000",
+  "adminChangePin": "Сменить PIN",
+  "adminLock": "Заблокировать",
+  "adminPinUpdated": "PIN обновлён.",
+
+  "changePinTitle": "Смена PIN",
+  "changePinCurrentPin": "Текущий PIN",
+  "changePinNewPin": "Новый PIN",
+  "changePinConfirmNewPin": "Повторите новый PIN",
+  "changePinNewPinRequired": "Новый PIN обязателен.",
+  "changePinConfirmationMismatch": "Подтверждение PIN не совпадает.",
+  "changePinCurrentInvalid": "Текущий PIN неверен.",
+  "changePinInvalidFormat": "PIN должен содержать только цифры, минимум 4.",
+
+  "employeesTitle": "Сотрудники",
+  "employeesNoEmployeesYet": "Пока нет сотрудников.",
+  "employeesAddEmployee": "Добавить",
+  "employeesInactiveHiddenHint": "Неактивные сотрудники скрыты в терминале.",
+
+  "employeeDialogAddTitle": "Добавить сотрудника",
+  "employeeDialogEditTitle": "Редактировать сотрудника",
+  "employeeFirstName": "Имя",
+  "employeeLastName": "Фамилия",
+  "employeeDefaultSchedule": "Расписание по умолчанию",
+  "employeeActiveLabel": "Активен",
+  "employeeFirstLastRequired": "Имя и фамилия обязательны.",
+  "employeeCreateFailed": "Не удалось создать сотрудника: {error}",
+  "employeeUpdateFailed": "Не удалось обновить сотрудника: {error}",
+  "employeeSaved": "Сохранено.",
+
+  "employeeDefaultScheduleSubtitle": "Расписание по умолчанию: {name}",
+  "employeeScheduleButtonLabel": "Расписание: {name}",
+  "employeeChangeScheduleTooltip": "Сменить расписание",
+  "employeeId": "ID сотрудника",
+  "employeeCode": "Код сотрудника",
+  "employeeCodeHint": "E001",
+  "employeeHireDate": "Дата приёма",
+  "employeeStatus": "Статус",
+  "employeeRole": "Роль",
+  "employeeRoleFieldLabel": "Сотрудник / Руководитель",
+  "employeeUsePin": "Включить PIN",
+  "employeeUseNfc": "Включить NFC",
+  "employeeAccessToken": "Токен доступа",
+  "employeePinStatus": "Статус PIN",
+  "employeePinStatusWithValue": "Статус PIN: {value}",
+  "@employeePinStatusWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeAccessNote": "Заметки о доступе",
+  "employeeAccessTokenRequiredWhenNfc": "Обязательно при включённом NFC.",
+  "employeeEmploymentType": "Тип занятости",
+  "employeeWeeklyHours": "Часов в неделю",
+  "employeeWeeklyHoursHint": "40",
+  "employeeEmail": "E-mail",
+  "employeePhone": "Телефон",
+  "employeeDepartment": "Отдел",
+  "employeeJobTitle": "Должность",
+  "employeeInternalComment": "Внутренний комментарий",
+  "employeePolicyAcknowledged": "Политика подтверждена",
+  "employeePolicyAcknowledgedAt": "Подтверждено",
+  "employeePolicyAcknowledgedAtWithValue": "Подтверждено: {value}",
+  "@employeePolicyAcknowledgedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeDataRetentionPolicy": "Политика хранения данных",
+  "employeeCreatedAt": "Создано",
+  "employeeCreatedAtWithValue": "Создано: {value}",
+  "@employeeCreatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeUpdatedAt": "Обновлено",
+  "employeeUpdatedAtWithValue": "Обновлено: {value}",
+  "@employeeUpdatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeCreatedBy": "Создано",
+  "employeeUpdatedBy": "Обновлено",
+  "employeePinStatusSet": "Установлен",
+  "employeePinStatusNotSet": "Не установлен",
+  "employeeRoleEmployee": "Сотрудник",
+  "employeeRoleManager": "Руководитель",
+  "employeeEmploymentTypeFullTime": "Полная занятость",
+  "employeeEmploymentTypePartTime": "Частичная занятость",
+  "employeeEmploymentTypeMinijob": "Мини-занятость",
+  "employeeEmploymentTypeCustom": "Иное",
+  "employeeTerminalAccessDisabled": "Доступ к терминалу отключён",
+  "employeeInactive": "Сотрудник неактивен",
+  "employeeCodeAlreadyExists": "Код сотрудника уже существует",
+  "employeePolicyText": "Сотрудник ознакомился с Политикой конфиденциальности и Условиями использования",
+  "employeePolicyPrefix": "Сотрудник ознакомился с ",
+  "employeePolicyLinkPrivacy": "Политикой конфиденциальности",
+  "employeePolicyMiddle": " и ",
+  "employeePolicyLinkTerms": "Условиями использования",
+  "employeeSetPin": "Установить PIN",
+  "employeeResetPin": "Сбросить PIN",
+  "employeeSectionIdentity": "Данные",
+  "employeeSectionEmployment": "Трудоустройство",
+  "employeeSectionContact": "Контакт",
+  "employeeSectionAccess": "Доступ к терминалу",
+  "employeeSectionSchedule": "Расписание",
+  "employeeSectionPolicy": "Политика и соответствие",
+  "employeeSectionAudit": "Запись",
+
+  "schedulesEmptyHint": "Создайте шаблон расписания.",
+  "schedulesFailedLoad": "Не удалось загрузить расписания: {error}",
+  "schedulesTitle": "Расписания",
+  "schedulesAddTemplateTooltip": "Добавить шаблон",
+  "schedulesNoTemplates": "Нет шаблонов.",
+  "schedulesCreateTemplateTitle": "Создать шаблон",
+  "schedulesRenameTemplateTitle": "Переименовать шаблон",
+  "schedulesTemplateNameLabel": "Название",
+  "schedulesWeekEditorTitle": "Редактор недели",
+  "schedulesFailedLoadTemplate": "Не удалось загрузить шаблон: {error}",
+  "schedulesDayOff": "Выходной",
+  "schedulesNoIntervals": "Нет интервалов.",
+  "schedulesAddInterval": "Добавить интервал",
+  "schedulesSaved": "Сохранено.",
+  "schedulesCopiedTo": "Скопировано на {weekday}.",
+  "schedulesInvalidInput": "Некорректный ввод.",
+  "schedulesBreadcrumb": "Админ / Расписания",
+  "schedulesNewSchedule": "Новое расписание",
+  "schedulesEditIntervalTitle": "Редактировать интервал",
+  "schedulesAddIntervalTitle": "Добавить интервал",
+  "schedulesStartTimeLabel": "Время начала",
+  "schedulesEndTimeLabel": "Время окончания",
+  "schedulesDiscardChanges": "Отменить",
+  "schedulesUnsavedChangesTitle": "Несохранённые изменения",
+  "schedulesUnsavedChangesMessage": "У вас есть несохранённые изменения. Сохранить, отменить или остаться?",
+  "schedulesSaveFailed": "Не удалось сохранить: {reason}",
+  "@schedulesSaveFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesTotalHours": "Всего {hours} ч",
+  "@schedulesTotalHours": {
+    "placeholders": {
+      "hours": { "type": "String" }
+    }
+  },
+  "schedulesIntervalOverlapError": "Этот интервал пересекается с другим.",
+  "schedulesIntervalEndBeforeStartError": "Время окончания должно быть позже времени начала.",
+  "schedulesScheduleActiveSuffix": " (Активно)",
+  "schedulesScheduleInactiveSuffix": " (Неактивно)",
+  "schedulesRenameScheduleTooltip": "Переименовать расписание",
+  "schedulesNameAlreadyExistsError": "Такое название уже существует.",
+  "schedulesNameRequiredError": "Название обязательно.",
+  "schedulesDeleteScheduleTooltip": "Удалить расписание",
+  "schedulesDeleteScheduleTitle": "Удалить расписание?",
+  "schedulesDeleteScheduleMessage": "Шаблон расписания будет удалён. У назначенных сотрудников не останется расписания по умолчанию.",
+  "schedulesDeleteScheduleButton": "Удалить",
+  "schedulesDeleteFailed": "Не удалось удалить: {reason}",
+  "@schedulesDeleteFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesDeleteBlockedAssignedTitle": "Удалить невозможно",
+  "schedulesDeleteBlockedAssignedMessage": "Расписание назначено сотрудникам. Снимите назначение перед удалением.",
+
+  "intervalStart": "Начало: {time}",
+  "intervalEnd": "Конец: {time}",
+  "intervalRemoveTooltip": "Удалить",
+
+  "weekdayMonday": "Понедельник",
+  "weekdayTuesday": "Вторник",
+  "weekdayWednesday": "Среда",
+  "weekdayThursday": "Четверг",
+  "weekdayFriday": "Пятница",
+  "weekdaySaturday": "Суббота",
+  "weekdaySunday": "Воскресенье",
+
+  "settingsTitle": "Настройки",
+  "settingsLanguageLabel": "Язык",
+  "settingsLanguageSystem": "Как в системе",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageRussian": "Русский",
+  "settingsLanguageEnglish": "English",
+  "settingsThemeLabel": "Тема",
+  "settingsThemeSystem": "Как в системе",
+  "settingsThemeLight": "Светлая",
+  "settingsThemeDark": "Тёмная",
+  "settingsThemeHighContrastLight": "Контрастная (светлая)",
+  "settingsThemeHighContrastDark": "Контрастная (тёмная)",
+  "settingsWorkingHoursLabel": "Рабочее время",
+  "settingsWorkingHoursFrom": "С",
+  "settingsWorkingHoursTo": "До",
+  "settingsWorkingHoursInvalidRange": "Время «с» должно быть раньше «до»",
+  "settingsWorkingHoursFromWithValue": "С: {value}",
+  "@settingsWorkingHoursFromWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsWorkingHoursToWithValue": "До: {value}",
+  "@settingsWorkingHoursToWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsPrivacyPolicy": "Политика конфиденциальности",
+  "settingsCreateBackup": "Создать резервную копию",
+  "settingsBackupCreated": "Резервная копия создана: {path}",
+  "settingsBackupSuccessTitle": "Резервная копия успешно создана",
+  "settingsRestoreCompletedTitle": "База данных восстановлена",
+  "settingsRestoreCompletedMessage": "База данных была восстановлена из резервной копии. Нажмите OK для продолжения.",
+  "@settingsBackupCreated": {
+    "placeholders": {
+      "path": { "type": "String" }
+    }
+  },
+  "settingsBackupErrorPermissionDenied": "Нет доступа к файлу или папке.",
+  "settingsBackupErrorNotFound": "Файл или папка не найдены.",
+  "settingsBackupErrorInvalidArchive": "Недопустимый файл резервной копии.",
+  "settingsBackupErrorIoFailure": "Ошибка при операции с файлом.",
+  "settingsBackupErrorDbFailure": "Ошибка базы данных.",
+  "settingsBackupErrorUnknown": "Произошла неизвестная ошибка.",
+  "settingsRestoreFromBackup": "Восстановить из резервной копии",
+  "settingsRestoreConfirmTitle": "Восстановление",
+  "settingsRestoreConfirmMessage": "Текущие данные будут полностью заменены данными из выбранного файла. Продолжить?",
+  "settingsRestoreCreated": "Восстановление выполнено. Обновите экран при необходимости.",
+  "settingsRestoreScheduledRestart": "Восстановление запланировано. Перезапустите приложение для завершения.",
+  "settingsRestoreErrorPermissionDenied": "Нет доступа к файлу или папке.",
+  "settingsRestoreErrorNotFound": "Файл или папка не найдены.",
+  "settingsRestoreErrorInvalidArchive": "Недопустимый файл резервной копии.",
+  "settingsRestoreErrorIoFailure": "Ошибка при операции с файлом.",
+  "settingsRestoreErrorDbFailure": "Ошибка базы данных.",
+  "settingsRestoreErrorUnknown": "Произошла неизвестная ошибка.",
+  "settingsRestoreSchemaError": "Файл создан в другой версии приложения. Восстановление невозможно.",
+  "settingsExportDiagnostics": "Экспорт диагностики",
+  "settingsExportDiagnosticsSuccess": "Диагностика успешно экспортирована",
+  "settingsExportDiagnosticsFailed": "Ошибка экспорта диагностики: {error}",
+  "@settingsExportDiagnosticsFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "legalTerms": "Условия использования",
+  "helpTitle": "Справка",
+  "aboutTitle": "О программе",
+  "legalNoticeWelcomeTitle": "Добро пожаловать",
+  "legalNoticeWelcomeText": "Пожалуйста, ознакомьтесь с Политикой конфиденциальности и Условиями использования.",
+  "legalNoticeOpenPrivacy": "Открыть Политику конфиденциальности",
+  "legalNoticeOpenTerms": "Открыть Условия использования",
+  "legalNoticeClose": "Закрыть",
+  "legalCopy": "Копировать",
+  "legalCopiedToClipboard": "Скопировано в буфер обмена.",
+  "legalFailedToCopy": "Не удалось скопировать.",
+
+  "sessionsTitle": "Смены",
+  "sessionsEmployeeFilter": "Сотрудник",
+  "sessionsEmployeeAll": "Все",
+  "sessionsNoEmployeesAvailable": "Нет доступных сотрудников.",
+  "sessionsFailedLoadEmployees": "Не удалось загрузить сотрудников: {error}",
+  "sessionsFilterFrom": "С",
+  "sessionsFilterTo": "По",
+  "sessionsFilterAny": "Любое",
+  "sessionsNoSessions": "Нет смен.",
+  "sessionsFailedLoadSessions": "Не удалось загрузить смены: {error}",
+  "sessionsTableEmployee": "Сотрудник",
+  "sessionsTableStart": "Начало",
+  "sessionsTableEnd": "Конец",
+  "sessionsTableDuration": "Длительность",
+  "sessionsDurationWithValue": "Длительность: {value}",
+  "@sessionsDurationWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "sessionsTableStatus": "Статус",
+  "sessionsTableNote": "Заметка",
+  "sessionsTableActions": "Действия",
+  "sessionsEdit": "Редактировать",
+  "sessionsEditDialogTitle": "Редактировать смену",
+  "sessionsEmployeePrefix": "Сотрудник: {name}",
+  "sessionsStartPrefix": "Начало: {value}",
+  "sessionsEndPrefix": "Конец: {value}",
+  "sessionsOpenSessionLabel": "Открытая смена (конец пустой)",
+  "sessionsSetEndNow": "Конец = сейчас",
+  "sessionsClearEnd": "Очистить конец",
+  "sessionsUpdateReason": "Причина изменения",
+  "sessionsEmployeeCannotChangeHint": "Сотрудника нельзя менять.",
+  "sessionsUpdateReasonRequired": "Причина изменения обязательна.",
+  "sessionsErrorSameDayRequired": "Сессия должна начинаться и заканчиваться в один день.",
+  "journalTitle": "Журнал",
+  "journalFilterFrom": "С",
+  "journalFilterTo": "По",
+  "journalFilterAny": "Любое",
+  "journalFilterStatusAll": "Все",
+  "journalFilterStatusOpen": "Открытые",
+  "journalFilterStatusClosed": "Закрытые",
+  "journalFilterSearch": "Поиск",
+  "journalPresetToday": "Сегодня",
+  "journalPresetWeek": "Неделя",
+  "journalPresetMonth": "Месяц",
+  "journalPresetLastMonth": "Прошлый месяц",
+  "journalEndEmpty": "—",
+  "journalEditDialogTitle": "Редактировать смену",
+  "journalCloseNow": "Закрыть сейчас",
+  "journalErrorEndBeforeStart": "Время конца должно быть позже времени начала.",
+  "journalErrorCrossDay": "Начало и конец должны быть в один день.",
+  "journalUpdateReasonHint": "Обязательно при изменении времени начала или конца",
+  "journalSaved": "Сохранено.",
+  "durationHm": "{hours}h {minutes}m",
+
+  "reportsTitle": "Отчёты",
+  "reportsNoData": "Нет данных.",
+  "reportsFailedLoad": "Не удалось загрузить отчёт: {error}",
+  "reportsOnlyClosedHint": "В итоги входят только ЗАКРЫТЫЕ смены.",
+  "reportsTableEmployee": "Сотрудник",
+  "reportsTableTotal": "Итого",
+  "reportsTableNorm": "Норма",
+  "reportsTableDelta": "Дельта",
+  "reportsTableSessions": "Смены",
+  "reportsExportPdf": "Экспорт PDF",
+  "reportsPdfFileType": "PDF-файлы",
+  "reportsExported": "Экспортировано.",
+  "reportsTableWorked": "Отработано",
+  "reportsTablePlanned": "План",
+  "reportsTableBalance": "Баланс (+/−)",
+  "reportsPlannedNoSchedule": "Нет графика",
+  "reportsPeriodLabel": "Период",
+  "reportsPeriodPresetToday": "Сегодня",
+  "reportsPeriodPresetWeek": "Неделя",
+  "reportsPeriodPresetMonth": "Месяц",
+  "reportsPeriodPresetLastMonth": "Прошлый месяц",
+  "reportsPeriodPresetCustom": "Произвольный",
+  "reportsEmployeeFilter": "Сотрудник",
+  "reportsDetailsTitle": "Детали",
+  "reportsExportEmployeePdf": "Экспорт PDF",
+  "reportsDetailsClose": "Закрыть",
+  "reportsTableDate": "Дата",
+  "reportsPdfTitle": "Отчёт по времени",
+  "reportsPdfPeriod": "Период: {from} — {to}",
+  "@reportsPdfPeriod": {
+    "placeholders": {
+      "from": { "type": "String" },
+      "to": { "type": "String" }
+    }
+  },
+  "reportsPdfGenerated": "Создан: {datetime}",
+  "@reportsPdfGenerated": {
+    "placeholders": {
+      "datetime": { "type": "String" }
+    }
+  },
+  "reportsPdfEmployee": "Сотрудник: {name}",
+  "@reportsPdfEmployee": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "reportsPdfSort": "Сортировка: {column}",
+  "@reportsPdfSort": {
+    "placeholders": {
+      "column": { "type": "String" }
+    }
+  },
+  "reportsPdfFooterBrand": "Timerevo — офлайн-отчёт",
+  "reportsPdfFooterPage": "Стр. {current} / {total}",
+  "@reportsPdfFooterPage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "adminNavAbsences": "Отсутствия",
+  "absencesTitle": "Отсутствия",
+  "absencesAdd": "Добавить отсутствие",
+  "absencesEmployee": "Сотрудник",
+  "absencesType": "Тип",
+  "absencesDateFrom": "С",
+  "absencesDateTo": "По",
+  "absencesStatus": "Статус",
+  "absencesCreatedBy": "Создал",
+  "absencesActions": "Действия",
+  "absenceTypeVacation": "Ежегодный отпуск",
+  "absenceTypeSickLeave": "Больничный",
+  "absenceTypeUnpaidLeave": "Без сохранения",
+  "absenceTypeParentalLeave": "Декретный/уход",
+  "absenceTypeStudyLeave": "Учебный отпуск",
+  "absenceTypeOther": "Другое",
+  "absenceStatusPending": "На рассмотрении",
+  "absenceStatusApproved": "Одобрено",
+  "absenceStatusRejected": "Отклонено",
+  "absenceApprove": "Одобрить",
+  "absenceReject": "Отклонить",
+  "absenceEdit": "Редактировать",
+  "absenceDelete": "Удалить",
+  "absenceRejectReason": "Причина отклонения",
+  "terminalMyCalendar": "Мой рабочий календарь",
+  "terminalMyPdf": "Отчёт времени (PDF)",
+  "terminalCalendarPageTitle": "Рабочий календарь ({name})",
+  "@terminalCalendarPageTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "terminalCalendarSessions": "Смены",
+  "terminalCalendarAbsences": "Отсутствия",
+  "terminalCalendarNoData": "Нет данных за день",
+  "terminalCalendarNewAbsence": "Новая заявка",
+  "terminalCalendarFormatMonth": "Месяц",
+  "terminalCalendarFormatTwoWeeks": "2 недели",
+  "terminalCalendarFormatWeek": "Неделя",
+  "absenceCreateTitle": "Новая заявка на отсутствие",
+  "absenceEditTitle": "Редактировать отсутствие",
+  "absenceErrorOverlap": "Пересечение с существующим отсутствием.",
+  "absenceErrorDateRestrictionVacation": "Отпуск должен начинаться сегодня или позже.",
+  "absenceErrorDateRestrictionSickLeave": "Больничный не может начинаться более чем 3 дня назад.",
+  "absencesEmpty": "Нет заявок на отсутствие.",
+  "absencesEmptyHint": "Заявок пока нет. Создайте первую заявку.",
+  "absenceDeleteConfirm": "Удалить эту заявку на отсутствие?",
+  "absenceApproveConfirm": "Одобрить эту заявку на отсутствие?",
+  "absenceRejectConfirmHint": "Сотрудник увидит причину отклонения.",
+  "absenceCreated": "Заявка на отсутствие создана.",
+  "absenceUpdated": "Заявка на отсутствие обновлена.",
+  "absenceApproved": "Заявка на отсутствие одобрена.",
+  "absenceRejected": "Заявка на отсутствие отклонена.",
+  "absenceDeleted": "Заявка на отсутствие удалена.",
+  "absencesApprovedBy": "Одобрил",
+  "absencesApprovedAt": "Дата одобрения",
+  "absenceErrorEditPendingOnly": "Редактировать можно только заявки на рассмотрении.",
+  "absenceErrorDeletePendingOnly": "Удалить можно только заявки на рассмотрении.",
+  "absenceErrorApproveRejectPendingOnly": "Одобрять или отклонять можно только заявки на рассмотрении.",
+  "absenceErrorRejectReasonRequired": "Укажите причину отклонения.",
+  "absenceErrorDateOrder": "Дата окончания должна быть не раньше даты начала.",
+  "absenceErrorEmployeeRequired": "Выберите сотрудника.",
+  "absenceErrorDateRequired": "Укажите даты «От» и «До»."
+}
+

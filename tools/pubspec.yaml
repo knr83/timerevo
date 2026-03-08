@@ -1,0 +1,6 @@
+name: convert_icon
+description: One-off icon converter
+environment:
+  sdk: ">=3.0.0"
+dependencies:
+  image: ^4.7.0

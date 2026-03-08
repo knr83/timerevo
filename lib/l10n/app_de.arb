@@ -1,0 +1,588 @@
+{
+  "@@locale": "de",
+
+  "appTitle": "Zeiterfassung",
+
+  "commonAdd": "Hinzufügen",
+  "commonSave": "Speichern",
+  "commonCancel": "Abbrechen",
+  "commonClose": "Schließen",
+  "commonOngoing": "Läuft",
+  "commonNotAvailable": "k. A.",
+  "commonCreate": "Erstellen",
+  "commonRename": "Umbenennen",
+  "commonActivate": "Aktivieren",
+  "commonDeactivate": "Deaktivieren",
+  "commonActive": "Aktiv",
+  "commonInactive": "Inaktiv",
+  "commonNone": "Keine",
+  "commonUnknown": "Unbekannt",
+  "commonBack": "Zurück",
+  "commonRemove": "Entfernen",
+  "commonOk": "OK",
+  "commonErrorOccurred": "Ein Fehler ist aufgetreten.",
+  "commonFilterLabelWithValue": "{label}: {value}",
+  "@commonFilterLabelWithValue": {
+    "placeholders": {
+      "label": { "type": "String" },
+      "value": { "type": "String" }
+    }
+  },
+
+  "initFailed": "Initialisierung fehlgeschlagen: {error}",
+  "initFailedGeneric": "Initialisierung fehlgeschlagen. Bitte erneut versuchen oder neu installieren.",
+
+  "initDbErrorTitle": "Datenbankfehler",
+  "initDbErrorMessage": "Die Datenbank konnte nicht geöffnet werden. Stellen Sie aus einem Backup wieder her oder initialisieren Sie neu.",
+  "initDbErrorRestore": "Aus Backup wiederherstellen",
+  "initDbErrorReinitialize": "Neu initialisieren (verloren alle lokalen Daten)",
+  "initDbErrorRetry": "Wiederholen",
+
+  "terminalTitle": "Terminal",
+  "terminalAdmin": "Verwaltung",
+  "terminalNoActiveEmployees": "Keine aktiven Mitarbeiter.",
+  "terminalFailedLoadEmployees": "Mitarbeiter konnten nicht geladen werden: {error}",
+  "terminalNoOpenSession": "Keine offene Schicht.",
+  "terminalStatusOnShift": "Im Dienst",
+  "terminalOnShiftSince": "seit {time}",
+  "@terminalOnShiftSince": {
+    "placeholders": {
+      "time": { "type": "String" }
+    }
+  },
+  "terminalStatusReady": "Bereit zur Stemplung",
+  "terminalCurrentTime": "Jetzt {time}",
+  "@terminalCurrentTime": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalSwitchEmployee": "Mitarbeiter wechseln",
+  "terminalSessionsToday": "Heute",
+  "terminalSessionInProgress": "läuft",
+  "terminalSessionRange": "{start} – {end}",
+  "@terminalSessionRange": {
+    "placeholders": {
+      "start": { "type": "String" },
+      "end": { "type": "String" }
+    }
+  },
+  "terminalNoSessionsToday": "Keine Schichten heute",
+  "terminalDurationLessThanOneMin": "< 1 Min.",
+  "terminalDurationMinutesOnly": "{m} Min.",
+  "@terminalDurationMinutesOnly": {
+    "placeholders": { "m": { "type": "int" } }
+  },
+  "terminalDurationHoursOnly": "{h} Std.",
+  "@terminalDurationHoursOnly": {
+    "placeholders": { "h": { "type": "int" } }
+  },
+  "terminalShowMoreSessions": "{count} weitere anzeigen",
+  "@terminalShowMoreSessions": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "terminalTotalToday": "Gesamt heute",
+  "terminalTotalTodayWithValue": "Gesamt heute: {value}",
+  "@terminalTotalTodayWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "terminalErrorSessionAlreadyOpen": "Es gibt bereits eine offene Schicht.",
+  "terminalErrorNoOpenSession": "Keine offene Schicht.",
+  "terminalErrorClockInBeforeStart": "Kommen vor Arbeitsbeginn nicht möglich.",
+  "terminalErrorClockInAfterEnd": "Kommen nach Arbeitsende nicht möglich.",
+  "terminalErrorHasApprovedAbsence": "Sie haben heute eine genehmigte Abwesenheit. Antreten ist nicht möglich.",
+  "terminalOpenSince": "Offene Schicht seit {time}",
+  "terminalIn": "KOMMEN",
+  "terminalOut": "GEHEN",
+  "terminalSaved": "Gespeichert.",
+  "terminalSuccessClockIn": "Schönen Arbeitstag",
+  "terminalSuccessClockOut": "Schöne Erholung",
+  "terminalPinPromptTitle": "PIN eingeben",
+  "terminalPinConfirm": "OK",
+  "terminalPinNotSet": "Für diesen Benutzer ist kein PIN gesetzt. Wenden Sie sich an den Administrator.",
+  "terminalUnclosedSessionTitle": "Nicht geschlossene Schicht",
+  "terminalUnclosedSessionMessage": "Schicht begann am {startTime}. Bitte Enddatum und -uhrzeit eingeben.",
+  "@terminalUnclosedSessionMessage": {
+    "placeholders": {
+      "startTime": {
+        "type": "String"
+      }
+    }
+  },
+  "terminalUnclosedSessionEndLabel": "Enddatum und -uhrzeit",
+  "terminalUnclosedSessionSelectEnd": "Datum und Uhrzeit wählen",
+  "terminalUnclosedSessionConfirm": "Schicht schließen",
+  "terminalUnclosedSessionErrorEndBeforeStart": "Ende muss nach dem Anfang liegen.",
+  "terminalUnclosedSessionErrorEndInFuture": "Ende darf nicht in der Zukunft liegen.",
+  "terminalUnclosedSessionErrorEndAfterWorkingHours": "Ende darf nicht nach dem Feierabend liegen.",
+  "terminalPolicyRequiredTitle": "Bestätigung der Richtlinie erforderlich",
+  "terminalPolicyRequiredMessage": "Um fortzufahren, müssen Sie die Datenschutzerklärung und Nutzungsbedingungen lesen und bestätigen.",
+  "terminalPolicyCheckboxText": "Ich habe die Datenschutzerklärung und Nutzungsbedingungen gelesen und akzeptiere sie",
+
+  "adminTitle": "Verwaltung",
+  "adminNavEmployees": "Mitarbeiter",
+  "adminNavSchedules": "Pläne",
+  "adminNavSessions": "Schichten",
+  "adminNavJournal": "Journal",
+  "adminNavReports": "Berichte",
+  "adminNavSettings": "Einstellungen",
+
+  "dashboardTitle": "Startseite",
+  "dashboardNavOverview": "Startseite",
+  "dashboardNowAtWork": "Jetzt im Einsatz",
+  "dashboardNoOneAtWork": "Noch niemand da",
+  "dashboardToday": "Alle Mitarbeiter heute",
+  "dashboardRecentActivity": "Letzte Aktivität",
+  "dashboardViewAllSessions": "Alle Schichten",
+  "dashboardNoRecentActivity": "Keine letzte Aktivität",
+  "dashboardNoEmployeesToday": "Keine Mitarbeiter heute",
+
+  "adminEnterPinToContinue": "PIN eingeben, um fortzufahren.",
+  "adminPinLabel": "PIN",
+  "adminUnlock": "Entsperren",
+  "adminInvalidPin": "Ungültiger PIN.",
+  "adminPinInvalidFormat": "PIN muss nur aus Ziffern bestehen und mindestens 4 Ziffern haben.",
+  "adminDefaultPinHint": "Standard-PIN: 0000",
+  "adminChangePin": "PIN ändern",
+  "adminLock": "Sperren",
+  "adminPinUpdated": "PIN aktualisiert.",
+
+  "changePinTitle": "PIN ändern",
+  "changePinCurrentPin": "Aktueller PIN",
+  "changePinNewPin": "Neuer PIN",
+  "changePinConfirmNewPin": "Neuen PIN bestätigen",
+  "changePinNewPinRequired": "Neuer PIN ist erforderlich.",
+  "changePinConfirmationMismatch": "PIN-Bestätigung stimmt nicht überein.",
+  "changePinCurrentInvalid": "Aktueller PIN ist ungültig.",
+  "changePinInvalidFormat": "PIN muss nur aus Ziffern bestehen und mindestens 4 Ziffern haben.",
+
+  "employeesTitle": "Mitarbeiter",
+  "employeesNoEmployeesYet": "Noch keine Mitarbeiter.",
+  "employeesAddEmployee": "Hinzufügen",
+  "employeesInactiveHiddenHint": "Inaktive Mitarbeiter sind im Terminal ausgeblendet.",
+
+  "employeeDialogAddTitle": "Mitarbeiter hinzufügen",
+  "employeeDialogEditTitle": "Mitarbeiter bearbeiten",
+  "employeeFirstName": "Vorname",
+  "employeeLastName": "Nachname",
+  "employeeDefaultSchedule": "Standardplan",
+  "employeeActiveLabel": "Aktiv",
+  "employeeFirstLastRequired": "Vor- und Nachname sind erforderlich.",
+  "employeeCreateFailed": "Mitarbeiter konnte nicht erstellt werden: {error}",
+  "employeeUpdateFailed": "Mitarbeiter konnte nicht aktualisiert werden: {error}",
+  "employeeSaved": "Gespeichert.",
+
+  "employeeDefaultScheduleSubtitle": "Standardplan: {name}",
+  "employeeScheduleButtonLabel": "Plan: {name}",
+  "employeeChangeScheduleTooltip": "Plan ändern",
+  "employeeId": "Mitarbeiter-ID",
+  "employeeCode": "Mitarbeiternummer",
+  "employeeCodeHint": "E001",
+  "employeeHireDate": "Einstellungsdatum",
+  "employeeStatus": "Status",
+  "employeeRole": "Rolle",
+  "employeeRoleFieldLabel": "Mitarbeiter / Vorgesetzter",
+  "employeeUsePin": "PIN aktivieren",
+  "employeeUseNfc": "NFC aktivieren",
+  "employeeAccessToken": "Zugangstoken",
+  "employeePinStatus": "PIN-Status",
+  "employeePinStatusWithValue": "PIN-Status: {value}",
+  "@employeePinStatusWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeAccessNote": "Zugangshinweise",
+  "employeeAccessTokenRequiredWhenNfc": "Erforderlich bei aktiviertem NFC.",
+  "employeeEmploymentType": "Beschäftigungsart",
+  "employeeWeeklyHours": "Wochenstunden",
+  "employeeWeeklyHoursHint": "40",
+  "employeeEmail": "E-Mail",
+  "employeePhone": "Telefon",
+  "employeeDepartment": "Abteilung",
+  "employeeJobTitle": "Tätigkeitsbezeichnung",
+  "employeeInternalComment": "Interne Notiz",
+  "employeePolicyAcknowledged": "Richtlinie bestätigt",
+  "employeePolicyAcknowledgedAt": "Bestätigt am",
+  "employeePolicyAcknowledgedAtWithValue": "Bestätigt: {value}",
+  "@employeePolicyAcknowledgedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeDataRetentionPolicy": "Aufbewahrungsfrist",
+  "employeeCreatedAt": "Erstellt am",
+  "employeeCreatedAtWithValue": "Erstellt: {value}",
+  "@employeeCreatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeUpdatedAt": "Aktualisiert am",
+  "employeeUpdatedAtWithValue": "Aktualisiert: {value}",
+  "@employeeUpdatedAtWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "employeeCreatedBy": "Erstellt von",
+  "employeeUpdatedBy": "Aktualisiert von",
+  "employeePinStatusSet": "Gesetzt",
+  "employeePinStatusNotSet": "Nicht gesetzt",
+  "employeeRoleEmployee": "Mitarbeiter",
+  "employeeRoleManager": "Vorgesetzter",
+  "employeeEmploymentTypeFullTime": "Vollzeit",
+  "employeeEmploymentTypePartTime": "Teilzeit",
+  "employeeEmploymentTypeMinijob": "Minijob",
+  "employeeEmploymentTypeCustom": "Sonstiges",
+  "employeeTerminalAccessDisabled": "Terminal-Zugang deaktiviert",
+  "employeeInactive": "Mitarbeiter ist inaktiv",
+  "employeeCodeAlreadyExists": "Mitarbeiternummer existiert bereits",
+  "employeePolicyText": "Mitarbeiter hat die Datenschutzerklärung und Nutzungsbedingungen bestätigt",
+  "employeePolicyPrefix": "Mitarbeiter hat die ",
+  "employeePolicyLinkPrivacy": "Datenschutzerklärung",
+  "employeePolicyMiddle": " und ",
+  "employeePolicyLinkTerms": "Nutzungsbedingungen",
+  "employeeSetPin": "PIN setzen",
+  "employeeResetPin": "PIN zurücksetzen",
+  "employeeSectionIdentity": "Stammdaten",
+  "employeeSectionEmployment": "Beschäftigung",
+  "employeeSectionContact": "Kontakt",
+  "employeeSectionAccess": "Terminal-Zugang",
+  "employeeSectionSchedule": "Plan",
+  "employeeSectionPolicy": "Richtlinie & Compliance",
+  "employeeSectionAudit": "Protokoll",
+
+  "schedulesEmptyHint": "Erstellen Sie eine Planvorlage.",
+  "schedulesFailedLoad": "Pläne konnten nicht geladen werden: {error}",
+  "schedulesTitle": "Pläne",
+  "schedulesAddTemplateTooltip": "Vorlage hinzufügen",
+  "schedulesNoTemplates": "Keine Vorlagen.",
+  "schedulesCreateTemplateTitle": "Vorlage erstellen",
+  "schedulesRenameTemplateTitle": "Vorlage umbenennen",
+  "schedulesTemplateNameLabel": "Name",
+  "schedulesWeekEditorTitle": "Wocheneditor",
+  "schedulesFailedLoadTemplate": "Vorlage konnte nicht geladen werden: {error}",
+  "schedulesDayOff": "Frei",
+  "schedulesNoIntervals": "Keine Intervalle.",
+  "schedulesAddInterval": "Intervall hinzufügen",
+  "schedulesSaved": "Gespeichert.",
+  "schedulesCopiedTo": "Kopiert nach {weekday}.",
+  "schedulesInvalidInput": "Ungültige Eingabe.",
+  "schedulesBreadcrumb": "Admin / Pläne",
+  "schedulesNewSchedule": "Neuer Plan",
+  "schedulesEditIntervalTitle": "Intervall bearbeiten",
+  "schedulesAddIntervalTitle": "Intervall hinzufügen",
+  "schedulesStartTimeLabel": "Startzeit",
+  "schedulesEndTimeLabel": "Endzeit",
+  "schedulesDiscardChanges": "Verwerfen",
+  "schedulesUnsavedChangesTitle": "Ungespeicherte Änderungen",
+  "schedulesUnsavedChangesMessage": "Sie haben ungespeicherte Änderungen. Speichern, verwerfen oder abbrechen?",
+  "schedulesSaveFailed": "Speichern fehlgeschlagen: {reason}",
+  "@schedulesSaveFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesTotalHours": "Gesamt {hours}h",
+  "@schedulesTotalHours": {
+    "placeholders": {
+      "hours": { "type": "String" }
+    }
+  },
+  "schedulesIntervalOverlapError": "Dieses Intervall überschneidet sich mit einem anderen.",
+  "schedulesIntervalEndBeforeStartError": "Die Endzeit muss nach der Startzeit liegen.",
+  "schedulesScheduleActiveSuffix": " (Aktiv)",
+  "schedulesScheduleInactiveSuffix": " (Inaktiv)",
+  "schedulesRenameScheduleTooltip": "Plan umbenennen",
+  "schedulesNameAlreadyExistsError": "Name existiert bereits.",
+  "schedulesNameRequiredError": "Name ist erforderlich.",
+  "schedulesDeleteScheduleTooltip": "Plan löschen",
+  "schedulesDeleteScheduleTitle": "Plan löschen?",
+  "schedulesDeleteScheduleMessage": "Die Planvorlage wird entfernt. Zugewiesenen Mitarbeitern bleibt keine Standardplanung.",
+  "schedulesDeleteScheduleButton": "Löschen",
+  "schedulesDeleteFailed": "Löschen fehlgeschlagen: {reason}",
+  "@schedulesDeleteFailed": {
+    "placeholders": {
+      "reason": { "type": "String" }
+    }
+  },
+  "schedulesDeleteBlockedAssignedTitle": "Löschen nicht möglich",
+  "schedulesDeleteBlockedAssignedMessage": "Dieser Plan ist Mitarbeitern zugewiesen. Heben Sie die Zuweisung auf, bevor Sie löschen.",
+
+  "intervalStart": "Start: {time}",
+  "intervalEnd": "Ende: {time}",
+  "intervalRemoveTooltip": "Entfernen",
+
+  "weekdayMonday": "Montag",
+  "weekdayTuesday": "Dienstag",
+  "weekdayWednesday": "Mittwoch",
+  "weekdayThursday": "Donnerstag",
+  "weekdayFriday": "Freitag",
+  "weekdaySaturday": "Samstag",
+  "weekdaySunday": "Sonntag",
+
+  "settingsTitle": "Einstellungen",
+  "settingsLanguageLabel": "Sprache",
+  "settingsLanguageSystem": "Systemstandard",
+  "settingsLanguageGerman": "Deutsch",
+  "settingsLanguageRussian": "Русский",
+  "settingsLanguageEnglish": "English",
+  "settingsThemeLabel": "Design",
+  "settingsThemeSystem": "Systemstandard",
+  "settingsThemeLight": "Hell",
+  "settingsThemeDark": "Dunkel",
+  "settingsThemeHighContrastLight": "Hoher Kontrast (hell)",
+  "settingsThemeHighContrastDark": "Hoher Kontrast (dunkel)",
+  "settingsWorkingHoursLabel": "Arbeitszeit",
+  "settingsWorkingHoursFrom": "Von",
+  "settingsWorkingHoursTo": "Bis",
+  "settingsWorkingHoursInvalidRange": "Von muss vor Bis liegen",
+  "settingsWorkingHoursFromWithValue": "Von: {value}",
+  "@settingsWorkingHoursFromWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsWorkingHoursToWithValue": "Bis: {value}",
+  "@settingsWorkingHoursToWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "settingsPrivacyPolicy": "Datenschutzerklärung",
+  "settingsCreateBackup": "Sicherung erstellen",
+  "settingsBackupCreated": "Sicherung erstellt: {path}",
+  "settingsBackupSuccessTitle": "Sicherung erfolgreich erstellt",
+  "settingsRestoreCompletedTitle": "Datenbank wiederhergestellt",
+  "settingsRestoreCompletedMessage": "Die Datenbank wurde aus einer Sicherung wiederhergestellt. OK zum Fortfahren drücken.",
+  "@settingsBackupCreated": {
+    "placeholders": {
+      "path": { "type": "String" }
+    }
+  },
+  "settingsBackupErrorPermissionDenied": "Zugriff auf Datei oder Ordner nicht möglich.",
+  "settingsBackupErrorNotFound": "Datei oder Ordner nicht gefunden.",
+  "settingsBackupErrorInvalidArchive": "Ungültige Sicherungsdatei.",
+  "settingsBackupErrorIoFailure": "Dateioperation fehlgeschlagen.",
+  "settingsBackupErrorDbFailure": "Datenbankfehler.",
+  "settingsBackupErrorUnknown": "Ein unbekannter Fehler ist aufgetreten.",
+  "settingsRestoreFromBackup": "Aus Sicherung wiederherstellen",
+  "settingsRestoreConfirmTitle": "Wiederherstellung",
+  "settingsRestoreConfirmMessage": "Aktuelle Daten werden vollständig durch Daten aus der gewählten Datei ersetzt. Fortfahren?",
+  "settingsRestoreCreated": "Wiederherstellung abgeschlossen. Bildschirm bei Bedarf aktualisieren.",
+  "settingsRestoreScheduledRestart": "Wiederherstellung geplant. Bitte starten Sie die Anwendung neu.",
+  "settingsRestoreErrorPermissionDenied": "Zugriff auf Datei oder Ordner nicht möglich.",
+  "settingsRestoreErrorNotFound": "Datei oder Ordner nicht gefunden.",
+  "settingsRestoreErrorInvalidArchive": "Ungültige Sicherungsdatei.",
+  "settingsRestoreErrorIoFailure": "Dateioperation fehlgeschlagen.",
+  "settingsRestoreErrorDbFailure": "Datenbankfehler.",
+  "settingsRestoreErrorUnknown": "Ein unbekannter Fehler ist aufgetreten.",
+  "settingsRestoreSchemaError": "Datei wurde in einer anderen App-Version erstellt. Wiederherstellung nicht möglich.",
+  "settingsExportDiagnostics": "Diagnosedaten exportieren",
+  "settingsExportDiagnosticsSuccess": "Diagnosedaten erfolgreich exportiert",
+  "settingsExportDiagnosticsFailed": "Diagnoseexport fehlgeschlagen: {error}",
+  "@settingsExportDiagnosticsFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "legalTerms": "Nutzungsbedingungen",
+  "helpTitle": "Hilfe",
+  "aboutTitle": "Über",
+  "legalNoticeWelcomeTitle": "Willkommen",
+  "legalNoticeWelcomeText": "Bitte lesen Sie die Datenschutzerklärung und Nutzungsbedingungen.",
+  "legalNoticeOpenPrivacy": "Datenschutzerklärung öffnen",
+  "legalNoticeOpenTerms": "Nutzungsbedingungen öffnen",
+  "legalNoticeClose": "Schließen",
+  "legalCopy": "Kopieren",
+  "legalCopiedToClipboard": "In die Zwischenablage kopiert.",
+  "legalFailedToCopy": "Kopieren fehlgeschlagen.",
+
+  "sessionsTitle": "Schichten",
+  "sessionsEmployeeFilter": "Mitarbeiter",
+  "sessionsEmployeeAll": "Alle",
+  "sessionsNoEmployeesAvailable": "Keine Mitarbeiter verfügbar.",
+  "sessionsFailedLoadEmployees": "Mitarbeiter konnten nicht geladen werden: {error}",
+  "sessionsFilterFrom": "Von",
+  "sessionsFilterTo": "Bis",
+  "sessionsFilterAny": "Beliebig",
+  "sessionsNoSessions": "Keine Schichten.",
+  "sessionsFailedLoadSessions": "Schichten konnten nicht geladen werden: {error}",
+  "sessionsTableEmployee": "Mitarbeiter",
+  "sessionsTableStart": "Start",
+  "sessionsTableEnd": "Ende",
+  "sessionsTableDuration": "Dauer",
+  "sessionsDurationWithValue": "Dauer: {value}",
+  "@sessionsDurationWithValue": {
+    "placeholders": {
+      "value": { "type": "String" }
+    }
+  },
+  "sessionsTableStatus": "Status",
+  "sessionsTableNote": "Notiz",
+  "sessionsTableActions": "Aktionen",
+  "sessionsEdit": "Bearbeiten",
+  "sessionsEditDialogTitle": "Schicht bearbeiten",
+  "sessionsEmployeePrefix": "Mitarbeiter: {name}",
+  "sessionsStartPrefix": "Start: {value}",
+  "sessionsEndPrefix": "Ende: {value}",
+  "sessionsOpenSessionLabel": "Offene Schicht (Ende ist leer)",
+  "sessionsSetEndNow": "Ende = jetzt setzen",
+  "sessionsClearEnd": "Ende löschen",
+  "sessionsUpdateReason": "Änderungsgrund",
+  "sessionsEmployeeCannotChangeHint": "Mitarbeiter kann nicht geändert werden.",
+  "sessionsUpdateReasonRequired": "Änderungsgrund ist erforderlich.",
+  "sessionsErrorSameDayRequired": "Die Sitzung muss am gleichen Tag beginnen und enden.",
+  "journalTitle": "Journal",
+  "journalFilterFrom": "Von",
+  "journalFilterTo": "Bis",
+  "journalFilterAny": "Beliebig",
+  "journalFilterStatusAll": "Alle",
+  "journalFilterStatusOpen": "Offen",
+  "journalFilterStatusClosed": "Geschlossen",
+  "journalFilterSearch": "Suchen",
+  "journalPresetToday": "Heute",
+  "journalPresetWeek": "Woche",
+  "journalPresetMonth": "Monat",
+  "journalPresetLastMonth": "Letzter Monat",
+  "journalEndEmpty": "—",
+  "journalEditDialogTitle": "Schicht bearbeiten",
+  "journalCloseNow": "Jetzt schließen",
+  "journalErrorEndBeforeStart": "Die Endzeit muss nach der Startzeit liegen.",
+  "journalErrorCrossDay": "Start und Ende müssen am gleichen Tag liegen.",
+  "journalUpdateReasonHint": "Erforderlich bei Änderung von Start- oder Endzeit",
+  "journalSaved": "Gespeichert.",
+  "durationHm": "{hours}h {minutes}m",
+
+  "reportsTitle": "Berichte",
+  "reportsNoData": "Keine Daten.",
+  "reportsFailedLoad": "Bericht konnte nicht geladen werden: {error}",
+  "reportsOnlyClosedHint": "Nur GESCHLOSSENE Schichten werden summiert.",
+  "reportsTableEmployee": "Mitarbeiter",
+  "reportsTableTotal": "Summe",
+  "reportsTableNorm": "Norm",
+  "reportsTableDelta": "Delta",
+  "reportsTableSessions": "Schichten",
+  "reportsExportPdf": "PDF exportieren",
+  "reportsPdfFileType": "PDF-Dateien",
+  "reportsExported": "Exportiert.",
+  "reportsTableWorked": "Gearbeitet",
+  "reportsTablePlanned": "Geplant",
+  "reportsTableBalance": "Saldo (+/−)",
+  "reportsPlannedNoSchedule": "Kein Plan",
+  "reportsPeriodLabel": "Zeitraum",
+  "reportsPeriodPresetToday": "Heute",
+  "reportsPeriodPresetWeek": "Woche",
+  "reportsPeriodPresetMonth": "Monat",
+  "reportsPeriodPresetLastMonth": "Letzter Monat",
+  "reportsPeriodPresetCustom": "Benutzerdefiniert",
+  "reportsEmployeeFilter": "Mitarbeiter",
+  "reportsDetailsTitle": "Details",
+  "reportsExportEmployeePdf": "PDF exportieren",
+  "reportsDetailsClose": "Schließen",
+  "reportsTableDate": "Datum",
+  "reportsPdfTitle": "Arbeitszeitbericht",
+  "reportsPdfPeriod": "Zeitraum: {from} — {to}",
+  "@reportsPdfPeriod": {
+    "placeholders": {
+      "from": { "type": "String" },
+      "to": { "type": "String" }
+    }
+  },
+  "reportsPdfGenerated": "Erstellt: {datetime}",
+  "@reportsPdfGenerated": {
+    "placeholders": {
+      "datetime": { "type": "String" }
+    }
+  },
+  "reportsPdfEmployee": "Mitarbeiter: {name}",
+  "@reportsPdfEmployee": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "reportsPdfSort": "Sortierung: {column}",
+  "@reportsPdfSort": {
+    "placeholders": {
+      "column": { "type": "String" }
+    }
+  },
+  "reportsPdfFooterBrand": "Timerevo — Offline-Bericht",
+  "reportsPdfFooterPage": "Seite {current} / {total}",
+  "@reportsPdfFooterPage": {
+    "placeholders": {
+      "current": { "type": "int" },
+      "total": { "type": "int" }
+    }
+  },
+
+  "adminNavAbsences": "Abwesenheiten",
+  "absencesTitle": "Abwesenheiten",
+  "absencesAdd": "Abwesenheit hinzufügen",
+  "absencesEmployee": "Mitarbeiter",
+  "absencesType": "Typ",
+  "absencesDateFrom": "Von",
+  "absencesDateTo": "Bis",
+  "absencesStatus": "Status",
+  "absencesCreatedBy": "Erstellt von",
+  "absencesActions": "Aktionen",
+  "absenceTypeVacation": "Jahresurlaub",
+  "absenceTypeSickLeave": "Krankschreibung",
+  "absenceTypeUnpaidLeave": "Unbezahlter Urlaub",
+  "absenceTypeParentalLeave": "Elternzeit",
+  "absenceTypeStudyLeave": "Bildungsurlaub",
+  "absenceTypeOther": "Sonstiges",
+  "absenceStatusPending": "Ausstehend",
+  "absenceStatusApproved": "Genehmigt",
+  "absenceStatusRejected": "Abgelehnt",
+  "absenceApprove": "Genehmigen",
+  "absenceReject": "Ablehnen",
+  "absenceEdit": "Bearbeiten",
+  "absenceDelete": "Löschen",
+  "absenceRejectReason": "Ablehnungsgrund",
+  "terminalMyCalendar": "Mein Arbeitskalender",
+  "terminalMyPdf": "Zeitbericht (PDF)",
+  "terminalCalendarPageTitle": "Arbeitskalender ({name})",
+  "@terminalCalendarPageTitle": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "terminalCalendarSessions": "Schichten",
+  "terminalCalendarAbsences": "Abwesenheiten",
+  "terminalCalendarNoData": "Keine Daten für diesen Tag",
+  "terminalCalendarNewAbsence": "Neue Anfrage",
+  "terminalCalendarFormatMonth": "Monat",
+  "terminalCalendarFormatTwoWeeks": "2 Wochen",
+  "terminalCalendarFormatWeek": "Woche",
+  "absenceCreateTitle": "Neuer Abwesenheitsantrag",
+  "absenceEditTitle": "Abwesenheit bearbeiten",
+  "absenceErrorOverlap": "Überschneidung mit bestehender Abwesenheit.",
+  "absenceErrorDateRestrictionVacation": "Urlaub muss heute oder später beginnen.",
+  "absenceErrorDateRestrictionSickLeave": "Krankschreibung kann nicht mehr als 3 Tage zurück datiert werden.",
+  "absencesEmpty": "Keine Abwesenheiten.",
+  "absencesEmptyHint": "Noch keine Abwesenheiten. Erstellen Sie Ihren ersten Antrag.",
+  "absenceDeleteConfirm": "Diesen Abwesenheitsantrag löschen?",
+  "absenceApproveConfirm": "Diesen Abwesenheitsantrag genehmigen?",
+  "absenceRejectConfirmHint": "Der Mitarbeiter wird den Ablehnungsgrund sehen.",
+  "absenceCreated": "Abwesenheitsantrag erstellt.",
+  "absenceUpdated": "Abwesenheitsantrag aktualisiert.",
+  "absenceApproved": "Abwesenheitsantrag genehmigt.",
+  "absenceRejected": "Abwesenheitsantrag abgelehnt.",
+  "absenceDeleted": "Abwesenheitsantrag gelöscht.",
+  "absencesApprovedBy": "Genehmigt von",
+  "absencesApprovedAt": "Genehmigt am",
+  "absenceErrorEditPendingOnly": "Nur ausstehende Anträge können bearbeitet werden.",
+  "absenceErrorDeletePendingOnly": "Nur ausstehende Anträge können gelöscht werden.",
+  "absenceErrorApproveRejectPendingOnly": "Nur ausstehende Anträge können genehmigt oder abgelehnt werden.",
+  "absenceErrorRejectReasonRequired": "Ablehnungsgrund ist erforderlich.",
+  "absenceErrorDateOrder": "Enddatum muss am oder nach dem Startdatum liegen.",
+  "absenceErrorEmployeeRequired": "Bitte wählen Sie einen Mitarbeiter.",
+  "absenceErrorDateRequired": "Bitte wählen Sie die Daten Von und Bis."
+}
+
