@@ -214,6 +214,12 @@ abstract class AppLocalizations {
   /// **'An error occurred.'**
   String get commonErrorOccurred;
 
+  /// No description provided for @commonRequiredFieldsLegend.
+  ///
+  /// In en, this message translates to:
+  /// **'* Required fields'**
+  String get commonRequiredFieldsLegend;
+
   /// No description provided for @commonFilterLabelWithValue.
   ///
   /// In en, this message translates to:
@@ -841,7 +847,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeCode.
   ///
   /// In en, this message translates to:
-  /// **'Employee Code'**
+  /// **'Employee code'**
   String get employeeCode;
 
   /// No description provided for @employeeCodeHint.
@@ -850,10 +856,28 @@ abstract class AppLocalizations {
   /// **'E001'**
   String get employeeCodeHint;
 
+  /// No description provided for @employeeCodeRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee code is required.'**
+  String get employeeCodeRequired;
+
+  /// No description provided for @employeeFirstNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'First name is required.'**
+  String get employeeFirstNameRequired;
+
+  /// No description provided for @employeeLastNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name is required.'**
+  String get employeeLastNameRequired;
+
   /// No description provided for @employeeHireDate.
   ///
   /// In en, this message translates to:
-  /// **'Hire Date'**
+  /// **'Hire date'**
   String get employeeHireDate;
 
   /// No description provided for @employeeStatus.
@@ -889,7 +913,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeAccessToken.
   ///
   /// In en, this message translates to:
-  /// **'Access Token'**
+  /// **'Access token'**
   String get employeeAccessToken;
 
   /// No description provided for @employeePinStatus.
@@ -907,7 +931,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeAccessNote.
   ///
   /// In en, this message translates to:
-  /// **'Access Notes'**
+  /// **'Access notes'**
   String get employeeAccessNote;
 
   /// No description provided for @employeeAccessTokenRequiredWhenNfc.
@@ -919,13 +943,13 @@ abstract class AppLocalizations {
   /// No description provided for @employeeEmploymentType.
   ///
   /// In en, this message translates to:
-  /// **'Employment Type'**
+  /// **'Employment type'**
   String get employeeEmploymentType;
 
   /// No description provided for @employeeWeeklyHours.
   ///
   /// In en, this message translates to:
-  /// **'Weekly Hours'**
+  /// **'Weekly hours'**
   String get employeeWeeklyHours;
 
   /// No description provided for @employeeWeeklyHoursHint.
@@ -1132,11 +1156,23 @@ abstract class AppLocalizations {
   /// **'Reset PIN'**
   String get employeeResetPin;
 
+  /// No description provided for @employeeFieldLabelWithRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'{label} *'**
+  String employeeFieldLabelWithRequired(String label);
+
   /// No description provided for @employeeSectionIdentity.
   ///
   /// In en, this message translates to:
   /// **'Identity'**
   String get employeeSectionIdentity;
+
+  /// No description provided for @employeeSectionBasicInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Basic information'**
+  String get employeeSectionBasicInfo;
 
   /// No description provided for @employeeSectionEmployment.
   ///

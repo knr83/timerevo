@@ -66,6 +66,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get commonErrorOccurred => 'Ein Fehler ist aufgetreten.';
 
   @override
+  String get commonRequiredFieldsLegend => '* Pflichtfelder';
+
+  @override
   String commonFilterLabelWithValue(String label, String value) {
     return '$label: $value';
   }
@@ -435,6 +438,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get employeeCodeHint => 'E001';
 
   @override
+  String get employeeCodeRequired => 'Mitarbeiternummer ist erforderlich.';
+
+  @override
+  String get employeeFirstNameRequired => 'Vorname ist erforderlich.';
+
+  @override
+  String get employeeLastNameRequired => 'Nachname ist erforderlich.';
+
+  @override
   String get employeeHireDate => 'Einstellungsdatum';
 
   @override
@@ -586,7 +598,15 @@ class AppLocalizationsDe extends AppLocalizations {
   String get employeeResetPin => 'PIN zurücksetzen';
 
   @override
+  String employeeFieldLabelWithRequired(String label) {
+    return '$label *';
+  }
+
+  @override
   String get employeeSectionIdentity => 'Stammdaten';
+
+  @override
+  String get employeeSectionBasicInfo => 'Stammdaten';
 
   @override
   String get employeeSectionEmployment => 'Beschäftigung';

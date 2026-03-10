@@ -29,21 +29,43 @@ class SettingsPage extends ConsumerWidget {
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
     final workingHours = workingHoursAsync.valueOrNull;
 
+    const formMaxWidth = 360.0;
+    const formMinWidth = 280.0;
+
     return Scaffold(
       body: ListView(
         padding: const EdgeInsets.all(12),
         children: [
-          Text(
-            l10n.settingsTitle,
-            style: Theme.of(context).textTheme.headlineSmall,
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownMenu<String?>(
-                  label: Text(l10n.settingsLanguageLabel),
-                  initialSelection: currentCode,
+          Align(
+            alignment: Alignment.centerLeft,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                minWidth: formMinWidth,
+                maxWidth: formMaxWidth,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    l10n.settingsTitle,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                  const SizedBox(height: 12),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final dropdownWidth = constraints.maxWidth -
+                          8 -
+                          (localeAsync.isLoading ? 16 : 0);
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: dropdownWidth,
+                            child: DropdownMenu<String?>(
+                              expandedInsets: EdgeInsets.zero,
+                              label: Text(l10n.settingsLanguageLabel),
+                              initialSelection: currentCode,
                   dropdownMenuEntries: [
                     DropdownMenuEntry<String?>(
                       value: null,
@@ -73,22 +95,32 @@ class SettingsPage extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
-              if (localeAsync.isLoading)
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              Expanded(
-                child: DropdownMenu<AppThemeSelection>(
-                  label: Text(l10n.settingsThemeLabel),
-                  initialSelection: themeSelection,
+                          const SizedBox(width: 8),
+                          if (localeAsync.isLoading)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final dropdownWidth = constraints.maxWidth -
+                          8 -
+                          (themeAsync.isLoading ? 16 : 0);
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(
+                            width: dropdownWidth,
+                            child: DropdownMenu<AppThemeSelection>(
+                              expandedInsets: EdgeInsets.zero,
+                              label: Text(l10n.settingsThemeLabel),
+                              initialSelection: themeSelection,
                   dropdownMenuEntries: [
                     DropdownMenuEntry(
                       value: AppThemeSelection.system,
@@ -119,25 +151,28 @@ class SettingsPage extends ConsumerWidget {
                   },
                 ),
               ),
-              const SizedBox(width: 8),
-              if (themeAsync.isLoading)
-                const SizedBox(
-                  width: 16,
-                  height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
+                          const SizedBox(width: 8),
+                          if (themeAsync.isLoading)
+                            const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(strokeWidth: 2),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
             l10n.settingsWorkingHoursLabel,
             style: Theme.of(context).textTheme.titleSmall,
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              OutlinedButton(
-                onPressed: workingHoursAsync.isLoading
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: workingHoursAsync.isLoading
                     ? null
                     : () async {
                         if (workingHours == null) return;
@@ -164,9 +199,11 @@ class SettingsPage extends ConsumerWidget {
                         workingHours != null
                             ? TimeFormat.formatMinutes(workingHours.startMin)
                             : l10n.commonNotAvailable)),
+                ),
               ),
               const SizedBox(width: 8),
-              OutlinedButton(
+              Expanded(
+                child: OutlinedButton(
                 onPressed: workingHoursAsync.isLoading
                     ? null
                     : () async {
@@ -193,6 +230,7 @@ class SettingsPage extends ConsumerWidget {
                         workingHours != null
                             ? TimeFormat.formatMinutes(workingHours.endMin)
                             : l10n.commonNotAvailable)),
+                ),
               ),
               const SizedBox(width: 8),
               if (workingHoursAsync.isLoading)
@@ -204,47 +242,42 @@ class SettingsPage extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 24),
-          Wrap(
-            spacing: 12,
-            runSpacing: 12,
-            children: [
-              SizedBox(
-                width: 200,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    final ok = await showDialog<bool>(
-                      context: context,
-                      builder: (_) => const ChangePinDialog(),
-                    );
-                    if (ok == true && context.mounted) {
-                      showAppSnack(context, l10n.adminPinUpdated);
-                    }
-                  },
-                  icon: const Icon(Icons.lock_outline, size: 20),
-                  label: Text(l10n.adminChangePin),
-                ),
-              ),
               ElevatedButton.icon(
                 onPressed: () async {
-                    final result = await ref
-                        .read(backupRestoreUseCaseProvider)
-                        .createBackupToFolder();
-                    if (!context.mounted) return;
-                    if (result.path != null) {
-                      await showSuccessAnimationDialog(
-                        context,
-                        message: l10n.settingsBackupSuccessTitle,
-                        icon: Icons.backup_rounded,
-                      );
-                    } else if (result.error != null) {
-                      showAppSnack(context,
-                          messageForBackupError(result.error!, l10n),
-                          isError: true);
-                    }
-                  },
+                  final ok = await showDialog<bool>(
+                    context: context,
+                    builder: (_) => const ChangePinDialog(),
+                  );
+                  if (ok == true && context.mounted) {
+                    showAppSnack(context, l10n.adminPinUpdated);
+                  }
+                },
+                icon: const Icon(Icons.lock_outline, size: 20),
+                label: Text(l10n.adminChangePin),
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final result = await ref
+                      .read(backupRestoreUseCaseProvider)
+                      .createBackupToFolder();
+                  if (!context.mounted) return;
+                  if (result.path != null) {
+                    await showSuccessAnimationDialog(
+                      context,
+                      message: l10n.settingsBackupSuccessTitle,
+                      icon: Icons.backup_rounded,
+                    );
+                  } else if (result.error != null) {
+                    showAppSnack(context,
+                        messageForBackupError(result.error!, l10n),
+                        isError: true);
+                  }
+                },
                 icon: const Icon(Icons.backup, size: 20),
                 label: Text(l10n.settingsCreateBackup),
               ),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: () async {
                   final result = await ref
@@ -267,13 +300,15 @@ class SettingsPage extends ConsumerWidget {
                 icon: const Icon(Icons.restore, size: 20),
                 label: Text(l10n.settingsRestoreFromBackup),
               ),
+              const SizedBox(height: 12),
               OutlinedButton.icon(
                 onPressed: () async {
                   unawaited(DiagnosticLog.append(DiagnosticLogEntry(
                     event: DiagnosticEvent.diagnosticExportStart,
                     ts: DateTime.now().toUtc().toIso8601String(),
                   )));
-                  final result = await ref.read(exportDiagnosticsUseCaseProvider).exportToFile(context);
+                  final result =
+                      await ref.read(exportDiagnosticsUseCaseProvider).exportToFile(context);
                   if (!context.mounted) return;
                   if (result.path != null) {
                     unawaited(DiagnosticLog.append(DiagnosticLogEntry(
@@ -295,7 +330,9 @@ class SettingsPage extends ConsumerWidget {
                 icon: const Icon(Icons.bug_report_outlined, size: 20),
                 label: Text(l10n.settingsExportDiagnostics),
               ),
-            ],
+                ],
+              ),
+            ),
           ),
         ],
       ),

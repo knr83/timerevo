@@ -21,6 +21,7 @@
   "commonRemove": "Удалить",
   "commonOk": "ОК",
   "commonErrorOccurred": "Произошла ошибка.",
+  "commonRequiredFieldsLegend": "* Обязательные поля",
   "commonFilterLabelWithValue": "{label}: {value}",
   "@commonFilterLabelWithValue": {
     "placeholders": {
@@ -182,6 +183,9 @@
   "employeeId": "ID сотрудника",
   "employeeCode": "Код сотрудника",
   "employeeCodeHint": "E001",
+  "employeeCodeRequired": "Укажите код сотрудника.",
+  "employeeFirstNameRequired": "Укажите имя.",
+  "employeeLastNameRequired": "Укажите фамилию.",
   "employeeHireDate": "Дата приёма",
   "employeeStatus": "Статус",
   "employeeRole": "Роль",
@@ -249,7 +253,14 @@
   "employeePolicyLinkTerms": "Условиями использования",
   "employeeSetPin": "Установить PIN",
   "employeeResetPin": "Сбросить PIN",
+  "employeeFieldLabelWithRequired": "{label} *",
+  "@employeeFieldLabelWithRequired": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
   "employeeSectionIdentity": "Данные",
+  "employeeSectionBasicInfo": "Основные данные",
   "employeeSectionEmployment": "Трудоустройство",
   "employeeSectionContact": "Контакт",
   "employeeSectionAccess": "Доступ к терминалу",

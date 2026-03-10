@@ -66,6 +66,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get commonErrorOccurred => 'Произошла ошибка.';
 
   @override
+  String get commonRequiredFieldsLegend => '* Обязательные поля';
+
+  @override
   String commonFilterLabelWithValue(String label, String value) {
     return '$label: $value';
   }
@@ -431,6 +434,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeCodeHint => 'E001';
 
   @override
+  String get employeeCodeRequired => 'Укажите код сотрудника.';
+
+  @override
+  String get employeeFirstNameRequired => 'Укажите имя.';
+
+  @override
+  String get employeeLastNameRequired => 'Укажите фамилию.';
+
+  @override
   String get employeeHireDate => 'Дата приёма';
 
   @override
@@ -582,7 +594,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeResetPin => 'Сбросить PIN';
 
   @override
+  String employeeFieldLabelWithRequired(String label) {
+    return '$label *';
+  }
+
+  @override
   String get employeeSectionIdentity => 'Данные';
+
+  @override
+  String get employeeSectionBasicInfo => 'Основные данные';
 
   @override
   String get employeeSectionEmployment => 'Трудоустройство';

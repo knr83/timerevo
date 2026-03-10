@@ -66,6 +66,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get commonErrorOccurred => 'An error occurred.';
 
   @override
+  String get commonRequiredFieldsLegend => '* Required fields';
+
+  @override
   String commonFilterLabelWithValue(String label, String value) {
     return '$label: $value';
   }
@@ -426,13 +429,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeId => 'Employee ID';
 
   @override
-  String get employeeCode => 'Employee Code';
+  String get employeeCode => 'Employee code';
 
   @override
   String get employeeCodeHint => 'E001';
 
   @override
-  String get employeeHireDate => 'Hire Date';
+  String get employeeCodeRequired => 'Employee code is required.';
+
+  @override
+  String get employeeFirstNameRequired => 'First name is required.';
+
+  @override
+  String get employeeLastNameRequired => 'Last name is required.';
+
+  @override
+  String get employeeHireDate => 'Hire date';
 
   @override
   String get employeeStatus => 'Status';
@@ -450,7 +462,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeUseNfc => 'Enable NFC';
 
   @override
-  String get employeeAccessToken => 'Access Token';
+  String get employeeAccessToken => 'Access token';
 
   @override
   String get employeePinStatus => 'PIN Status';
@@ -461,16 +473,16 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get employeeAccessNote => 'Access Notes';
+  String get employeeAccessNote => 'Access notes';
 
   @override
   String get employeeAccessTokenRequiredWhenNfc => 'Required when NFC enabled.';
 
   @override
-  String get employeeEmploymentType => 'Employment Type';
+  String get employeeEmploymentType => 'Employment type';
 
   @override
-  String get employeeWeeklyHours => 'Weekly Hours';
+  String get employeeWeeklyHours => 'Weekly hours';
 
   @override
   String get employeeWeeklyHoursHint => '40';
@@ -582,7 +594,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeResetPin => 'Reset PIN';
 
   @override
+  String employeeFieldLabelWithRequired(String label) {
+    return '$label *';
+  }
+
+  @override
   String get employeeSectionIdentity => 'Identity';
+
+  @override
+  String get employeeSectionBasicInfo => 'Basic information';
 
   @override
   String get employeeSectionEmployment => 'Employment';

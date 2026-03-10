@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/app_info.dart';
 import '../../../ui/legal/legal_links.dart';
 
 class AboutPage extends ConsumerWidget {
@@ -21,7 +22,7 @@ class AboutPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'v0.1.0',
+            'v$appVersion',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

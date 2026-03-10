@@ -10,7 +10,7 @@ $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
     $version = $Matches[1]
 } else {
-    $version = "0.1.0"
+    $version = "0.2.0"
 }
 
 $packageName = "timerevo-${version}-win64"
@@ -43,7 +43,6 @@ Copy-Item -Path "USER_GUIDE_DE.md" -Destination $outDir -Force
 
 # Create zip
 Write-Host "Creating archive..." -ForegroundColor Cyan
-$zipDir = Split-Path -Parent $outDir
 Compress-Archive -Path $outDir -DestinationPath $zipPath -Force
 
 Write-Host ""

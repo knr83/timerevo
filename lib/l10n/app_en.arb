@@ -21,6 +21,7 @@
   "commonRemove": "Remove",
   "commonOk": "OK",
   "commonErrorOccurred": "An error occurred.",
+  "commonRequiredFieldsLegend": "* Required fields",
   "commonFilterLabelWithValue": "{label}: {value}",
   "@commonFilterLabelWithValue": {
     "placeholders": {
@@ -215,15 +216,18 @@
   },
   "employeeChangeScheduleTooltip": "Change schedule",
   "employeeId": "Employee ID",
-  "employeeCode": "Employee Code",
+  "employeeCode": "Employee code",
   "employeeCodeHint": "E001",
-  "employeeHireDate": "Hire Date",
+  "employeeCodeRequired": "Employee code is required.",
+  "employeeFirstNameRequired": "First name is required.",
+  "employeeLastNameRequired": "Last name is required.",
+  "employeeHireDate": "Hire date",
   "employeeStatus": "Status",
   "employeeRole": "Role",
   "employeeRoleFieldLabel": "Employee / Manager",
   "employeeUsePin": "Enable PIN",
   "employeeUseNfc": "Enable NFC",
-  "employeeAccessToken": "Access Token",
+  "employeeAccessToken": "Access token",
   "employeePinStatus": "PIN Status",
   "employeePinStatusWithValue": "PIN Status: {value}",
   "@employeePinStatusWithValue": {
@@ -231,10 +235,10 @@
       "value": { "type": "String" }
     }
   },
-  "employeeAccessNote": "Access Notes",
+  "employeeAccessNote": "Access notes",
   "employeeAccessTokenRequiredWhenNfc": "Required when NFC enabled.",
-  "employeeEmploymentType": "Employment Type",
-  "employeeWeeklyHours": "Weekly Hours",
+  "employeeEmploymentType": "Employment type",
+  "employeeWeeklyHours": "Weekly hours",
   "employeeWeeklyHoursHint": "40",
   "employeeEmail": "Email",
   "employeePhone": "Phone",
@@ -284,7 +288,14 @@
   "employeePolicyLinkTerms": "Terms",
   "employeeSetPin": "Set PIN",
   "employeeResetPin": "Reset PIN",
+  "employeeFieldLabelWithRequired": "{label} *",
+  "@employeeFieldLabelWithRequired": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
   "employeeSectionIdentity": "Identity",
+  "employeeSectionBasicInfo": "Basic information",
   "employeeSectionEmployment": "Employment",
   "employeeSectionContact": "Contact",
   "employeeSectionAccess": "Terminal Access",

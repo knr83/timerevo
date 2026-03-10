@@ -12,6 +12,7 @@ import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_details.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../../../ui/legal/legal_doc_page.dart';
+
 const _employmentTypes = [
   'full_time',
   'part_time',
@@ -71,6 +72,10 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   String? _codeError;
   EmployeePinStatus _pinStatus = EmployeePinStatus.notSet;
   bool _resettingPin = false;
+  /// After save in embedded mode, baseline for _isDirty. Null until first save.
+  Map<String, dynamic>? _lastSavedValues;
+  /// Set when user attempts save; enables showing errorText on empty required fields.
+  bool _submitted = false;
 
   Map<String, dynamic> get _currentValues => {
         'code': _codeCtrl.text.trim().toUpperCase(),
@@ -106,6 +111,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       };
 
   Map<String, dynamic> get _initialValues {
+    if (_lastSavedValues != null) return _lastSavedValues!;
     final e = widget.existing;
     if (e == null) {
       return {
@@ -306,7 +312,10 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   }
 
   Future<void> _save() async {
-    if (!_isValid || !_isDirty) return;
+    if (!_isValid || !_isDirty) {
+      if (!_submitted) setState(() => _submitted = true);
+      return;
+    }
     final l10n = AppLocalizations.of(context);
     final useCase = ref.read(employeesAdminUseCaseProvider);
     try {
@@ -393,7 +402,9 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       }
       if (mounted) {
         if (widget.embedded) {
+          _lastSavedValues = Map<String, dynamic>.from(_currentValues);
           widget.onSaved?.call(newEmployeeId);
+          setState(() {});
         } else {
           Navigator.of(context).pop(true);
         }
@@ -450,32 +461,71 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     _SectionCard(
-                      title: l10n.employeeSectionIdentity,
+                      title: l10n.employeeSectionBasicInfo,
                       icon: Icons.badge_outlined,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          Text(
+                            l10n.commonRequiredFieldsLegend,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
                           Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
                                 flex: 2,
-                                child: _ReadOnlyField(
-                                  label: l10n.employeeId,
-                                  value: widget.existing != null
-                                      ? '${widget.existing!.id}'
-                                      : '—',
+                                child: TextField(
+                                  controller: _firstNameCtrl,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.employeeFieldLabelWithRequired(
+                                        l10n.employeeFirstName),
+                                    errorText: _submitted &&
+                                            _firstNameCtrl.text.trim().isEmpty
+                                        ? l10n.employeeFirstNameRequired
+                                        : null,
+                                    border: const OutlineInputBorder(),
+                                  ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                flex: 3,
+                                flex: 2,
+                                child: TextField(
+                                  controller: _lastNameCtrl,
+                                  onChanged: (_) => setState(() {}),
+                                  decoration: InputDecoration(
+                                    labelText: l10n.employeeFieldLabelWithRequired(
+                                        l10n.employeeLastName),
+                                    errorText: _submitted &&
+                                            _lastNameCtrl.text.trim().isEmpty
+                                        ? l10n.employeeLastNameRequired
+                                        : null,
+                                    border: const OutlineInputBorder(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Expanded(
+                                flex: 1,
                                 child: TextField(
                                   controller: _codeCtrl,
+                                  readOnly: widget.existing != null,
                                   decoration: InputDecoration(
                                     labelText: l10n.employeeCode,
                                     hintText: l10n.employeeCodeHint,
-                                    errorText: _codeError,
+                                    errorText: _codeError ??
+                                        (_submitted &&
+                                                widget.existing == null &&
+                                                _codeCtrl.text.trim().isEmpty
+                                            ? l10n.employeeCodeRequired
+                                            : null),
                                     border: const OutlineInputBorder(),
                                     contentPadding: const EdgeInsets.symmetric(
                                       horizontal: 12,
@@ -483,47 +533,26 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                     ),
                                   ),
                                   textCapitalization: TextCapitalization.characters,
-                                  onChanged: (_) => setState(() {
-                                    _codeError = null;
-                                  }),
-                                  onEditingComplete: _checkCodeUnique,
-                                  onTapOutside: (_) => _checkCodeUnique(),
+                                  onChanged: widget.existing == null
+                                      ? (_) => setState(() {
+                                            _codeError = null;
+                                          })
+                                      : null,
+                                  onEditingComplete: widget.existing == null
+                                      ? _checkCodeUnique
+                                      : null,
+                                  onTapOutside: widget.existing == null
+                                      ? (_) => _checkCodeUnique()
+                                      : null,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: TextField(
-                                  controller: _firstNameCtrl,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.employeeFirstName,
-                                    border: const OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: TextField(
-                                  controller: _lastNameCtrl,
-                                  onChanged: (_) => setState(() {}),
-                                  decoration: InputDecoration(
-                                    labelText: l10n.employeeLastName,
-                                    border: const OutlineInputBorder(),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 8),
-                          SwitchListTile(
+                          _CompactSwitch(
                             value: _isActive,
                             onChanged: (v) => setState(() => _isActive = v),
-                            title: Text(l10n.employeeStatus),
-                            contentPadding: EdgeInsets.zero,
+                            label: l10n.employeeActiveLabel,
                           ),
                         ],
                       ),
@@ -537,6 +566,28 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                         children: [
                           Row(
                             children: [
+                              Expanded(
+                                child: DropdownButtonFormField<String>(
+                                  initialValue: _employeeRole,
+                                  decoration: InputDecoration(
+                                    labelText: l10n.employeeRole,
+                                    border: const OutlineInputBorder(),
+                                    contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 12,
+                                    ),
+                                  ),
+                                  items: _roles
+                                      .map((r) => DropdownMenuItem(
+                                            value: r,
+                                            child: Text(_roleLabel(r)),
+                                          ))
+                                      .toList(),
+                                  onChanged: (v) =>
+                                      setState(() => _employeeRole = v ?? 'employee'),
+                                ),
+                              ),
+                              const SizedBox(width: 12),
                               Expanded(
                                 child: InputDecorator(
                                   decoration: InputDecoration(
@@ -570,28 +621,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                       ),
                                     ),
                                   ),
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  initialValue: _employeeRole,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.employeeRoleFieldLabel,
-                                    border: const OutlineInputBorder(),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                  items: _roles
-                                      .map((r) => DropdownMenuItem(
-                                            value: r,
-                                            child: Text(_roleLabel(r)),
-                                          ))
-                                      .toList(),
-                                  onChanged: (v) =>
-                                      setState(() => _employeeRole = v ?? 'employee'),
                                 ),
                               ),
                             ],
@@ -710,73 +739,84 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          SwitchListTile(
-                            value: _usePin,
-                            onChanged: (v) => setState(() => _usePin = v),
-                            title: Text(l10n.employeeUsePin),
-                            contentPadding: EdgeInsets.zero,
+                          Row(
+                            children: [
+                              _CompactSwitch(
+                                value: _usePin,
+                                onChanged: (v) => setState(() => _usePin = v),
+                                label: l10n.employeeUsePin,
+                              ),
+                              const Spacer(),
+                              if (_usePin)
+                                Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      l10n.employeePinStatusWithValue(
+                                        _pinStatus == EmployeePinStatus.set
+                                            ? l10n.employeePinStatusSet
+                                            : l10n.employeePinStatusNotSet,
+                                      ),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .onSurfaceVariant,
+                                      ),
+                                    ),
+                                    if (widget.existing != null) ...[
+                                      const SizedBox(width: 8),
+                                      TextButton(
+                                        onPressed: _showSetPinDialog,
+                                        child: Text(l10n.employeeSetPin),
+                                      ),
+                                      TextButton(
+                                        onPressed: _resettingPin ? null : _resetPin,
+                                        child: _resettingPin
+                                            ? const SizedBox(
+                                                width: 16,
+                                                height: 16,
+                                                child: CircularProgressIndicator(
+                                                  strokeWidth: 2,
+                                                ),
+                                              )
+                                            : Text(l10n.employeeResetPin),
+                                      ),
+                                    ],
+                                  ],
+                                ),
+                            ],
                           ),
-                          SwitchListTile(
+                          _CompactSwitch(
                             value: _useNfc,
                             onChanged: (v) => setState(() => _useNfc = v),
-                            title: Text(l10n.employeeUseNfc),
-                            contentPadding: EdgeInsets.zero,
+                            label: l10n.employeeUseNfc,
                           ),
                           if (!_usePin && !_useNfc)
                             Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
+                              padding: const EdgeInsets.only(top: 8, bottom: 12),
                               child: Text(
                                 l10n.employeeTerminalAccessDisabled,
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.error,
-                                  fontSize: 13,
-                                ),
-                              ),
-                            ),
-                          Row(
-                            children: [
-                              Text(
-                                l10n.employeePinStatusWithValue(
-                                  _pinStatus == EmployeePinStatus.set
-                                      ? l10n.employeePinStatusSet
-                                      : l10n.employeePinStatusNotSet,
-                                ),
                                 style: TextStyle(
                                   color: Theme.of(context)
                                       .colorScheme
                                       .onSurfaceVariant,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
                                 ),
                               ),
-                              if (_usePin && widget.existing != null) ...[
-                                const Spacer(),
-                                TextButton(
-                                  onPressed: _showSetPinDialog,
-                                  child: Text(l10n.employeeSetPin),
-                                ),
-                                TextButton(
-                                  onPressed: _resettingPin ? null : _resetPin,
-                                  child: _resettingPin
-                                      ? const SizedBox(
-                                          width: 16,
-                                          height: 16,
-                                          child: CircularProgressIndicator(
-                                            strokeWidth: 2,
-                                          ),
-                                        )
-                                      : Text(l10n.employeeResetPin),
-                                ),
-                              ],
-                            ],
-                          ),
+                            ),
                           const SizedBox(height: 8),
                           TextField(
                             controller: _accessTokenCtrl,
                             onChanged: (_) => setState(() {}),
                             decoration: InputDecoration(
-                              labelText: l10n.employeeAccessToken,
+                              labelText: _useNfc
+                                  ? l10n.employeeFieldLabelWithRequired(
+                                      l10n.employeeAccessToken)
+                                  : l10n.employeeAccessToken,
                               border: const OutlineInputBorder(),
-                              errorText: _useNfc &&
+                              errorText: _submitted &&
+                                      _useNfc &&
                                       _accessTokenCtrl.text.trim().isEmpty
                                   ? l10n.employeeAccessTokenRequiredWhenNfc
                                   : null,
@@ -1059,6 +1099,34 @@ class _SetPinDialogContentState extends State<_SetPinDialogContent> {
   }
 }
 
+/// Compact switch with label next to the toggle, not stretched across full width.
+class _CompactSwitch extends StatelessWidget {
+  const _CompactSwitch({
+    required this.value,
+    required this.onChanged,
+    required this.label,
+  });
+
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(label),
+        const SizedBox(width: 12),
+        Switch(
+          value: value,
+          onChanged: onChanged,
+        ),
+      ],
+    );
+  }
+}
+
 class _SectionCard extends StatelessWidget {
   const _SectionCard({
     required this.title,
@@ -1095,35 +1163,6 @@ class _SectionCard extends StatelessWidget {
             const SizedBox(height: 12),
             child,
           ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ReadOnlyField extends StatelessWidget {
-  const _ReadOnlyField({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  static const _contentPadding = EdgeInsets.symmetric(
-    horizontal: 12,
-    vertical: 12,
-  );
-
-  @override
-  Widget build(BuildContext context) {
-    return InputDecorator(
-      decoration: InputDecoration(
-        labelText: label,
-        border: const OutlineInputBorder(),
-        contentPadding: _contentPadding,
-      ),
-      child: Text(
-        value,
-        style: TextStyle(
-          color: Theme.of(context).colorScheme.onSurfaceVariant,
         ),
       ),
     );

@@ -21,6 +21,7 @@
   "commonRemove": "Entfernen",
   "commonOk": "OK",
   "commonErrorOccurred": "Ein Fehler ist aufgetreten.",
+  "commonRequiredFieldsLegend": "* Pflichtfelder",
   "commonFilterLabelWithValue": "{label}: {value}",
   "@commonFilterLabelWithValue": {
     "placeholders": {
@@ -182,6 +183,9 @@
   "employeeId": "Mitarbeiter-ID",
   "employeeCode": "Mitarbeiternummer",
   "employeeCodeHint": "E001",
+  "employeeCodeRequired": "Mitarbeiternummer ist erforderlich.",
+  "employeeFirstNameRequired": "Vorname ist erforderlich.",
+  "employeeLastNameRequired": "Nachname ist erforderlich.",
   "employeeHireDate": "Einstellungsdatum",
   "employeeStatus": "Status",
   "employeeRole": "Rolle",
@@ -249,7 +253,14 @@
   "employeePolicyLinkTerms": "Nutzungsbedingungen",
   "employeeSetPin": "PIN setzen",
   "employeeResetPin": "PIN zurücksetzen",
+  "employeeFieldLabelWithRequired": "{label} *",
+  "@employeeFieldLabelWithRequired": {
+    "placeholders": {
+      "label": { "type": "String" }
+    }
+  },
   "employeeSectionIdentity": "Stammdaten",
+  "employeeSectionBasicInfo": "Stammdaten",
   "employeeSectionEmployment": "Beschäftigung",
   "employeeSectionContact": "Kontakt",
   "employeeSectionAccess": "Terminal-Zugang",
