@@ -1,6 +1,6 @@
 # Timerevo
 
-[![Release](https://img.shields.io/github/v/release/OWNER/REPO?display_name=tag)](https://github.com/knr83/timerevo/releases)
+[![Release](https://img.shields.io/github/v/release/knr83/timerevo)](https://github.com/knr83/timerevo/releases)
 ![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 
