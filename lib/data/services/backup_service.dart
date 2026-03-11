@@ -123,20 +123,23 @@ class BackupService {
         ],
       ),
     );
-    if (confirmed != true)
+    if (confirmed != true) {
       return (success: false, error: null, needsRestart: false);
+    }
 
     final xFile = await openFile(
       acceptedTypeGroups: [
         const XTypeGroup(label: 'SQLite', extensions: ['sqlite']),
       ],
     );
-    if (xFile == null)
+    if (xFile == null) {
       return (success: false, error: null, needsRestart: false);
+    }
 
     final backupPath = xFile.path;
-    if (backupPath.isEmpty)
+    if (backupPath.isEmpty) {
       return (success: false, error: null, needsRestart: false);
+    }
 
     try {
       final db = sqlite3.open(backupPath);
@@ -200,16 +203,18 @@ class BackupService {
         ],
       ),
     );
-    if (confirmed != true)
+    if (confirmed != true) {
       return (success: false, error: null, needsRestart: false);
+    }
 
     final xFile = await openFile(
       acceptedTypeGroups: [
         const XTypeGroup(label: 'SQLite', extensions: ['sqlite']),
       ],
     );
-    if (xFile == null)
+    if (xFile == null) {
       return (success: false, error: null, needsRestart: false);
+    }
 
     final backupPath = xFile.path;
     if (backupPath.isEmpty) {
@@ -269,8 +274,9 @@ class BackupService {
   /// Attempts to restart the app. Returns true if restart was initiated (caller will exit).
   static Future<bool> _tryRestartApp() async {
     try {
-      if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)
+      if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) {
         return false;
+      }
       await Process.start(
         Platform.resolvedExecutable,
         List<String>.from(Platform.executableArguments),

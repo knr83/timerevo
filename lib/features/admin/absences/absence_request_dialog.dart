@@ -254,8 +254,9 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                               firstDate: first,
                               initialDate: _dateFrom,
                             );
-                            if (picked != null)
+                            if (picked != null) {
                               setState(() => _dateFrom = picked);
+                            }
                           },
                           child: Text(
                             _dateFrom != null
@@ -275,8 +276,9 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                               initialDate:
                                   _dateTo ?? _dateFrom ?? DateTime.now(),
                             );
-                            if (picked != null)
+                            if (picked != null) {
                               setState(() => _dateTo = picked);
+                            }
                           },
                           child: Text(
                             _dateTo != null

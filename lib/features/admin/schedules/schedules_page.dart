@@ -475,14 +475,16 @@ class _WeekEditorContent extends ConsumerWidget {
     if (action == _GuardAction.cancel) return;
     if (action == _GuardAction.discard) {
       ref.read(scheduleDraftProvider.notifier).resetToBase();
-      if (context.mounted)
+      if (context.mounted) {
         await _showDeleteConfirmDialog(context, ref, templateId);
+      }
       return;
     }
     if (action == _GuardAction.save) {
       final ok = await _save(context, ref);
-      if (context.mounted && ok)
+      if (context.mounted && ok) {
         await _showDeleteConfirmDialog(context, ref, templateId);
+      }
     }
   }
 

@@ -27,12 +27,14 @@ Future<void> _migratePrefsToAppSettings(
   final prefs = await SharedPreferences.getInstance();
 
   final startMin = prefs.getInt('working_hours_start_min');
-  if (startMin != null)
+  if (startMin != null) {
     await appSettings.set('working_hours_start_min', startMin.toString());
+  }
 
   final endMin = prefs.getInt('working_hours_end_min');
-  if (endMin != null)
+  if (endMin != null) {
     await appSettings.set('working_hours_end_min', endMin.toString());
+  }
 
   final locale = prefs.getString('locale_override');
   if (locale != null && locale.trim().isNotEmpty) {

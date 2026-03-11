@@ -230,8 +230,9 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
     final sessions = sessionsAsync.valueOrNull;
     if (sessions != null) sessionDays.addAll(_sessionDays(sessions));
     final absences = absencesAsync.valueOrNull;
-    if (absences != null)
+    if (absences != null) {
       absenceDaysByStatus.addAll(_absenceDaysByStatus(absences));
+    }
 
     return Scaffold(
       appBar: AppBar(

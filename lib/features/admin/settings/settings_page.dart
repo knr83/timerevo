@@ -178,7 +178,9 @@ class SettingsPage extends ConsumerWidget {
                           onPressed: workingHoursAsync.isLoading
                               ? null
                               : () async {
-                                  if (workingHours == null) return;
+                                  if (workingHours == null) {
+                                    return;
+                                  }
                                   final picked = await showTimePicker(
                                     context: context,
                                     initialTime:
@@ -186,8 +188,9 @@ class SettingsPage extends ConsumerWidget {
                                           workingHours.startMin,
                                         ),
                                   );
-                                  if (picked == null || !context.mounted)
+                                  if (picked == null || !context.mounted) {
                                     return;
+                                  }
                                   final startMin =
                                       picked.hour * 60 + picked.minute;
                                   final notifier = ref.read(
@@ -222,7 +225,9 @@ class SettingsPage extends ConsumerWidget {
                           onPressed: workingHoursAsync.isLoading
                               ? null
                               : () async {
-                                  if (workingHours == null) return;
+                                  if (workingHours == null) {
+                                    return;
+                                  }
                                   final picked = await showTimePicker(
                                     context: context,
                                     initialTime:
@@ -230,8 +235,9 @@ class SettingsPage extends ConsumerWidget {
                                           workingHours.endMin,
                                         ),
                                   );
-                                  if (picked == null || !context.mounted)
+                                  if (picked == null || !context.mounted) {
                                     return;
+                                  }
                                   final endMin =
                                       picked.hour * 60 + picked.minute;
                                   final notifier = ref.read(

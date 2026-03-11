@@ -45,19 +45,24 @@ class ClockInUseCase {
 
   Future<ClockActionResult> call(int employeeId) async {
     final employee = await _employeesRepo.getEmployee(employeeId);
-    if (employee == null)
+    if (employee == null) {
       return const ClockError(ClockErrorKind.employeeInactive);
-    if (!employee.isActive)
+    }
+    if (!employee.isActive) {
       return const ClockError(ClockErrorKind.employeeInactive);
+    }
     final open = await _sessionsRepo.getOpenSessionForEmployee(employeeId);
-    if (open != null)
+    if (open != null) {
       return const ClockError(ClockErrorKind.sessionAlreadyOpen);
+    }
     final today = todayYmd();
     final hasAbsence = await _absencesRepo.hasApprovedAbsenceOnDate(
       employeeId,
       today,
     );
-    if (hasAbsence) return const ClockError(ClockErrorKind.hasApprovedAbsence);
+    if (hasAbsence) {
+      return const ClockError(ClockErrorKind.hasApprovedAbsence);
+    }
     await _sessionsRepo.createOpenSession(employeeId: employeeId);
     return const ClockSaved();
   }
