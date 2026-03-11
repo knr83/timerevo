@@ -10,7 +10,7 @@ $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
     $version = $Matches[1]
 } else {
-    $version = "0.2.0"
+    $version = "0.3.0"
 }
 
 $packageName = "timerevo-${version}-win64"

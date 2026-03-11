@@ -220,7 +220,7 @@ class BackupService {
   /// Attempts to restart the app. Returns true if restart was initiated (caller will exit).
   static Future<bool> _tryRestartApp() async {
     try {
-      if (!Platform.isWindows) return false;
+      if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) return false;
       await Process.start(
         Platform.resolvedExecutable,
         List<String>.from(Platform.executableArguments),

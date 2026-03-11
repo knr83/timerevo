@@ -1,7 +1,7 @@
 name: timerevo
 description: Local desktop time tracking (Flutter + drift + SQLite).
 publish_to: 'none'
-version: 0.2.0+1
+version: 0.3.0+1
 
 environment:
   sdk: ">=3.10.8 <4.0.0"
@@ -51,6 +51,7 @@ flutter:
   generate: true
   uses-material-design: true
   assets:
+    - assets/icon/
     - assets/legal/
     - assets/fonts/Roboto-Regular.ttf
     - assets/fonts/Roboto-Bold.ttf

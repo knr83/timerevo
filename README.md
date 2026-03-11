@@ -1,12 +1,12 @@
 # Timerevo
 
 [![Release](https://img.shields.io/github/v/release/knr83/timerevo)](https://github.com/knr83/timerevo/releases)
-![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6)
+![Platform](https://img.shields.io/badge/platform-Windows%20%7C%20Linux%20%7C%20macOS-0078D6)
 ![Status](https://img.shields.io/badge/status-early%20release-orange)
 
 **Privacy-first desktop time tracking for small teams — fully offline, local-first, and built for simple daily clock-in and clock-out.**
 
-Timerevo is a Windows desktop app for employee time tracking. Employees use the terminal to clock in and out, while admins manage employees, schedules, absences, reports, and settings in the same application.
+Timerevo is a desktop app (Windows, Linux, macOS) for employee time tracking. Employees use the terminal to clock in and out, while admins manage employees, schedules, absences, reports, and settings in the same application.
 
 All data is stored locally in SQLite on the machine. No server. No cloud. No internet connection required for daily use.
 
@@ -96,47 +96,57 @@ Configure language, theme, backup and restore, and other app preferences.
 
 ![Settings](assets/screenshots/05-settings-page.png)
 
-## Supported platform
+## Supported platforms
 
-Timerevo currently supports:
+Timerevo supports:
 
 - **Windows 10 / 11 (64-bit)**
+- **Linux (64-bit)**
+- **macOS**
 
 ## Run from source
 
 ### Requirements
 
 - Flutter SDK compatible with the project
-- Windows development environment for Flutter Desktop
+- Platform-specific tools: Windows (Visual Studio), Linux (clang, cmake, ninja, pkg-config, libgtk-3-dev), macOS (Xcode)
 
 ### Start locally
 
     flutter pub get
-    flutter run -d windows
+    flutter run -d windows   # or linux, macos
 
 ## Build
 
-To build the Windows desktop application:
+To build the desktop application:
 
-    flutter build windows
+    flutter build windows   # Windows
+    flutter build linux     # Linux
+    flutter build macos    # macOS (on macOS only)
 
 Build output:
 
-    build/windows/x64/runner/Release/
+- Windows: `build/windows/x64/runner/Release/`
+- Linux: `build/linux/x64/release/bundle/`
+- macOS: `build/macos/Build/Products/Release/timerevo.app`
 
 ## Distribution
 
-Timerevo is distributed as a standalone Windows build.
+Timerevo is distributed as standalone builds per platform.
 
-1. Download the latest `timerevo-<version>-win64.zip` release
-2. Unpack it to any folder
-3. Run `timerevo.exe`
+**Windows:** Download `timerevo-<version>-win64.zip`, unpack, run `timerevo.exe`
+
+**Linux:** Download `timerevo-<version>-linux64.tar.gz`, unpack, run `./timerevo`
+
+**macOS:** Download `timerevo-<version>-macos.zip`, unpack, open `timerevo.app`
 
 No installer is required.
 
-To create a distributable package locally:
+To create distributable packages locally:
 
-    .\tools\build_release.ps1
+    .\tools\build_release.ps1        # Windows (PowerShell)
+    ./tools/build_release_linux.sh    # Linux (bash)
+    ./tools/build_release_macos.sh    # macOS (bash, run on macOS)
 
 ## Tech stack
 
@@ -162,9 +172,11 @@ To create a distributable package locally:
 
 Timerevo stores its local database on the machine.
 
-Typical database location on Windows:
+Typical database location:
 
-    %LOCALAPPDATA%\timerevo\timerevo.sqlite
+- **Windows:** `%LOCALAPPDATA%\timerevo\timerevo.sqlite`
+- **Linux:** `~/.local/share/timerevo/timerevo.sqlite`
+- **macOS:** `~/Library/Application Support/timerevo/timerevo.sqlite`
 
 This keeps the application self-contained and easy to back up or restore.
 
