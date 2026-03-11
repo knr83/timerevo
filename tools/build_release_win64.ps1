@@ -1,5 +1,5 @@
 # Build Timerevo for Windows and create a distributable zip.
-# Run from project root: .\tools\build_release.ps1
+# Run from project root: .\tools\build_release_win64.ps1
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
