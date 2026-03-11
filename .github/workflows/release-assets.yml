@@ -1,0 +1,139 @@
+# Build Windows, Linux, and macOS release assets when a release is published.
+# Run publish_release_win64.ps1 on Windows first to create the release with notes and Windows asset.
+# This workflow then adds (or overwrites) all platform assets.
+
+name: Release assets (Windows, Linux, macOS)
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Release tag (e.g. v2026.3.0)'
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get version
+        id: version
+        run: |
+          $m = (Get-Content pubspec.yaml -Raw) -match 'version:\s*(\d+\.\d+\.\d+)'
+          $v = if ($m) { $Matches[1] } else { "2026.3.0" }
+          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+
+      - name: Build Windows
+        run: |
+          flutter pub get
+          flutter build windows
+          $ver = "${{ steps.version.outputs.version }}"
+          $pkg = "timerevo-$ver-win64"
+          New-Item -ItemType Directory -Force -Path "dist/$pkg" | Out-Null
+          Copy-Item -Path "build/windows/x64/runner/Release/*" -Destination "dist/$pkg" -Recurse -Force
+          Get-ChildItem -Path "dist/$pkg" -Recurse -Include "*.sqlite","*.sqlite-wal","*.sqlite-shm" -File -ErrorAction SilentlyContinue | Remove-Item -Force
+          Copy-Item -Path "USER_GUIDE_EN.md","USER_GUIDE_RU.md","USER_GUIDE_DE.md" -Destination "dist/$pkg" -Force
+          Compress-Archive -Path "dist/$pkg" -DestinationPath "dist/$pkg.zip" -Force
+
+      - name: Upload Windows asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          files: dist/timerevo-${{ steps.version.outputs.version }}-win64.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Install Linux dependencies
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+
+      - name: Get version
+        id: version
+        run: |
+          v=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          echo "version=${v:-2026.3.0}" >> "$GITHUB_OUTPUT"
+
+      - name: Build Linux
+        run: |
+          flutter pub get
+          flutter build linux
+          VERSION="${{ steps.version.outputs.version }}"
+          PKG="timerevo-${VERSION}-linux64"
+          mkdir -p "dist/${PKG}"
+          cp -r build/linux/x64/release/bundle/* "dist/${PKG}/"
+          cp USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md "dist/${PKG}/"
+          tar -czf "dist/${PKG}.tar.gz" -C dist "$PKG"
+
+      - name: Upload Linux asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          files: dist/timerevo-${{ steps.version.outputs.version }}-linux64.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Get version
+        id: version
+        run: |
+          v=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
+          echo "version=${v:-2026.3.0}" >> "$GITHUB_OUTPUT"
+
+      - name: Build macOS
+        run: |
+          flutter pub get
+          flutter build macos
+          VERSION="${{ steps.version.outputs.version }}"
+          PKG="timerevo-${VERSION}-macos"
+          mkdir -p "dist/${PKG}"
+          cp -r build/macos/Build/Products/Release/timerevo.app "dist/${PKG}/"
+          cp USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md "dist/${PKG}/"
+          cd dist && zip -r "${PKG}.zip" "$PKG"
+
+      - name: Upload macOS asset
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+          files: dist/timerevo-${{ steps.version.outputs.version }}-macos.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
