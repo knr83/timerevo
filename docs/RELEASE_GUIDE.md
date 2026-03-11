@@ -9,7 +9,7 @@ Each release must be:
 - factually accurate
 - based on real changes only
 - consistent in structure and tone
-- focused on user-visible improvements
+- focused on meaningful release information
 - free of vague filler and speculative wording
 
 ## Source of truth
@@ -88,6 +88,7 @@ Review:
 - commit messages
 - user-visible changes
 - important technical changes worth mentioning publicly
+- documentation changes worth mentioning publicly
 
 ### 3. Filter changes
 Keep only changes that are relevant for release notes.
@@ -98,6 +99,7 @@ Prioritize:
 - fixes affecting real usage
 - reporting/export changes
 - stability improvements with visible user impact
+- meaningful documentation updates when relevant
 
 Low-level internal refactors should usually be omitted unless they materially improve reliability or maintainability in a meaningful way.
 
@@ -123,7 +125,7 @@ Release notes must be:
 
 - concise
 - factual
-- product-focused
+- product-focused when applicable
 - professional
 - clean and readable
 
@@ -146,16 +148,29 @@ If the release is small, say so clearly and keep it short.
 
 ## Required release notes format
 
-Use exactly this structure:
+Use this minimum structure:
 
 ## Timerevo <version>
 
-Desktop time tracking for small teams — fully offline, local-first, and built for simple daily clock-in and clock-out.
+Desktop time tracking — fully offline, local-first.
 
-### Highlights
+### Changes
 - ...
 - ...
 - ...
+
+## Optional sections
+
+Add these sections only when they provide real value for this specific release.
+
+### Installation
+Use only when:
+- installation steps changed
+- a new platform/build format was introduced
+- the release is strongly end-user oriented
+- users need a reminder about how to run the release assets
+
+Example:
 
 ### Installation
 1. Download the asset for your platform from this release
@@ -163,16 +178,26 @@ Desktop time tracking for small teams — fully offline, local-first, and built 
 3. Run Timerevo
 
 ### Notes
+Use only when:
+- platform support needs clarification
+- asset naming or packaging changed
+- there is an important release-specific note
+- there is important context not suitable for the main change list
+
+Example:
+
+### Notes
 - Available for Windows, Linux, and macOS
 - Release assets are platform-specific
 - Data is stored locally on the machine
 
-## Rules for "Highlights"
+## Rules for "Changes"
 
-- 3 to 6 bullet points maximum
-- prefer user-visible changes
-- combine small related changes into one meaningful bullet
+- 3 to 6 bullet points maximum in most releases
+- prefer meaningful changes over noise
+- combine small related changes into one clear bullet
 - mention technical changes only if they significantly affect usability, reliability, or release quality
+- mention documentation changes only if they are meaningful for users or contributors
 - use polished release-quality wording, not raw commit style
 
 Examples of acceptable wording:
@@ -180,7 +205,8 @@ Examples of acceptable wording:
 - Added PDF export for ...
 - Refined schedule configuration for ...
 - Improved reliability of ...
-- Updated ... behavior for ...
+- Updated release documentation for ...
+- Fixed ...
 
 Examples of unacceptable wording:
 - fixed stuff
@@ -189,6 +215,13 @@ Examples of unacceptable wording:
 - cleanup
 - updated code
 - bug fixes and enhancements
+
+## Choosing the section title
+
+Use:
+- `Changes` as the default and universal section title
+- do not use `Highlights` as the default for every release
+- if a release is almost entirely documentation-related or fix-only, `Changes` is still preferred for consistency
 
 ## Validation checklist before publishing
 
@@ -201,7 +234,7 @@ Before creating a GitHub Release, verify:
 - release notes mention only real changes
 - no unfinished features are presented as complete
 - wording matches current product scope
-- installation section is platform-neutral and accurate
+- optional sections are included only when useful
 
 ## Optional working mode for Cursor
 
@@ -211,4 +244,5 @@ If asked to prepare release notes, Cursor should work in this sequence:
 2. list the most release-worthy changes
 3. filter out noise and internal-only details
 4. write final release notes in the required format
-5. output only the final Markdown unless asked otherwise
+5. add optional sections only if they are genuinely useful
+6. output only the final Markdown unless asked otherwise
