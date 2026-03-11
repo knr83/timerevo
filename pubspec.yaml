@@ -1,7 +1,7 @@
 name: timerevo
 description: Local desktop time tracking (Flutter + drift + SQLite).
 publish_to: 'none'
-version: 0.3.0+1
+version: 2026.3.0+1
 
 environment:
   sdk: ">=3.10.8 <4.0.0"

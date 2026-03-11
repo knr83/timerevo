@@ -9,7 +9,7 @@ cd "$project_root"
 # Get version from pubspec
 version=$(grep -E '^version:\s*' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
 if [ -z "$version" ]; then
-  version="0.3.0"
+  version="2026.3.0"
 fi
 
 package_name="timerevo-${version}-linux64"
