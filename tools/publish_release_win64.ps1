@@ -15,7 +15,7 @@ $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
     $version = $Matches[1]
 } else {
-    $version = "2026.3.0"
+    $version = "2026.3.1"
 }
 
 $zipPath = "dist\timerevo-${version}-win64.zip"
