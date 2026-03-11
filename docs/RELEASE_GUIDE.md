@@ -119,9 +119,9 @@ Attach the release artifact(s) generated for the current release.
 
 Artifact names must follow the naming rules defined above.
 
-**Publish (Windows):** `tools/publish_release_win64.ps1` — builds for Windows and creates the release with notes.
+**Publish:** `tools/publish_release_win64.ps1` — creates the release with notes (no local build).
 
-**GitHub Actions:** When a release is published, `.github/workflows/release-assets.yml` automatically builds Windows, Linux, and macOS assets and uploads them. Run `publish_release_win64.ps1` on Windows to create the release; CI adds all platform assets.
+**GitHub Actions:** When a release is created, `.github/workflows/release-assets.yml` automatically builds Windows, Linux, and macOS assets and uploads them.
 
 Prerequisites: `.cursor/RELEASE_NOTES.md`, GitHub CLI (`gh auth login`).
 

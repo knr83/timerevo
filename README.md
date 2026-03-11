@@ -142,16 +142,6 @@ Timerevo is distributed as standalone builds per platform.
 
 No installer is required.
 
-To create a Windows distributable package locally:
-
-    .\tools\build_release_win64.ps1  # Windows (PowerShell)
-
-To publish a release to GitHub:
-
-1. Create `.cursor/RELEASE_NOTES.md` with release notes
-2. On Windows: `.\tools\publish_release_win64.ps1` — builds and creates the release
-3. GitHub Actions adds Windows, Linux, and macOS assets automatically (`.github/workflows/release-assets.yml`)
-
 ## Tech stack
 
 - **Flutter**

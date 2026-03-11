@@ -1,8 +1,7 @@
 # Build Windows, Linux, and macOS release assets when a release is published.
 # Run publish_release_win64.ps1 on Windows first to create the release with notes and Windows asset.
 # This workflow then adds (or overwrites) all platform assets.
-
-name: Release assets (Windows, Linux, macOS)
+name: Release Assets
 
 on:
   release:
@@ -10,130 +9,335 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag (e.g. v2026.3.0)'
+        description: Release tag (example: v1.2.3)
         required: true
+        type: string
+
+concurrency:
+  group: release-assets-${{ github.event_name }}-${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
 
 permissions:
   contents: write
 
 jobs:
-  windows:
+  build-windows:
+    name: Build Windows
     runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
 
-      - name: Set up Flutter
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Validate release inputs
+        shell: pwsh
+        run: |
+          if ([string]::IsNullOrWhiteSpace("${env:RELEASE_TAG}")) {
+            Write-Error "RELEASE_TAG is empty"
+            exit 1
+          }
+
+          Write-Host "Release tag: ${env:RELEASE_TAG}"
+
+          $files = @("USER_GUIDE_EN.md", "USER_GUIDE_RU.md", "USER_GUIDE_DE.md")
+          foreach ($file in $files) {
+            if (Test-Path $file) {
+              Write-Host "Found optional guide: $file"
+            } else {
+              Write-Host "::warning::Optional guide file not found: $file"
+            }
+          }
+
+      - name: Derive version from tag
+        shell: pwsh
+        run: |
+          $version = "${env:RELEASE_TAG}" -replace '^v', ''
+          if ([string]::IsNullOrWhiteSpace($version)) {
+            Write-Error "Failed to derive version from tag: ${env:RELEASE_TAG}"
+            exit 1
+          }
+
+          "APP_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          Write-Host "Derived app version: $version"
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version-file: pubspec.yaml
           cache: true
 
-      - name: Get version
-        id: version
-        run: |
-          $m = (Get-Content pubspec.yaml -Raw) -match 'version:\s*(\d+\.\d+\.\d+)'
-          $v = if ($m) { $Matches[1] } else { "2026.3.0" }
-          "version=$v" | Out-File -FilePath $env:GITHUB_OUTPUT -Append
+      - name: Install dependencies
+        shell: pwsh
+        run: flutter pub get
 
       - name: Build Windows
-        run: |
-          flutter pub get
-          flutter build windows
-          $ver = "${{ steps.version.outputs.version }}"
-          $pkg = "timerevo-$ver-win64"
-          New-Item -ItemType Directory -Force -Path "dist/$pkg" | Out-Null
-          Copy-Item -Path "build/windows/x64/runner/Release/*" -Destination "dist/$pkg" -Recurse -Force
-          Get-ChildItem -Path "dist/$pkg" -Recurse -Include "*.sqlite","*.sqlite-wal","*.sqlite-shm" -File -ErrorAction SilentlyContinue | Remove-Item -Force
-          Copy-Item -Path "USER_GUIDE_EN.md","USER_GUIDE_RU.md","USER_GUIDE_DE.md" -Destination "dist/$pkg" -Force
-          Compress-Archive -Path "dist/$pkg" -DestinationPath "dist/$pkg.zip" -Force
+        shell: pwsh
+        run: flutter build windows --release
 
-      - name: Upload Windows asset
+      - name: Prepare package
+        shell: pwsh
+        run: |
+          $appName = "Timerevo"
+          $packageRoot = "dist\$appName-windows-${env:APP_VERSION}"
+          $appOutput = "build\windows\x64\runner\Release"
+
+          if (!(Test-Path $appOutput)) {
+            Write-Error "Build output not found: $appOutput"
+            exit 1
+          }
+
+          New-Item -ItemType Directory -Force -Path $packageRoot | Out-Null
+          Copy-Item "$appOutput\*" $packageRoot -Recurse -Force
+
+      - name: Copy optional guides
+        shell: pwsh
+        run: |
+          $docsDir = "dist\Timerevo-windows-${env:APP_VERSION}\docs"
+          New-Item -ItemType Directory -Force -Path $docsDir | Out-Null
+
+          $files = @("USER_GUIDE_EN.md", "USER_GUIDE_RU.md", "USER_GUIDE_DE.md")
+          foreach ($file in $files) {
+            if (Test-Path $file) {
+              Copy-Item $file $docsDir -Force
+              Write-Host "Copied $file"
+            } else {
+              Write-Host "::warning::Skipping missing optional guide: $file"
+            }
+          }
+
+      - name: Archive package
+        shell: pwsh
+        run: |
+          $archive = "timerevo-windows-${env:APP_VERSION}.zip"
+          Compress-Archive `
+            -Path "dist\Timerevo-windows-${env:APP_VERSION}\*" `
+            -DestinationPath $archive `
+            -Force
+
+      - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
-          files: dist/timerevo-${{ steps.version.outputs.version }}-win64.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: timerevo-windows-${{ env.APP_VERSION }}.zip
 
-  linux:
+  build-linux:
+    name: Build Linux
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
 
-      - name: Set up Flutter
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RELEASE_TAG}" ]; then
+            echo "::error::RELEASE_TAG is empty"
+            exit 1
+          fi
+
+          echo "Release tag: ${RELEASE_TAG}"
+
+          for file in USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md; do
+            if [ -f "$file" ]; then
+              echo "Found optional guide: $file"
+            else
+              echo "::warning::Optional guide file not found: $file"
+            fi
+          done
+
+      - name: Derive version from tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${RELEASE_TAG#v}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to derive version from tag: ${RELEASE_TAG}"
+            exit 1
+          fi
+
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Derived app version: $VERSION"
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version-file: pubspec.yaml
           cache: true
 
       - name: Install Linux dependencies
         run: |
-          sudo apt-get update -y
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev
+          sudo apt-get update -qq
+          sudo apt-get install -y \
+            clang \
+            cmake \
+            ninja-build \
+            pkg-config \
+            libgtk-3-dev \
+            liblzma-dev \
+            libstdc++-12-dev
 
-      - name: Get version
-        id: version
-        run: |
-          v=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-          echo "version=${v:-2026.3.0}" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build Linux
-        run: |
-          flutter pub get
-          flutter build linux
-          VERSION="${{ steps.version.outputs.version }}"
-          PKG="timerevo-${VERSION}-linux64"
-          mkdir -p "dist/${PKG}"
-          cp -r build/linux/x64/release/bundle/* "dist/${PKG}/"
-          cp USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md "dist/${PKG}/"
-          tar -czf "dist/${PKG}.tar.gz" -C dist "$PKG"
+        run: flutter build linux --release
 
-      - name: Upload Linux asset
+      - name: Prepare package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_ROOT="dist/Timerevo-linux-${APP_VERSION}"
+          APP_OUTPUT="build/linux/x64/release/bundle"
+
+          if [ ! -d "$APP_OUTPUT" ]; then
+            echo "::error::Build output not found: $APP_OUTPUT"
+            exit 1
+          fi
+
+          mkdir -p "$PACKAGE_ROOT"
+          cp -R "$APP_OUTPUT"/. "$PACKAGE_ROOT"/
+
+      - name: Copy optional guides
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DOCS_DIR="dist/Timerevo-linux-${APP_VERSION}/docs"
+          mkdir -p "$DOCS_DIR"
+
+          for file in USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md; do
+            if [ -f "$file" ]; then
+              cp "$file" "$DOCS_DIR"/
+              echo "Copied $file"
+            else
+              echo "::warning::Skipping missing optional guide: $file"
+            fi
+          done
+
+      - name: Archive package
+        shell: bash
+        run: |
+          set -euo pipefail
+          tar -czf "timerevo-linux-${APP_VERSION}.tar.gz" -C dist "Timerevo-linux-${APP_VERSION}"
+
+      - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
-          files: dist/timerevo-${{ steps.version.outputs.version }}-linux64.tar.gz
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: timerevo-linux-${{ env.APP_VERSION }}.tar.gz
 
-  macos:
+  build-macos:
+    name: Build macOS
     runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ (github.event_name == 'workflow_dispatch' && inputs.tag) || github.event.release.tag_name }}
 
-      - name: Set up Flutter
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ env.RELEASE_TAG }}
+
+      - name: Validate release inputs
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ -z "${RELEASE_TAG}" ]; then
+            echo "::error::RELEASE_TAG is empty"
+            exit 1
+          fi
+
+          echo "Release tag: ${RELEASE_TAG}"
+
+          for file in USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md; do
+            if [ -f "$file" ]; then
+              echo "Found optional guide: $file"
+            else
+              echo "::warning::Optional guide file not found: $file"
+            fi
+          done
+
+      - name: Derive version from tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          VERSION="${RELEASE_TAG#v}"
+          if [ -z "$VERSION" ]; then
+            echo "::error::Failed to derive version from tag: ${RELEASE_TAG}"
+            exit 1
+          fi
+
+          echo "APP_VERSION=$VERSION" >> "$GITHUB_ENV"
+          echo "Derived app version: $VERSION"
+
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          flutter-version-file: pubspec.yaml
           cache: true
 
-      - name: Get version
-        id: version
-        run: |
-          v=$(grep -E '^version:' pubspec.yaml | sed -E 's/version:\s*([0-9]+\.[0-9]+\.[0-9]+).*/\1/')
-          echo "version=${v:-2026.3.0}" >> "$GITHUB_OUTPUT"
+      - name: Install dependencies
+        run: flutter pub get
 
       - name: Build macOS
-        run: |
-          flutter pub get
-          flutter build macos
-          VERSION="${{ steps.version.outputs.version }}"
-          PKG="timerevo-${VERSION}-macos"
-          mkdir -p "dist/${PKG}"
-          cp -r build/macos/Build/Products/Release/timerevo.app "dist/${PKG}/"
-          cp USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md "dist/${PKG}/"
-          cd dist && zip -r "${PKG}.zip" "$PKG"
+        run: flutter build macos --release
 
-      - name: Upload macOS asset
+      - name: Prepare package
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          PACKAGE_ROOT="dist/Timerevo-macos-${APP_VERSION}"
+          APP_BUNDLE="build/macos/Build/Products/Release/Timerevo.app"
+
+          if [ ! -d "$APP_BUNDLE" ]; then
+            echo "::error::App bundle not found: $APP_BUNDLE"
+            exit 1
+          fi
+
+          mkdir -p "$PACKAGE_ROOT"
+          cp -R "$APP_BUNDLE" "$PACKAGE_ROOT"/
+
+      - name: Copy optional guides
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          DOCS_DIR="dist/Timerevo-macos-${APP_VERSION}/docs"
+          mkdir -p "$DOCS_DIR"
+
+          for file in USER_GUIDE_EN.md USER_GUIDE_RU.md USER_GUIDE_DE.md; do
+            if [ -f "$file" ]; then
+              cp "$file" "$DOCS_DIR"/
+              echo "Copied $file"
+            else
+              echo "::warning::Skipping missing optional guide: $file"
+            fi
+          done
+
+      - name: Archive package
+        shell: bash
+        run: |
+          set -euo pipefail
+          ditto -c -k --sequesterRsrc --keepParent "dist/Timerevo-macos-${APP_VERSION}" "timerevo-macos-${APP_VERSION}.zip"
+
+      - name: Upload release asset
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.event.release.tag_name }}
-          files: dist/timerevo-${{ steps.version.outputs.version }}-macos.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          files: timerevo-macos-${{ env.APP_VERSION }}.zip
