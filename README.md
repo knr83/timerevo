@@ -1,5 +1,9 @@
 # Timerevo
 
+[![Release](https://img.shields.io/github/v/release/OWNER/REPO?display_name=tag)](https://github.com/knr83/timerevo/releases)
+![Platform](https://img.shields.io/badge/platform-Windows%2010%2F11-0078D6)
+![Status](https://img.shields.io/badge/status-early%20release-orange)
+
 **Privacy-first desktop time tracking for small teams — fully offline, local-first, and built for simple daily clock-in and clock-out.**
 
 Timerevo is a Windows desktop app for employee time tracking. Employees use the terminal to clock in and out, while admins manage employees, schedules, absences, reports, and settings in the same application.
@@ -10,17 +14,16 @@ All data is stored locally in SQLite on the machine. No server. No cloud. No int
 
 - **Fully offline** — no cloud dependency and no server setup
 - **Local-first by design** — all records stay on the machine
-- **Simple terminal workflow** — fast employee clock-in and clock-out
+- **Simple terminal workflow** — fast daily use for employees
 - **Optional PIN protection** — additional access control for employee check-in
 - **Built for small teams** — practical for single-workplace and small business setups
-- **Admin tools included** — employees, schedules, journal, absences, reports, and settings
-- **Backup and restore** — easy local data protection
+- **Backup and restore** — straightforward local data protection
 - **Multilingual UI** — German, Russian, and English
 - **Accessible themes** — light, dark, and high-contrast
 
 ## Project status
 
-**Early release**. Core workflows are implemented and usable.
+**Early release.** Core workflows are implemented and ready for everyday use.
 
 Currently available and ready to use:
 
@@ -35,75 +38,62 @@ Currently available and ready to use:
 
 ## Features
 
-### Terminal
+### Fast employee clock-in and clock-out
+- use a shared terminal for daily check-in and check-out
+- select an employee profile and enter a PIN if enabled
+- keep the workflow simple and quick for everyday use
 
-The terminal is designed for fast daily employee use.
-
-- select employee profile
-- enter PIN if enabled
-- clock **IN** / **OUT**
-- view personal work calendar
-- export personal time report to PDF
-
-### Administration
-
-The admin area includes all core management tools.
-
-#### Employees
-
+### Employee and schedule management
 - create and edit employee profiles
-- assign employee code and role
-- enable, set, or reset PIN
-- assign schedule templates
-- mark employees as active or inactive
+- assign employee codes, roles, and schedule templates
+- define working intervals per weekday, including shifts that cross midnight
 
-#### Schedules
-
-- create and manage schedule templates
-- define working intervals per weekday
-- support schedules that cross midnight
-
-#### Journal
-
-- browse recorded work sessions
+### Work session control
+- browse recorded work sessions in the journal
 - filter by employee, date range, and status
-- edit start and end time
-- add notes and update reasons
+- edit start and end times, add notes, and document update reasons
 
-#### Absences
+### Absence management
+- manage absence requests in one place
+- support approval and rejection workflows
+- keep planned and unplanned time off organized
 
-- manage absence requests
-- approve or reject requests
-- keep planned and unplanned time off in one place
-
-#### Reports
-
-- generate summaries by employee and period
+### Reports and exports
+- generate summaries by employee and date range
 - export reports to PDF
+- export personal time reports from the terminal
 
-#### Settings
-
-- change language and theme
-- configure allowed working hours
-- change admin PIN
+### Settings and local data safety
+- switch language and theme
 - create and restore backups
 - export diagnostics for support
+- keep all data stored locally on the machine
 
 ## Screenshots
 
 ### Terminal
+Fast daily clock-in and clock-out from a shared workplace terminal.
+
 ![Terminal](assets/screenshots/01-terminal-page.png)
 
 ### Employees
+Manage employee profiles, PIN access, and schedule templates.
+
 ![Employees](assets/screenshots/02-employees-page.png)
 
 ### Schedules
+Define working intervals per weekday, including shifts that cross midnight.
+
 ![Schedules](assets/screenshots/03-schedule-management.png)
 
 ### Reports
+View summaries by employee and period, then export them to PDF.
+
 ![Reports](assets/screenshots/04-reports-page.png)
 
 ### Settings
+Configure language, theme, backup and restore, and other app preferences.
+
 ![Settings](assets/screenshots/05-settings-page.png)
 
 ## Supported platform
@@ -136,15 +126,15 @@ Build output:
 
 ## Distribution
 
-The project is currently distributed as a standalone Windows build.
+Timerevo is distributed as a standalone Windows build.
 
-- no installer
-- unpack the release archive
-- run `timerevo.exe`
+1. Download the latest `timerevo-<version>-win64.zip` release
+2. Unpack it to any folder
+3. Run `timerevo.exe`
 
-**Default admin PIN:** `0000` — change it in Administration → Settings.
+No installer is required.
 
-To create a distributable zip:
+To create a distributable package locally:
 
     .\tools\build_release.ps1
 

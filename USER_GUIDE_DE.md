@@ -34,6 +34,10 @@ Doppelklicken Sie auf `timerevo.exe`.
 ## Verwaltung
 
 Geben Sie die Admin-PIN zum Entsperren ein. Zum Abmelden **Zurück** drücken — die Verwaltung sperrt automatisch.
+
+> Beim ersten Zugang verwenden Sie die Standard-PIN: `0000`.
+> Aus Sicherheitsgründen ändern Sie diese nach dem Login unter **Einstellungen → PIN ändern**.
+
 Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 
 ### Mitarbeiter

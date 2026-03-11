@@ -34,6 +34,10 @@ Double-click `timerevo.exe`.
 ## Administration
 
 Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks automatically.
+
+> On first access, use the default admin PIN: `0000`.
+> For security, change it after login in **Settings → Change PIN**.
+
 **Help** menu: Privacy Policy, Terms of use, About.
 
 ### Employees

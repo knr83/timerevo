@@ -24,6 +24,7 @@ migrate_working_dir/
 .cursor/
 
 # Flutter/Dart/Pub related
+web/
 **/doc/api/
 **/ios/Flutter/.last_build_id
 .dart_tool/
