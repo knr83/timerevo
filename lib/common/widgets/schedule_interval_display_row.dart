@@ -39,7 +39,10 @@ class ScheduleIntervalDisplayRow extends StatelessWidget {
                   onTap: onTap,
                   borderRadius: BorderRadius.circular(4),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 8,
+                      horizontal: 4,
+                    ),
                     child: Text(
                       label,
                       style: Theme.of(context).textTheme.bodyMedium,

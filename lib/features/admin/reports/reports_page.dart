@@ -36,12 +36,9 @@ Widget balanceText(int ms, AppLocalizations l10n, BuildContext context) {
   final color = ms > 0
       ? Colors.green.shade700
       : ms < 0
-          ? Theme.of(context).colorScheme.error
-          : Theme.of(context).colorScheme.onSurface;
-  return Text(
-    formatBalanceMs(ms, l10n),
-    style: TextStyle(color: color),
-  );
+      ? Theme.of(context).colorScheme.error
+      : Theme.of(context).colorScheme.onSurface;
+  return Text(formatBalanceMs(ms, l10n), style: TextStyle(color: color));
 }
 
 class ReportsPage extends ConsumerStatefulWidget {
@@ -187,9 +184,11 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                       loading: () =>
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(
-                        child: Text(l10n.reportsFailedLoad(
-                            errorMessageForUser(
-                                e, l10n.commonErrorOccurred))),
+                        child: Text(
+                          l10n.reportsFailedLoad(
+                            errorMessageForUser(e, l10n.commonErrorOccurred),
+                          ),
+                        ),
                       ),
                     ),
                   ),
@@ -234,12 +233,18 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     if (f.fromUtcMs == null || f.toUtcMs == null) {
       return AppLocalizations.of(context).reportsPeriodLabel;
     }
-    final fromDt =
-        DateTime.fromMillisecondsSinceEpoch(f.fromUtcMs!, isUtc: true).toLocal();
-    final toDt =
-        DateTime.fromMillisecondsSinceEpoch(f.toUtcMs!, isUtc: true).toLocal();
-    final from = '${fromDt.year}-${fromDt.month.toString().padLeft(2, '0')}-${fromDt.day.toString().padLeft(2, '0')}';
-    final to = '${toDt.year}-${toDt.month.toString().padLeft(2, '0')}-${toDt.day.toString().padLeft(2, '0')}';
+    final fromDt = DateTime.fromMillisecondsSinceEpoch(
+      f.fromUtcMs!,
+      isUtc: true,
+    ).toLocal();
+    final toDt = DateTime.fromMillisecondsSinceEpoch(
+      f.toUtcMs!,
+      isUtc: true,
+    ).toLocal();
+    final from =
+        '${fromDt.year}-${fromDt.month.toString().padLeft(2, '0')}-${fromDt.day.toString().padLeft(2, '0')}';
+    final to =
+        '${toDt.year}-${toDt.month.toString().padLeft(2, '0')}-${toDt.day.toString().padLeft(2, '0')}';
     return '$from – $to';
   }
 
@@ -247,9 +252,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 }
 
 class _EmployeeFilterDropdown extends ConsumerWidget {
-  const _EmployeeFilterDropdown({
-    required this.filters,
-  });
+  const _EmployeeFilterDropdown({required this.filters});
 
   final ({int? fromUtcMs, int? toUtcMs, int? employeeId}) filters;
 
@@ -269,7 +272,8 @@ class _EmployeeFilterDropdown extends ConsumerWidget {
               (e) => DropdownMenuEntry(
                 value: e.id,
                 label: EmployeeDisplayName.of(
-                    EmployeeDisplay(firstName: e.firstName, lastName: e.lastName)),
+                  EmployeeDisplay(firstName: e.firstName, lastName: e.lastName),
+                ),
               ),
             ),
           ],
@@ -287,8 +291,11 @@ class _EmployeeFilterDropdown extends ConsumerWidget {
         height: 56,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Text(l10n.reportsFailedLoad(
-          errorMessageForUser(e, l10n.commonErrorOccurred))),
+      error: (e, _) => Text(
+        l10n.reportsFailedLoad(
+          errorMessageForUser(e, l10n.commonErrorOccurred),
+        ),
+      ),
     );
   }
 }
@@ -342,39 +349,47 @@ class _ReportTable extends ConsumerWidget {
         columns: [
           DataColumn(
             label: Text(l10n.reportsTableEmployee),
-            onSort: (_, __) => onSort(0, sortColumnIndex == 0 ? !sortAscending : true),
+            onSort: (_, __) =>
+                onSort(0, sortColumnIndex == 0 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTableWorked),
-            onSort: (_, __) => onSort(1, sortColumnIndex == 1 ? !sortAscending : true),
+            onSort: (_, __) =>
+                onSort(1, sortColumnIndex == 1 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTablePlanned),
-            onSort: (_, __) => onSort(2, sortColumnIndex == 2 ? !sortAscending : true),
+            onSort: (_, __) =>
+                onSort(2, sortColumnIndex == 2 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTableBalance),
-            onSort: (_, __) => onSort(3, sortColumnIndex == 3 ? !sortAscending : true),
+            onSort: (_, __) =>
+                onSort(3, sortColumnIndex == 3 ? !sortAscending : true),
           ),
         ],
-        rows: sorted.map((r) {
-          final plannedText = r.anyDayHasSchedule
-              ? formatDurationMs(r.normMs, l10n)
-              : l10n.reportsPlannedNoSchedule;
-          return DataRow(
-            selected: ref.watch(selectedEmployeeForDetailsProvider) == r.employeeId,
-            onSelectChanged: (selected) {
-              ref.read(selectedEmployeeForDetailsProvider.notifier).state =
-                  selected == true ? r.employeeId : null;
-            },
-            cells: [
-              DataCell(Text(r.employeeName)),
-              DataCell(Text(formatDurationMs(r.totalMs, l10n))),
-              DataCell(Text(plannedText)),
-              DataCell(balanceText(r.deltaMs, l10n, context)),
-            ],
-          );
-        }).toList(growable: false),
+        rows: sorted
+            .map((r) {
+              final plannedText = r.anyDayHasSchedule
+                  ? formatDurationMs(r.normMs, l10n)
+                  : l10n.reportsPlannedNoSchedule;
+              return DataRow(
+                selected:
+                    ref.watch(selectedEmployeeForDetailsProvider) ==
+                    r.employeeId,
+                onSelectChanged: (selected) {
+                  ref.read(selectedEmployeeForDetailsProvider.notifier).state =
+                      selected == true ? r.employeeId : null;
+                },
+                cells: [
+                  DataCell(Text(r.employeeName)),
+                  DataCell(Text(formatDurationMs(r.totalMs, l10n))),
+                  DataCell(Text(plannedText)),
+                  DataCell(balanceText(r.deltaMs, l10n, context)),
+                ],
+              );
+            })
+            .toList(growable: false),
       ),
     );
   }
@@ -398,15 +413,17 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final dayRowsAsync = ref.watch(watchEmployeeDayReportProvider);
     final employeeName =
-        rows.where((r) => r.employeeId == selectedId).firstOrNull?.employeeName ?? '';
+        rows
+            .where((r) => r.employeeId == selectedId)
+            .firstOrNull
+            ?.employeeName ??
+        '';
 
     return Container(
       margin: const EdgeInsets.only(left: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outlineVariant,
-        ),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(
@@ -434,7 +451,9 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                     }
                     await exportEmployeeDailyPdf(
                       context,
-                      dayReportUseCase: ref.read(employeeDayReportUseCaseProvider),
+                      dayReportUseCase: ref.read(
+                        employeeDayReportUseCaseProvider,
+                      ),
                       employeeId: selectedId,
                       employeeName: employeeName,
                       fromUtcMs: filters.fromUtcMs!,
@@ -482,28 +501,32 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                           columnWidth: const IntrinsicColumnWidth(),
                         ),
                       ],
-                    rows: dayRows.map((dr) {
-                      final plannedText = dr.hasSchedule
-                          ? formatDurationMs(dr.normMs, l10n)
-                          : l10n.reportsPlannedNoSchedule;
-                      return DataRow(
-                        cells: [
-                          DataCell(Text(dr.dateYmd)),
-                          DataCell(Text(formatDurationMs(dr.workedMs, l10n))),
-                          DataCell(Text(plannedText)),
-                          DataCell(balanceText(dr.deltaMs, l10n, context)),
-                        ],
-                      );
-                    }).toList(growable: false),
+                      rows: dayRows
+                          .map((dr) {
+                            final plannedText = dr.hasSchedule
+                                ? formatDurationMs(dr.normMs, l10n)
+                                : l10n.reportsPlannedNoSchedule;
+                            return DataRow(
+                              cells: [
+                                DataCell(Text(dr.dateYmd)),
+                                DataCell(
+                                  Text(formatDurationMs(dr.workedMs, l10n)),
+                                ),
+                                DataCell(Text(plannedText)),
+                                DataCell(
+                                  balanceText(dr.deltaMs, l10n, context),
+                                ),
+                              ],
+                            );
+                          })
+                          .toList(growable: false),
                     ),
                   ),
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (e, _) => Center(
-                child: Text(
-                  errorMessageForUser(e, l10n.commonErrorOccurred),
-                ),
+                child: Text(errorMessageForUser(e, l10n.commonErrorOccurred)),
               ),
             ),
           ),
@@ -584,16 +607,23 @@ Future<void> _exportPdf(
 
     final fromStr = filters.fromUtcMs != null
         ? dateToYmd(
-            DateTime.fromMillisecondsSinceEpoch(filters.fromUtcMs!, isUtc: true)
-                .toLocal())
+            DateTime.fromMillisecondsSinceEpoch(
+              filters.fromUtcMs!,
+              isUtc: true,
+            ).toLocal(),
+          )
         : '—';
     final toStr = filters.toUtcMs != null
         ? dateToYmd(
-            DateTime.fromMillisecondsSinceEpoch(filters.toUtcMs!, isUtc: true)
-                .toLocal())
+            DateTime.fromMillisecondsSinceEpoch(
+              filters.toUtcMs!,
+              isUtc: true,
+            ).toLocal(),
+          )
         : '—';
-    final generatedStr =
-        DateFormat.yMMMd().add_Hm().format(DateTime.now().toLocal());
+    final generatedStr = DateFormat.yMMMd().add_Hm().format(
+      DateTime.now().toLocal(),
+    );
 
     pdf.addPage(
       pw.MultiPage(
@@ -603,8 +633,10 @@ Future<void> _exportPdf(
           child: pw.Row(
             mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
-              pw.Text(l10n.reportsPdfFooterBrand,
-                  style: const pw.TextStyle(fontSize: 10)),
+              pw.Text(
+                l10n.reportsPdfFooterBrand,
+                style: const pw.TextStyle(fontSize: 10),
+              ),
               pw.Text(
                 l10n.reportsPdfFooterPage(ctx.pageNumber, ctx.pagesCount),
                 style: const pw.TextStyle(fontSize: 10),
@@ -617,17 +649,21 @@ Future<void> _exportPdf(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             mainAxisSize: pw.MainAxisSize.min,
             children: [
-              pw.Text('Timerevo',
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 14,
-                  )),
+              pw.Text(
+                'Timerevo',
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 14,
+                ),
+              ),
               pw.SizedBox(height: 4),
-              pw.Text(l10n.reportsPdfTitle,
-                  style: pw.TextStyle(
-                    fontWeight: pw.FontWeight.bold,
-                    fontSize: 18,
-                  )),
+              pw.Text(
+                l10n.reportsPdfTitle,
+                style: pw.TextStyle(
+                  fontWeight: pw.FontWeight.bold,
+                  fontSize: 18,
+                ),
+              ),
               pw.SizedBox(height: 6),
               pw.Text(
                 l10n.reportsPdfPeriod(fromStr, toStr),
@@ -669,31 +705,39 @@ Future<void> _exportPdf(
                 children: [
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(6),
-                    child: pw.Text(l10n.reportsTableEmployee,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(6),
-                    child: pw.Align(
-                      alignment: pw.Alignment.centerRight,
-                      child: pw.Text(l10n.reportsTableWorked,
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                    child: pw.Text(
+                      l10n.reportsTableEmployee,
+                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(6),
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
-                      child: pw.Text(l10n.reportsTablePlanned,
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      child: pw.Text(
+                        l10n.reportsTableWorked,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
                     ),
                   ),
                   pw.Padding(
                     padding: const pw.EdgeInsets.all(6),
                     child: pw.Align(
                       alignment: pw.Alignment.centerRight,
-                      child: pw.Text(l10n.reportsTableBalance,
-                          style: pw.TextStyle(fontWeight: pw.FontWeight.bold)),
+                      child: pw.Text(
+                        l10n.reportsTablePlanned,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
+                    ),
+                  ),
+                  pw.Padding(
+                    padding: const pw.EdgeInsets.all(6),
+                    child: pw.Align(
+                      alignment: pw.Alignment.centerRight,
+                      child: pw.Text(
+                        l10n.reportsTableBalance,
+                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      ),
                     ),
                   ),
                 ],
@@ -763,10 +807,10 @@ Future<void> _exportPdf(
       showAppSnack(
         context,
         l10n.reportsFailedLoad(
-            errorMessageForUser(e, l10n.commonErrorOccurred)),
+          errorMessageForUser(e, l10n.commonErrorOccurred),
+        ),
         isError: true,
       );
     }
   }
 }
-

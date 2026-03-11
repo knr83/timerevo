@@ -47,4 +47,3 @@ Future<File> getDatabaseFile() async {
   final dir = await getApplicationSupportDirectory();
   return File(p.join(dir.path, 'timerevo.sqlite'));
 }
-

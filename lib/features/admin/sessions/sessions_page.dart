@@ -18,12 +18,15 @@ import '../../../domain/entities/session_with_employee_info.dart';
 
 enum _JournalStatusFilter { all, open, closed }
 
-final _journalFiltersProvider =
-    StateProvider<_JournalFilters>((ref) => _JournalFilters.initial());
+final _journalFiltersProvider = StateProvider<_JournalFilters>(
+  (ref) => _JournalFilters.initial(),
+);
 
 final _journalProvider = StreamProvider<List<SessionWithEmployeeInfo>>((ref) {
   final filters = ref.watch(_journalFiltersProvider);
-  return ref.watch(watchSessionsUseCaseProvider).streamSessionsWithEmployee(
+  return ref
+      .watch(watchSessionsUseCaseProvider)
+      .streamSessionsWithEmployee(
         employeeId: filters.employeeId,
         fromUtcMs: filters.fromUtcMs,
         toUtcMs: filters.toUtcMs,
@@ -63,31 +66,34 @@ class SessionsPage extends ConsumerWidget {
                       label: l10n.journalFilterFrom,
                       valueUtcMs: filters.fromUtcMs,
                       anyLabel: l10n.journalFilterAny,
-                      onPickedUtcMs: (v) => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(fromUtcMs: v),
-                      onCleared: () => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(fromUtcMs: null),
+                      onPickedUtcMs: (v) =>
+                          ref.read(_journalFiltersProvider.notifier).state =
+                              filters.copyWith(fromUtcMs: v),
+                      onCleared: () =>
+                          ref.read(_journalFiltersProvider.notifier).state =
+                              filters.copyWith(fromUtcMs: null),
                       useEndOfDay: false,
                     ),
                     DateFilterChip(
                       label: l10n.journalFilterTo,
                       valueUtcMs: filters.toUtcMs,
                       anyLabel: l10n.journalFilterAny,
-                      onPickedUtcMs: (v) => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(toUtcMs: v),
-                      onCleared: () => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(toUtcMs: null),
+                      onPickedUtcMs: (v) =>
+                          ref.read(_journalFiltersProvider.notifier).state =
+                              filters.copyWith(toUtcMs: v),
+                      onCleared: () =>
+                          ref.read(_journalFiltersProvider.notifier).state =
+                              filters.copyWith(toUtcMs: null),
                       useEndOfDay: true,
                     ),
                     _PresetChips(
-                      onPreset: (fromUtcMs, toUtcMs) => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(
-                              fromUtcMs: fromUtcMs, toUtcMs: toUtcMs),
+                      onPreset: (fromUtcMs, toUtcMs) =>
+                          ref
+                              .read(_journalFiltersProvider.notifier)
+                              .state = filters.copyWith(
+                            fromUtcMs: fromUtcMs,
+                            toUtcMs: toUtcMs,
+                          ),
                     ),
                   ],
                 ),
@@ -102,19 +108,24 @@ class SessionsPage extends ConsumerWidget {
                       initialSelection: filters.statusFilter,
                       dropdownMenuEntries: [
                         DropdownMenuEntry(
-                            value: _JournalStatusFilter.all,
-                            label: l10n.journalFilterStatusAll),
+                          value: _JournalStatusFilter.all,
+                          label: l10n.journalFilterStatusAll,
+                        ),
                         DropdownMenuEntry(
-                            value: _JournalStatusFilter.open,
-                            label: l10n.journalFilterStatusOpen),
+                          value: _JournalStatusFilter.open,
+                          label: l10n.journalFilterStatusOpen,
+                        ),
                         DropdownMenuEntry(
-                            value: _JournalStatusFilter.closed,
-                            label: l10n.journalFilterStatusClosed),
+                          value: _JournalStatusFilter.closed,
+                          label: l10n.journalFilterStatusClosed,
+                        ),
                       ],
-                      onSelected: (v) => ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(
-                              statusFilter: v ?? filters.statusFilter),
+                      onSelected: (v) =>
+                          ref
+                              .read(_journalFiltersProvider.notifier)
+                              .state = filters.copyWith(
+                            statusFilter: v ?? filters.statusFilter,
+                          ),
                     ),
                     employeesAsync.when(
                       data: (employees) {
@@ -123,20 +134,24 @@ class SessionsPage extends ConsumerWidget {
                           initialSelection: filters.employeeId,
                           dropdownMenuEntries: [
                             DropdownMenuEntry(
-                                value: null, label: l10n.sessionsEmployeeAll),
+                              value: null,
+                              label: l10n.sessionsEmployeeAll,
+                            ),
                             ...employees.map(
                               (e) => DropdownMenuEntry(
                                 value: e.id,
                                 label: EmployeeDisplayName.of(
-                                    EmployeeDisplay(
-                                        firstName: e.firstName,
-                                        lastName: e.lastName)),
+                                  EmployeeDisplay(
+                                    firstName: e.firstName,
+                                    lastName: e.lastName,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
-                          onSelected: (v) => ref
-                              .read(_journalFiltersProvider.notifier)
-                              .state = filters.copyWith(employeeId: v),
+                          onSelected: (v) =>
+                              ref.read(_journalFiltersProvider.notifier).state =
+                                  filters.copyWith(employeeId: v),
                         );
                       },
                       loading: () => const SizedBox(
@@ -144,16 +159,19 @@ class SessionsPage extends ConsumerWidget {
                         height: 56,
                         child: Center(child: CircularProgressIndicator()),
                       ),
-                      error: (e, _) => Text(l10n.sessionsFailedLoadEmployees(
-                          errorMessageForUser(e, l10n.commonErrorOccurred))),
+                      error: (e, _) => Text(
+                        l10n.sessionsFailedLoadEmployees(
+                          errorMessageForUser(e, l10n.commonErrorOccurred),
+                        ),
+                      ),
                     ),
                     SizedBox(
                       width: 180,
                       child: _JournalSearchField(
                         initialQuery: filters.searchQuery,
-                        onChanged: (v) => ref
-                            .read(_journalFiltersProvider.notifier)
-                            .state = filters.copyWith(searchQuery: v),
+                        onChanged: (v) =>
+                            ref.read(_journalFiltersProvider.notifier).state =
+                                filters.copyWith(searchQuery: v),
                       ),
                     ),
                   ],
@@ -170,11 +188,13 @@ class SessionsPage extends ConsumerWidget {
                   }
                   return _JournalTable(rows: filtered);
                 },
-                loading: () =>
-                    const Center(child: CircularProgressIndicator()),
+                loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
-                  child: Text(l10n.sessionsFailedLoadSessions(
-                      errorMessageForUser(e, l10n.commonErrorOccurred))),
+                  child: Text(
+                    l10n.sessionsFailedLoadSessions(
+                      errorMessageForUser(e, l10n.commonErrorOccurred),
+                    ),
+                  ),
                 ),
               ),
             ),
@@ -252,9 +272,12 @@ List<SessionWithEmployeeInfo> _applyClientFilters(
   if (query.isNotEmpty) {
     final lower = query.toLowerCase();
     result = result.where((r) {
-      final name = EmployeeDisplayName.of(EmployeeDisplay(
-              firstName: r.employee.firstName, lastName: r.employee.lastName))
-          .toLowerCase();
+      final name = EmployeeDisplayName.of(
+        EmployeeDisplay(
+          firstName: r.employee.firstName,
+          lastName: r.employee.lastName,
+        ),
+      ).toLowerCase();
       final note = (r.session.note ?? '').toLowerCase();
       return name.contains(lower) || note.contains(lower);
     }).toList();
@@ -322,12 +345,12 @@ class _JournalFilters {
   final String searchQuery;
 
   factory _JournalFilters.initial() => const _JournalFilters(
-        employeeId: null,
-        fromUtcMs: null,
-        toUtcMs: null,
-        statusFilter: _JournalStatusFilter.all,
-        searchQuery: '',
-      );
+    employeeId: null,
+    fromUtcMs: null,
+    toUtcMs: null,
+    statusFilter: _JournalStatusFilter.all,
+    searchQuery: '',
+  );
 
   _JournalFilters copyWith({
     Object? employeeId = _sentinel,
@@ -337,10 +360,12 @@ class _JournalFilters {
     Object? searchQuery = _sentinel,
   }) {
     return _JournalFilters(
-      employeeId:
-          identical(employeeId, _sentinel) ? this.employeeId : employeeId as int?,
-      fromUtcMs:
-          identical(fromUtcMs, _sentinel) ? this.fromUtcMs : fromUtcMs as int?,
+      employeeId: identical(employeeId, _sentinel)
+          ? this.employeeId
+          : employeeId as int?,
+      fromUtcMs: identical(fromUtcMs, _sentinel)
+          ? this.fromUtcMs
+          : fromUtcMs as int?,
       toUtcMs: identical(toUtcMs, _sentinel) ? this.toUtcMs : toUtcMs as int?,
       statusFilter: identical(statusFilter, _sentinel)
           ? this.statusFilter
@@ -363,47 +388,50 @@ class _JournalTable extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
-          scrollDirection: Axis.vertical,
-          child: SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: DataTable(
-              sortColumnIndex: 1,
-              sortAscending: false,
-              columnSpacing: 24,
-              columns: [
-                DataColumn(label: Text(l10n.sessionsTableEmployee)),
-                DataColumn(
-                  label: Center(child: Text(l10n.sessionsTableStart)),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Center(child: Text(l10n.sessionsTableEnd)),
-                  numeric: true,
-                ),
-                DataColumn(
-                  label: Center(child: Text(l10n.sessionsTableDuration)),
-                  numeric: true,
-                ),
-                DataColumn(
-                    label: Center(child: Text(l10n.sessionsTableStatus))),
-                DataColumn(
-                    label: Center(child: Text(l10n.sessionsTableActions))),
-              ],
-              rows: rows.map((row) {
+      scrollDirection: Axis.vertical,
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: DataTable(
+          sortColumnIndex: 1,
+          sortAscending: false,
+          columnSpacing: 24,
+          columns: [
+            DataColumn(label: Text(l10n.sessionsTableEmployee)),
+            DataColumn(
+              label: Center(child: Text(l10n.sessionsTableStart)),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Center(child: Text(l10n.sessionsTableEnd)),
+              numeric: true,
+            ),
+            DataColumn(
+              label: Center(child: Text(l10n.sessionsTableDuration)),
+              numeric: true,
+            ),
+            DataColumn(label: Center(child: Text(l10n.sessionsTableStatus))),
+            DataColumn(label: Center(child: Text(l10n.sessionsTableActions))),
+          ],
+          rows: rows
+              .map((row) {
                 final s = row.session;
-                final employeeName = EmployeeDisplayName.of(EmployeeDisplay(
+                final employeeName = EmployeeDisplayName.of(
+                  EmployeeDisplay(
                     firstName: row.employee.firstName,
-                    lastName: row.employee.lastName));
-                final start =
-                    TimeFormat.formatLocalDateTimeNoSeconds(s.startTs);
+                    lastName: row.employee.lastName,
+                  ),
+                );
+                final start = TimeFormat.formatLocalDateTimeNoSeconds(
+                  s.startTs,
+                );
                 final end = s.endTs == null
                     ? l10n.journalEndEmpty
                     : TimeFormat.formatLocalDateTimeNoSeconds(s.endTs!);
                 final duration = s.endTs == null
                     ? l10n.commonOngoing
                     : (() {
-                        final minutes =
-                            ((s.endTs! - s.startTs) / 60000).floor();
+                        final minutes = ((s.endTs! - s.startTs) / 60000)
+                            .floor();
                         final h = minutes ~/ 60;
                         final m = minutes % 60;
                         return l10n.durationHm(h, m);
@@ -419,9 +447,7 @@ class _JournalTable extends ConsumerWidget {
                     DataCell(
                       Center(
                         child: Icon(
-                          isOpen
-                              ? Icons.schedule
-                              : Icons.check_circle_outline,
+                          isOpen ? Icons.schedule : Icons.check_circle_outline,
                           size: 20,
                           color: isOpen
                               ? Theme.of(context).colorScheme.primary
@@ -435,16 +461,21 @@ class _JournalTable extends ConsumerWidget {
                           icon: const Icon(Icons.edit_outlined),
                           tooltip: l10n.sessionsEdit,
                           onPressed: () => _openEditDialog(
-                              context, ref, row, closeNowPreFill: false),
+                            context,
+                            ref,
+                            row,
+                            closeNowPreFill: false,
+                          ),
                         ),
                       ),
                     ),
                   ],
                 );
-              }).toList(growable: false),
-            ),
-          ),
-        );
+              })
+              .toList(growable: false),
+        ),
+      ),
+    );
   }
 
   Future<void> _openEditDialog(
@@ -467,8 +498,9 @@ class _JournalTable extends ConsumerWidget {
         final l10n = AppLocalizations.of(context);
         return StatefulBuilder(
           builder: (context, setState) {
-            final startText =
-                TimeFormat.formatLocalDateTimeNoSeconds(startUtcMs);
+            final startText = TimeFormat.formatLocalDateTimeNoSeconds(
+              startUtcMs,
+            );
             final endText = endUtcMs == null
                 ? l10n.commonOngoing
                 : TimeFormat.formatLocalDateTimeNoSeconds(endUtcMs!);
@@ -493,9 +525,12 @@ class _JournalTable extends ConsumerWidget {
                       alignment: Alignment.centerLeft,
                       child: Text(
                         l10n.sessionsEmployeePrefix(
-                          EmployeeDisplayName.of(EmployeeDisplay(
+                          EmployeeDisplayName.of(
+                            EmployeeDisplay(
                               firstName: row.employee.firstName,
-                              lastName: row.employee.lastName)),
+                              lastName: row.employee.lastName,
+                            ),
+                          ),
                         ),
                       ),
                     ),
@@ -505,12 +540,12 @@ class _JournalTable extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () async {
-                              final picked =
-                                  await pickLocalDateTime(context);
+                              final picked = await pickLocalDateTime(context);
                               if (picked == null) return;
                               setState(() {
-                                startUtcMs =
-                                    picked.toUtc().millisecondsSinceEpoch;
+                                startUtcMs = picked
+                                    .toUtc()
+                                    .millisecondsSinceEpoch;
                               });
                             },
                             child: Text(l10n.sessionsStartPrefix(startText)),
@@ -520,12 +555,12 @@ class _JournalTable extends ConsumerWidget {
                         Expanded(
                           child: OutlinedButton(
                             onPressed: () async {
-                              final picked =
-                                  await pickLocalDateTime(context);
+                              final picked = await pickLocalDateTime(context);
                               if (picked == null) return;
                               setState(() {
-                                endUtcMs =
-                                    picked.toUtc().millisecondsSinceEpoch;
+                                endUtcMs = picked
+                                    .toUtc()
+                                    .millisecondsSinceEpoch;
                               });
                             },
                             child: Text(l10n.sessionsEndPrefix(endText)),
@@ -539,8 +574,7 @@ class _JournalTable extends ConsumerWidget {
                       child: Text(
                         l10n.sessionsDurationWithValue(durationText),
                         style: TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -585,8 +619,7 @@ class _JournalTable extends ConsumerWidget {
                       child: Text(
                         l10n.sessionsEmployeeCannotChangeHint,
                         style: TextStyle(
-                          color:
-                              Theme.of(context).colorScheme.onSurfaceVariant,
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
                         ),
                       ),
                     ),
@@ -599,8 +632,7 @@ class _JournalTable extends ConsumerWidget {
                   child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
-                  onPressed: (reasonRequired &&
-                          reasonCtrl.text.trim().isEmpty)
+                  onPressed: (reasonRequired && reasonCtrl.text.trim().isEmpty)
                       ? null
                       : () => Navigator.of(context).pop(true),
                   child: Text(l10n.commonSave),

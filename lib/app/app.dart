@@ -25,7 +25,8 @@ class App extends ConsumerWidget {
     final overrideAsync = ref.watch(localeOverrideLanguageCodeProvider);
     final overrideCode = overrideAsync.valueOrNull;
     final themeSelectionAsync = ref.watch(appThemeSelectionProvider);
-    final themeSelection = themeSelectionAsync.valueOrNull ?? AppThemeSelection.system;
+    final themeSelection =
+        themeSelectionAsync.valueOrNull ?? AppThemeSelection.system;
     final themeConfig = buildAppTheme(themeSelection);
 
     return MaterialApp(
@@ -37,11 +38,7 @@ class App extends ConsumerWidget {
       highContrastDarkTheme: themeConfig.highContrastDarkTheme,
       themeMode: themeConfig.themeMode,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
-      supportedLocales: const [
-        Locale('de'),
-        Locale('ru'),
-        Locale('en'),
-      ],
+      supportedLocales: const [Locale('de'), Locale('ru'), Locale('en')],
       locale: overrideCode == null ? null : Locale(overrideCode),
       localeResolutionCallback: (locale, supportedLocales) {
         final code = locale?.languageCode.toLowerCase();
@@ -52,32 +49,41 @@ class App extends ConsumerWidget {
       },
       initialRoute: AppRoutes.terminal,
       routes: {
-        AppRoutes.terminal: (_) => const RestoreCompletedGate(child: TerminalPage()),
+        AppRoutes.terminal: (_) =>
+            const RestoreCompletedGate(child: TerminalPage()),
         AppRoutes.admin: (_) => const RestoreCompletedGate(child: AdminShell()),
       },
       onGenerateRoute: (settings) {
         // Fallback for unexpected route names.
         final name = settings.name;
         if (name == AppRoutes.admin) {
-          return MaterialPageRoute(builder: (_) => const RestoreCompletedGate(child: AdminShell()));
+          return MaterialPageRoute(
+            builder: (_) => const RestoreCompletedGate(child: AdminShell()),
+          );
         }
-        return MaterialPageRoute(builder: (_) => const RestoreCompletedGate(child: TerminalPage()));
+        return MaterialPageRoute(
+          builder: (_) => const RestoreCompletedGate(child: TerminalPage()),
+        );
       },
       builder: (context, child) {
         return init.when(
-          loading: () => const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          ),
+          loading: () =>
+              const Scaffold(body: Center(child: CircularProgressIndicator())),
           error: (e, _) {
             final l10n = AppLocalizations.of(context);
             debugPrint('[E] App init error: ${e.runtimeType}');
-            unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-              event: DiagnosticEvent.appInitFailed,
-              ts: DateTime.now().toUtc().toIso8601String(),
-              errorType: e.runtimeType.toString(),
-            )));
+            unawaited(
+              DiagnosticLog.append(
+                DiagnosticLogEntry(
+                  event: DiagnosticEvent.appInitFailed,
+                  ts: DateTime.now().toUtc().toIso8601String(),
+                  errorType: e.runtimeType.toString(),
+                ),
+              ),
+            );
             final errStr = e.toString().toLowerCase();
-            final isDbError = errStr.contains('sqlite') ||
+            final isDbError =
+                errStr.contains('sqlite') ||
                 errStr.contains('database') ||
                 errStr.contains('unable to open');
             if (isDbError) {
@@ -97,14 +103,18 @@ class App extends ConsumerWidget {
                         const SizedBox(height: 24),
                         FilledButton.icon(
                           onPressed: () async {
-                            final result =
-                                await BackupService.performRestore(context);
-                            if (result.success && result.needsRestart &&
+                            final result = await BackupService.performRestore(
+                              context,
+                            );
+                            if (result.success &&
+                                result.needsRestart &&
                                 context.mounted) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                    content: Text(
-                                        l10n.settingsRestoreScheduledRestart)),
+                                  content: Text(
+                                    l10n.settingsRestoreScheduledRestart,
+                                  ),
+                                ),
                               );
                             }
                           },
@@ -134,11 +144,7 @@ class App extends ConsumerWidget {
                 ),
               );
             }
-            return Scaffold(
-              body: Center(
-                child: Text(l10n.initFailedGeneric),
-              ),
-            );
+            return Scaffold(body: Center(child: Text(l10n.initFailedGeneric)));
           },
           data: (_) => child ?? const SizedBox.shrink(),
         );
@@ -146,4 +152,3 @@ class App extends ConsumerWidget {
     );
   }
 }
-

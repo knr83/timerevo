@@ -18,10 +18,8 @@ class BackupRestoreUseCase {
   }
 
   /// Restores the database from a user-selected backup file.
-  Future<({bool success, BackupErrorCode? error, bool needsRestart})> restoreFromBackup(
-    BuildContext context,
-    WidgetRef ref,
-  ) {
+  Future<({bool success, BackupErrorCode? error, bool needsRestart})>
+  restoreFromBackup(BuildContext context, WidgetRef ref) {
     return _backupService.restoreFromBackup(context, ref);
   }
 }

@@ -8,4 +8,3 @@ abstract final class WorkSessionSourceDb {
   static const admin = 'admin';
   static const import = 'import';
 }
-

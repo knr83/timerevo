@@ -15,23 +15,25 @@ class AuthRepo implements IAuthRepo {
   Future<bool> changeAdminPin({
     required String currentPin,
     required String newPin,
-  }) =>
-      updateAdminPin(currentPin: currentPin, newPin: newPin);
+  }) => updateAdminPin(currentPin: currentPin, newPin: newPin);
 
   Future<void> ensureDefaultAdmin({
     String username = 'admin',
     String pin = '0000',
   }) async {
-    final existing = await (_db.select(_db.users)
-          ..where((u) => u.username.equals(username))
-          ..limit(1))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.users)
+              ..where((u) => u.username.equals(username))
+              ..limit(1))
+            .getSingleOrNull();
     if (existing != null) return;
 
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
       final passwordHash = await PinHash.hashForUser(pin);
-      await _db.into(_db.users).insert(
+      await _db
+          .into(_db.users)
+          .insert(
             UsersCompanion.insert(
               username: username,
               passwordHash: passwordHash,
@@ -46,13 +48,16 @@ class AuthRepo implements IAuthRepo {
     String username = 'admin',
     required String pin,
   }) async {
-    final user = await (_db.select(_db.users)
-          ..where((u) =>
-              u.username.equals(username) &
-              u.role.equals('ADMIN') &
-              u.isActive.equals(1))
-          ..limit(1))
-        .getSingleOrNull();
+    final user =
+        await (_db.select(_db.users)
+              ..where(
+                (u) =>
+                    u.username.equals(username) &
+                    u.role.equals('ADMIN') &
+                    u.isActive.equals(1),
+              )
+              ..limit(1))
+            .getSingleOrNull();
 
     if (user == null) return false;
     return PinHash.verifyForUser(pin, user.passwordHash);
@@ -63,13 +68,16 @@ class AuthRepo implements IAuthRepo {
     required String currentPin,
     required String newPin,
   }) async {
-    final user = await (_db.select(_db.users)
-          ..where((u) =>
-              u.username.equals(username) &
-              u.role.equals('ADMIN') &
-              u.isActive.equals(1))
-          ..limit(1))
-        .getSingleOrNull();
+    final user =
+        await (_db.select(_db.users)
+              ..where(
+                (u) =>
+                    u.username.equals(username) &
+                    u.role.equals('ADMIN') &
+                    u.isActive.equals(1),
+              )
+              ..limit(1))
+            .getSingleOrNull();
     if (user == null) return false;
 
     final ok = await PinHash.verifyForUser(currentPin, user.passwordHash);
@@ -77,9 +85,9 @@ class AuthRepo implements IAuthRepo {
 
     final newHash = await PinHash.hashForUser(newPin);
     return guardRepoCall(() async {
-      final rows = await (_db.update(_db.users)
-              ..where((u) => u.id.equals(user.id)))
-          .write(UsersCompanion(passwordHash: Value(newHash)));
+      final rows =
+          await (_db.update(_db.users)..where((u) => u.id.equals(user.id)))
+              .write(UsersCompanion(passwordHash: Value(newHash)));
       return rows > 0;
     });
   }

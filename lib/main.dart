@@ -15,21 +15,29 @@ void main() async {
 
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.presentError(details);
-    unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-      event: DiagnosticEvent.appFlutterError,
-      ts: DateTime.now().toUtc().toIso8601String(),
-      errorType: details.exception.runtimeType.toString(),
-    )));
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: DiagnosticEvent.appFlutterError,
+          ts: DateTime.now().toUtc().toIso8601String(),
+          errorType: details.exception.runtimeType.toString(),
+        ),
+      ),
+    );
   };
 
-  runZonedGuarded(
-    () => runApp(const ProviderScope(child: App())),
-    (error, stackTrace) {
-      unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-        event: DiagnosticEvent.appUnhandledError,
-        ts: DateTime.now().toUtc().toIso8601String(),
-        errorType: error.runtimeType.toString(),
-      )));
-    },
-  );
+  runZonedGuarded(() => runApp(const ProviderScope(child: App())), (
+    error,
+    stackTrace,
+  ) {
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: DiagnosticEvent.appUnhandledError,
+          ts: DateTime.now().toUtc().toIso8601String(),
+          errorType: error.runtimeType.toString(),
+        ),
+      ),
+    );
+  });
 }

@@ -105,36 +105,39 @@ String _formatDuration(AppLocalizations l10n, int totalMin) {
   return l10n.durationHm(h, m);
 }
 
-
 final _calendarRangeAbsencesProvider =
-    StreamProvider.family<List<AbsenceWithEmployeeInfo>, (int, int, int)>(
-        (ref, args) {
-  final (employeeId, year, month) = args;
-  final firstYmd = dateToYmd(DateTime(year, month - 1, 1));
-  final lastYmd = dateToYmd(DateTime(year, month + 2, 0));
-  return ref.watch(watchAbsencesUseCaseProvider).streamAbsences(
-        employeeId: employeeId,
-        fromDate: firstYmd,
-        toDate: lastYmd,
-      );
-});
-
+    StreamProvider.family<List<AbsenceWithEmployeeInfo>, (int, int, int)>((
+      ref,
+      args,
+    ) {
+      final (employeeId, year, month) = args;
+      final firstYmd = dateToYmd(DateTime(year, month - 1, 1));
+      final lastYmd = dateToYmd(DateTime(year, month + 2, 0));
+      return ref
+          .watch(watchAbsencesUseCaseProvider)
+          .streamAbsences(
+            employeeId: employeeId,
+            fromDate: firstYmd,
+            toDate: lastYmd,
+          );
+    });
 
 final _calendarDayAbsencesProvider =
-    StreamProvider.family<List<AbsenceWithEmployeeInfo>, (int, String)>(
-        (ref, args) {
-  final (employeeId, ymd) = args;
-  return ref.watch(watchAbsencesUseCaseProvider).streamAbsences(
-        employeeId: employeeId,
-        fromDate: ymd,
-        toDate: ymd,
-      );
-});
+    StreamProvider.family<List<AbsenceWithEmployeeInfo>, (int, String)>((
+      ref,
+      args,
+    ) {
+      final (employeeId, ymd) = args;
+      return ref
+          .watch(watchAbsencesUseCaseProvider)
+          .streamAbsences(employeeId: employeeId, fromDate: ymd, toDate: ymd);
+    });
 
 /// Expands absence date range to all days with status (for calendar markers).
 /// REJECTED absences are excluded — they are not shown on the calendar.
 Map<DateTime, Set<String>> _absenceDaysByStatus(
-    List<AbsenceWithEmployeeInfo> absences) {
+  List<AbsenceWithEmployeeInfo> absences,
+) {
   final map = <DateTime, Set<String>>{};
   for (final row in absences) {
     final a = row.absence;
@@ -166,8 +169,10 @@ Map<DateTime, Set<String>> _absenceDaysByStatus(
 Set<DateTime> _sessionDays(List<SessionInfo> sessions) {
   final set = <DateTime>{};
   for (final s in sessions) {
-    final local =
-        DateTime.fromMillisecondsSinceEpoch(s.startTs, isUtc: true).toLocal();
+    final local = DateTime.fromMillisecondsSinceEpoch(
+      s.startTs,
+      isUtc: true,
+    ).toLocal();
     set.add(DateTime(local.year, local.month, local.day));
   }
   return set;
@@ -206,10 +211,18 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
     final l10n = AppLocalizations.of(context);
     final locale = Localizations.localeOf(context).languageCode;
     final sessionsAsync = ref.watch(
-      watchSessionsForCalendarRangeProvider((widget.employeeId, _focusedDay.year, _focusedDay.month)),
+      watchSessionsForCalendarRangeProvider((
+        widget.employeeId,
+        _focusedDay.year,
+        _focusedDay.month,
+      )),
     );
     final absencesAsync = ref.watch(
-      _calendarRangeAbsencesProvider((widget.employeeId, _focusedDay.year, _focusedDay.month)),
+      _calendarRangeAbsencesProvider((
+        widget.employeeId,
+        _focusedDay.year,
+        _focusedDay.month,
+      )),
     );
 
     final sessionDays = <DateTime>{};
@@ -217,12 +230,21 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
     final sessions = sessionsAsync.valueOrNull;
     if (sessions != null) sessionDays.addAll(_sessionDays(sessions));
     final absences = absencesAsync.valueOrNull;
-    if (absences != null) absenceDaysByStatus.addAll(_absenceDaysByStatus(absences));
+    if (absences != null)
+      absenceDaysByStatus.addAll(_absenceDaysByStatus(absences));
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(l10n.terminalCalendarPageTitle(EmployeeDisplayName.of(EmployeeDisplay(
-            firstName: widget.employee.firstName, lastName: widget.employee.lastName)))),
+        title: Text(
+          l10n.terminalCalendarPageTitle(
+            EmployeeDisplayName.of(
+              EmployeeDisplay(
+                firstName: widget.employee.firstName,
+                lastName: widget.employee.lastName,
+              ),
+            ),
+          ),
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
           tooltip: l10n.commonBack,
@@ -233,191 +255,200 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
         builder: (context, constraints) {
           final sideBySide = constraints.maxWidth >= 900;
           final calendarPart = Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    FilledButton.tonal(
-                      onPressed: () {
-                        final now = DateTime.now();
-                        final today = DateTime(now.year, now.month, now.day);
-                        setState(() {
-                          _selectedDay = today;
-                          _focusedDay = today;
-                        });
-                      },
-                      style: FilledButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                        minimumSize: const Size(0, 48),
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  FilledButton.tonal(
+                    onPressed: () {
+                      final now = DateTime.now();
+                      final today = DateTime(now.year, now.month, now.day);
+                      setState(() {
+                        _selectedDay = today;
+                        _focusedDay = today;
+                      });
+                    },
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
                       ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.today_outlined, size: 20),
-                          const SizedBox(width: 8),
-                          Text(l10n.terminalSessionsToday),
-                        ],
+                      minimumSize: const Size(0, 48),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.today_outlined, size: 20),
+                        const SizedBox(width: 8),
+                        Text(l10n.terminalSessionsToday),
+                      ],
+                    ),
+                  ),
+                  SegmentedButton<CalendarFormat>(
+                    showSelectedIcon: false,
+                    segments: [
+                      ButtonSegment<CalendarFormat>(
+                        value: CalendarFormat.month,
+                        label: Text(l10n.terminalCalendarFormatMonth),
+                      ),
+                      ButtonSegment<CalendarFormat>(
+                        value: CalendarFormat.week,
+                        label: Text(l10n.terminalCalendarFormatWeek),
+                      ),
+                      ButtonSegment<CalendarFormat>(
+                        value: CalendarFormat.twoWeeks,
+                        label: Text(l10n.terminalCalendarFormatTwoWeeks),
+                      ),
+                    ],
+                    selected: {_calendarFormat},
+                    onSelectionChanged: (Set<CalendarFormat> s) =>
+                        setState(() => _calendarFormat = s.first),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                DateFormat.yMMMd(locale).format(_selectedDay),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 8),
+              Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 380),
+                  child: TableCalendar<String>(
+                    firstDay: DateTime.utc(2020, 1, 1),
+                    lastDay: DateTime.utc(2030, 12, 31),
+                    focusedDay: _focusedDay,
+                    startingDayOfWeek: StartingDayOfWeek.monday,
+                    selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+                    calendarFormat: _calendarFormat,
+                    eventLoader: (day) {
+                      final hasSession = sessionDays.any(
+                        (d) => isSameDay(d, day),
+                      );
+                      Set<String>? statuses;
+                      for (final e in absenceDaysByStatus.entries) {
+                        if (isSameDay(e.key, day)) {
+                          statuses = e.value;
+                          break;
+                        }
+                      }
+                      final list = <String>[];
+                      if (hasSession) list.add('session');
+                      if (statuses != null) {
+                        for (final s in statuses) {
+                          list.add('absence_$s');
+                        }
+                      }
+                      return list;
+                    },
+                    onDaySelected: (selectedDay, focusedDay) {
+                      setState(() {
+                        _selectedDay = selectedDay;
+                        _focusedDay = focusedDay;
+                      });
+                    },
+                    onFormatChanged: (format) =>
+                        setState(() => _calendarFormat = format),
+                    onPageChanged: (focusedDay) =>
+                        setState(() => _focusedDay = focusedDay),
+                    locale: locale,
+                    headerStyle: const HeaderStyle(formatButtonVisible: false),
+                    calendarBuilders: CalendarBuilders<String>(
+                      markerBuilder: (context, day, events) {
+                        if (events.isEmpty) return null;
+                        final cs = Theme.of(context).colorScheme;
+                        return Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (events.contains('session'))
+                              Container(
+                                height: 3,
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(top: 2),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            if (events.contains('absence_PENDING'))
+                              Container(
+                                height: 3,
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(top: 2),
+                                decoration: BoxDecoration(
+                                  color: cs.tertiary,
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                            if (events.contains('absence_APPROVED'))
+                              Container(
+                                height: 3,
+                                width: double.infinity,
+                                margin: const EdgeInsets.only(top: 2),
+                                decoration: BoxDecoration(
+                                  color: cs.primary,
+                                  borderRadius: BorderRadius.circular(1),
+                                ),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              Center(
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Container(
+                      width: 24,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.primary,
+                        borderRadius: BorderRadius.circular(1),
                       ),
                     ),
-                    SegmentedButton<CalendarFormat>(
-                      showSelectedIcon: false,
-                      segments: [
-                        ButtonSegment<CalendarFormat>(
-                          value: CalendarFormat.month,
-                          label: Text(l10n.terminalCalendarFormatMonth),
-                        ),
-                        ButtonSegment<CalendarFormat>(
-                          value: CalendarFormat.week,
-                          label: Text(l10n.terminalCalendarFormatWeek),
-                        ),
-                        ButtonSegment<CalendarFormat>(
-                          value: CalendarFormat.twoWeeks,
-                          label: Text(l10n.terminalCalendarFormatTwoWeeks),
-                        ),
-                      ],
-                      selected: {_calendarFormat},
-                      onSelectionChanged: (Set<CalendarFormat> s) =>
-                          setState(() => _calendarFormat = s.first),
+                    const SizedBox(width: 6),
+                    Text(
+                      l10n.terminalCalendarSessions,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    const SizedBox(width: 16),
+                    Container(
+                      width: 24,
+                      height: 3,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.tertiary,
+                        borderRadius: BorderRadius.circular(1),
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      l10n.terminalCalendarAbsences,
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  DateFormat.yMMMd(locale).format(_selectedDay),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+              ),
+              if (!sideBySide) ...[
+                const SizedBox(height: 12),
+                _DayDetailBlock(
+                  employeeId: widget.employeeId,
+                  employee: widget.employee,
+                  selectedDay: _selectedDay,
+                  l10n: l10n,
                 ),
-                const SizedBox(height: 8),
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 380),
-                    child: TableCalendar<String>(
-                      firstDay: DateTime.utc(2020, 1, 1),
-                      lastDay: DateTime.utc(2030, 12, 31),
-                      focusedDay: _focusedDay,
-                      startingDayOfWeek: StartingDayOfWeek.monday,
-                      selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
-                      calendarFormat: _calendarFormat,
-                      eventLoader: (day) {
-                        final hasSession = sessionDays.any((d) => isSameDay(d, day));
-                        Set<String>? statuses;
-                        for (final e in absenceDaysByStatus.entries) {
-                          if (isSameDay(e.key, day)) {
-                            statuses = e.value;
-                            break;
-                          }
-                        }
-                        final list = <String>[];
-                        if (hasSession) list.add('session');
-                        if (statuses != null) {
-                          for (final s in statuses) {
-                            list.add('absence_$s');
-                          }
-                        }
-                        return list;
-                      },
-                      onDaySelected: (selectedDay, focusedDay) {
-                        setState(() {
-                          _selectedDay = selectedDay;
-                          _focusedDay = focusedDay;
-                        });
-                      },
-                      onFormatChanged: (format) =>
-                          setState(() => _calendarFormat = format),
-                      onPageChanged: (focusedDay) =>
-                          setState(() => _focusedDay = focusedDay),
-                      locale: locale,
-                      headerStyle: const HeaderStyle(formatButtonVisible: false),
-                      calendarBuilders: CalendarBuilders<String>(
-                        markerBuilder: (context, day, events) {
-                          if (events.isEmpty) return null;
-                          final cs = Theme.of(context).colorScheme;
-                          return Column(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              if (events.contains('session'))
-                                Container(
-                                  height: 3,
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(top: 2),
-                                  decoration: BoxDecoration(
-                                    color: cs.primary,
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                              if (events.contains('absence_PENDING'))
-                                Container(
-                                  height: 3,
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(top: 2),
-                                  decoration: BoxDecoration(
-                                    color: cs.tertiary,
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                              if (events.contains('absence_APPROVED'))
-                                Container(
-                                  height: 3,
-                                  width: double.infinity,
-                                  margin: const EdgeInsets.only(top: 2),
-                                  decoration: BoxDecoration(
-                                    color: cs.primary,
-                                    borderRadius: BorderRadius.circular(1),
-                                  ),
-                                ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Center(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Container(
-                        width: 24,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.primary,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(l10n.terminalCalendarSessions,
-                          style: Theme.of(context).textTheme.bodySmall),
-                      const SizedBox(width: 16),
-                      Container(
-                        width: 24,
-                        height: 3,
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.tertiary,
-                          borderRadius: BorderRadius.circular(1),
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      Text(l10n.terminalCalendarAbsences,
-                          style: Theme.of(context).textTheme.bodySmall),
-                    ],
-                  ),
-                ),
-                if (!sideBySide) ...[
-                  const SizedBox(height: 12),
-                  _DayDetailBlock(
-                    employeeId: widget.employeeId,
-                    employee: widget.employee,
-                    selectedDay: _selectedDay,
-                    l10n: l10n,
-                  ),
-                ],
               ],
-            );
+            ],
+          );
           final detailBlock = _DayDetailBlock(
             employeeId: widget.employeeId,
             employee: widget.employee,
@@ -472,10 +503,12 @@ class _DayDetailBlock extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final ymd = dateToYmd(selectedDay);
-    final sessionsAsync =
-        ref.watch(watchSessionsForEmployeeOnDateProvider((employeeId, selectedDay)));
-    final absencesAsync =
-        ref.watch(_calendarDayAbsencesProvider((employeeId, ymd)));
+    final sessionsAsync = ref.watch(
+      watchSessionsForEmployeeOnDateProvider((employeeId, selectedDay)),
+    );
+    final absencesAsync = ref.watch(
+      _calendarDayAbsencesProvider((employeeId, ymd)),
+    );
 
     return sessionsAsync.when(
       data: (sessions) {
@@ -502,8 +535,8 @@ class _DayDetailBlock extends ConsumerWidget {
                       Text(
                         l10n.terminalCalendarNoData,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                       const SizedBox(height: 16),
                       FilledButton.icon(
@@ -530,8 +563,8 @@ class _DayDetailBlock extends ConsumerWidget {
                       Text(
                         l10n.terminalCalendarSessions,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       ...sessions.map(
@@ -547,15 +580,16 @@ class _DayDetailBlock extends ConsumerWidget {
                       Text(
                         l10n.terminalCalendarAbsences,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                            ),
+                          color: Theme.of(context).colorScheme.primary,
+                        ),
                       ),
                       const SizedBox(height: 8),
                       ...absences.map(
                         (row) => _AbsenceCard(
                           row: row,
                           l10n: l10n,
-                          onEdit: () => _openEditDialog(context, ref, row.absence),
+                          onEdit: () =>
+                              _openEditDialog(context, ref, row.absence),
                           onDelete: () =>
                               _deleteAbsence(context, ref, row.absence.id),
                         ),
@@ -573,25 +607,6 @@ class _DayDetailBlock extends ConsumerWidget {
             );
           },
           loading: () => Card(
-                elevation: 1,
-                margin: EdgeInsets.zero,
-                child: const Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-          error: (e, _) => Card(
-                elevation: 1,
-                margin: EdgeInsets.zero,
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred))),
-                ),
-              ),
-        );
-      },
-      loading: () => Card(
             elevation: 1,
             margin: EdgeInsets.zero,
             child: const Padding(
@@ -599,15 +614,40 @@ class _DayDetailBlock extends ConsumerWidget {
               child: Center(child: CircularProgressIndicator()),
             ),
           ),
-      error: (e, _) => Card(
+          error: (e, _) => Card(
             elevation: 1,
             margin: EdgeInsets.zero,
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Text(l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred))),
+              child: Text(
+                l10n.terminalFailedLoadEmployees(
+                  errorMessageForUser(e, l10n.commonErrorOccurred),
+                ),
+              ),
             ),
           ),
+        );
+      },
+      loading: () => Card(
+        elevation: 1,
+        margin: EdgeInsets.zero,
+        child: const Padding(
+          padding: EdgeInsets.all(24),
+          child: Center(child: CircularProgressIndicator()),
+        ),
+      ),
+      error: (e, _) => Card(
+        elevation: 1,
+        margin: EdgeInsets.zero,
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            l10n.terminalFailedLoadEmployees(
+              errorMessageForUser(e, l10n.commonErrorOccurred),
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -677,7 +717,11 @@ class _DayDetailBlock extends ConsumerWidget {
       }
     } on DomainException catch (e) {
       if (context.mounted) {
-        showAppSnack(context, _resolveAbsenceError(e.message, l10n), isError: true);
+        showAppSnack(
+          context,
+          _resolveAbsenceError(e.message, l10n),
+          isError: true,
+        );
       }
     }
   }
@@ -790,8 +834,16 @@ class _AbsenceCard extends StatelessWidget {
             ? Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  IconButton(icon: const Icon(Icons.edit), tooltip: l10n.absenceEdit, onPressed: onEdit),
-                  IconButton(icon: const Icon(Icons.delete), tooltip: l10n.absenceDelete, onPressed: onDelete),
+                  IconButton(
+                    icon: const Icon(Icons.edit),
+                    tooltip: l10n.absenceEdit,
+                    onPressed: onEdit,
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete),
+                    tooltip: l10n.absenceDelete,
+                    onPressed: onDelete,
+                  ),
                 ],
               )
             : null,
@@ -799,4 +851,3 @@ class _AbsenceCard extends StatelessWidget {
     );
   }
 }
-

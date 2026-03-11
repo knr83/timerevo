@@ -26,7 +26,4 @@ class TerminalController extends Notifier<TerminalState> {
 }
 
 final terminalControllerProvider =
-    NotifierProvider<TerminalController, TerminalState>(
-  TerminalController.new,
-);
-
+    NotifierProvider<TerminalController, TerminalState>(TerminalController.new);

@@ -9,7 +9,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: Release tag (example: v1.2.3)
+        description: 'Release tag (e.g. v1.2.3)'
         required: true
         type: string
 
@@ -30,7 +30,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.RELEASE_TAG }}
 
@@ -132,7 +132,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.RELEASE_TAG }}
 
@@ -246,7 +246,7 @@ jobs:
 
     steps:
       - name: Checkout source
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           ref: ${{ env.RELEASE_TAG }}
 
@@ -303,7 +303,7 @@ jobs:
           set -euo pipefail
 
           PACKAGE_ROOT="dist/Timerevo-macos-${APP_VERSION}"
-          APP_BUNDLE="build/macos/Build/Products/Release/Timerevo.app"
+          APP_BUNDLE="build/macos/Build/Products/Release/timerevo.app"
 
           if [ ! -d "$APP_BUNDLE" ]; then
             echo "::error::App bundle not found: $APP_BUNDLE"

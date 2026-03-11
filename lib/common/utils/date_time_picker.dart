@@ -98,10 +98,22 @@ Future<({int fromUtcMs, int toUtcMs})?> pickDateRange(
   if (range == null) return null;
   if (!context.mounted) return null;
 
-  final fromDate = DateTime(range.start.year, range.start.month, range.start.day);
+  final fromDate = DateTime(
+    range.start.year,
+    range.start.month,
+    range.start.day,
+  );
   final toDate = DateTime(range.end.year, range.end.month, range.end.day);
   final fromUtcMs = fromDate.toUtc().millisecondsSinceEpoch;
-  final toEndOfDay = DateTime(toDate.year, toDate.month, toDate.day, 23, 59, 59, 999);
+  final toEndOfDay = DateTime(
+    toDate.year,
+    toDate.month,
+    toDate.day,
+    23,
+    59,
+    59,
+    999,
+  );
   final toUtcMs = toEndOfDay.toUtc().millisecondsSinceEpoch;
 
   return (fromUtcMs: fromUtcMs, toUtcMs: toUtcMs);

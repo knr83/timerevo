@@ -50,28 +50,33 @@ Future<void> exportEmployeeDailyPdf(
 
   try {
     final dayRows = await dayReportUseCase.getEmployeeDayReport(
-          employeeId: employeeId,
-          fromUtcMs: fromUtcMs,
-          toUtcMs: toUtcMs,
-        );
+      employeeId: employeeId,
+      fromUtcMs: fromUtcMs,
+      toUtcMs: toUtcMs,
+    );
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
     final fontBoldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
     final theme = pw.ThemeData.withFont(
       base: pw.Font.ttf(fontData),
       bold: pw.Font.ttf(fontBoldData),
     );
-    final fromStr =
-        _formatDate(DateTime.fromMillisecondsSinceEpoch(fromUtcMs, isUtc: true).toLocal());
-    final toStr =
-        _formatDate(DateTime.fromMillisecondsSinceEpoch(toUtcMs, isUtc: true).toLocal());
-    final generatedStr =
-        DateFormat.yMMMd().add_Hm().format(DateTime.now().toLocal());
+    final fromStr = _formatDate(
+      DateTime.fromMillisecondsSinceEpoch(fromUtcMs, isUtc: true).toLocal(),
+    );
+    final toStr = _formatDate(
+      DateTime.fromMillisecondsSinceEpoch(toUtcMs, isUtc: true).toLocal(),
+    );
+    final generatedStr = DateFormat.yMMMd().add_Hm().format(
+      DateTime.now().toLocal(),
+    );
     final labels = EmployeeDailyPdfLabels(
       title: l10n.reportsPdfTitle,
       periodLine: l10n.reportsPdfPeriod(fromStr, toStr),
       generatedLine: l10n.reportsPdfGenerated(generatedStr),
       employeeLine: l10n.reportsPdfEmployee(employeeName),
-      sortLine: sortColumnName != null ? l10n.reportsPdfSort(sortColumnName) : null,
+      sortLine: sortColumnName != null
+          ? l10n.reportsPdfSort(sortColumnName)
+          : null,
       dateColumn: l10n.reportsTableDate,
       workedColumn: l10n.reportsTableWorked,
       plannedColumn: l10n.reportsTablePlanned,
@@ -97,7 +102,9 @@ Future<void> exportEmployeeDailyPdf(
   } catch (e) {
     if (context.mounted) {
       showErrorSnack(
-        l10n.reportsFailedLoad(errorMessageForUser(e, l10n.commonErrorOccurred)),
+        l10n.reportsFailedLoad(
+          errorMessageForUser(e, l10n.commonErrorOccurred),
+        ),
         isError: true,
       );
     }

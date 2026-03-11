@@ -6,7 +6,9 @@ import 'dart:io';
 
 void main() {
   final root = Directory.current.path.replaceAll(r'\', '/');
-  final projectRoot = root.endsWith('/tools') ? root.replaceAll('/tools', '') : root;
+  final projectRoot = root.endsWith('/tools')
+      ? root.replaceAll('/tools', '')
+      : root;
 
   final assetsLegal = Directory('$projectRoot/assets/legal');
   if (!assetsLegal.existsSync()) {
@@ -14,7 +16,10 @@ void main() {
   }
 
   final files = <(String, String)>[
-    ('$projectRoot/PRIVACY_POLICY.md', '$projectRoot/assets/legal/privacy_policy.md'),
+    (
+      '$projectRoot/PRIVACY_POLICY.md',
+      '$projectRoot/assets/legal/privacy_policy.md',
+    ),
     ('$projectRoot/TERMS.md', '$projectRoot/assets/legal/terms.md'),
   ];
 
@@ -25,7 +30,9 @@ void main() {
       exit(1);
     }
     File(dst).writeAsStringSync(srcFile.readAsStringSync());
-    stdout.writeln('Copied: ${src.split(RegExp(r'[/\\]')).last} → assets/legal/');
+    stdout.writeln(
+      'Copied: ${src.split(RegExp(r'[/\\]')).last} → assets/legal/',
+    );
   }
   stdout.writeln('Done.');
 }

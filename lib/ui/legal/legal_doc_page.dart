@@ -5,11 +5,7 @@ import 'package:timerevo/l10n/app_localizations.dart';
 
 /// A reusable screen that renders a bundled markdown document.
 class LegalDocPage extends StatelessWidget {
-  const LegalDocPage({
-    super.key,
-    required this.title,
-    required this.assetPath,
-  });
+  const LegalDocPage({super.key, required this.title, required this.assetPath});
 
   final String title;
   final String assetPath;
@@ -38,7 +34,8 @@ class LegalDocPage extends StatelessWidget {
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return _ErrorView(
-                message: AppLocalizations.of(context).commonErrorOccurred);
+              message: AppLocalizations.of(context).commonErrorOccurred,
+            );
           }
           if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
@@ -71,9 +68,9 @@ class LegalDocPage extends StatelessWidget {
       debugPrint('[E] LegalDocPage _copyToClipboard: ${e.runtimeType}');
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.legalFailedToCopy)),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(l10n.legalFailedToCopy)));
       }
     }
   }
@@ -92,7 +89,11 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.error_outline, size: 48, color: Theme.of(context).colorScheme.error),
+            Icon(
+              Icons.error_outline,
+              size: 48,
+              color: Theme.of(context).colorScheme.error,
+            ),
             const SizedBox(height: 16),
             Text(
               'Document not found in this build.',

@@ -31,15 +31,21 @@ import 'terminal_controller.dart';
 /// True when the current moment is past the end of the working day for the
 /// session (next calendar day, or same day but current time >= working hours end).
 bool _isPastWorkingDayEnd(SessionInfo open, int endMin) {
-  final sessionStartLocal =
-      DateTime.fromMillisecondsSinceEpoch(open.startTs, isUtc: true).toLocal();
+  final sessionStartLocal = DateTime.fromMillisecondsSinceEpoch(
+    open.startTs,
+    isUtc: true,
+  ).toLocal();
   final sessionDate = DateTime(
-      sessionStartLocal.year, sessionStartLocal.month, sessionStartLocal.day);
+    sessionStartLocal.year,
+    sessionStartLocal.month,
+    sessionStartLocal.day,
+  );
   final now = DateTime.now();
   final today = DateTime(now.year, now.month, now.day);
   final nowMin = now.hour * 60 + now.minute;
   final isNextDay = today.isAfter(sessionDate);
-  final isSameDayPastEnd = today.year == sessionDate.year &&
+  final isSameDayPastEnd =
+      today.year == sessionDate.year &&
       today.month == sessionDate.month &&
       today.day == sessionDate.day &&
       nowMin >= endMin;
@@ -61,7 +67,6 @@ String _formatDuration(AppLocalizations l10n, int totalMin) {
   if (m == 0) return l10n.terminalDurationHoursOnly(h);
   return l10n.durationHm(h, m);
 }
-
 
 class TerminalPage extends ConsumerWidget {
   const TerminalPage({super.key});
@@ -92,8 +97,9 @@ class TerminalPage extends ConsumerWidget {
           if (state.selectedEmployeeId == null) {
             return _EmployeeSelector(
               employees: employees,
-              onSelect: (id) =>
-                  ref.read(terminalControllerProvider.notifier).selectEmployee(id),
+              onSelect: (id) => ref
+                  .read(terminalControllerProvider.notifier)
+                  .selectEmployee(id),
             );
           }
 
@@ -114,8 +120,11 @@ class TerminalPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(l10n.terminalFailedLoadEmployees(
-              errorMessageForUser(e, l10n.commonErrorOccurred))),
+          child: Text(
+            l10n.terminalFailedLoadEmployees(
+              errorMessageForUser(e, l10n.commonErrorOccurred),
+            ),
+          ),
         ),
       ),
     );
@@ -123,10 +132,7 @@ class TerminalPage extends ConsumerWidget {
 }
 
 class _EmployeeSelector extends ConsumerWidget {
-  const _EmployeeSelector({
-    required this.employees,
-    required this.onSelect,
-  });
+  const _EmployeeSelector({required this.employees, required this.onSelect});
 
   final List<EmployeeInfo> employees;
   final void Function(int employeeId) onSelect;
@@ -140,8 +146,11 @@ class _EmployeeSelector extends ConsumerWidget {
         final e = employees[index];
         return Card(
           child: ListTile(
-            title: Text(EmployeeDisplayName.of(EmployeeDisplay(
-                  firstName: e.firstName, lastName: e.lastName))),
+            title: Text(
+              EmployeeDisplayName.of(
+                EmployeeDisplay(firstName: e.firstName, lastName: e.lastName),
+              ),
+            ),
             onTap: () => _onEmployeePressed(context, ref, e),
           ),
         );
@@ -199,8 +208,11 @@ class _EmployeeSelector extends ConsumerWidget {
         showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
-            content: Text(l10n.terminalFailedLoadEmployees(
-                errorMessageForUser(err, l10n.commonErrorOccurred))),
+            content: Text(
+              l10n.terminalFailedLoadEmployees(
+                errorMessageForUser(err, l10n.commonErrorOccurred),
+              ),
+            ),
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(ctx),
@@ -262,7 +274,8 @@ class _PinDialogContent extends StatefulWidget {
 
   final AppLocalizations l10n;
   final int employeeId;
-  final Future<bool> Function({required int employeeId, required String pin}) verifyPin;
+  final Future<bool> Function({required int employeeId, required String pin})
+  verifyPin;
   final VoidCallback onSuccess;
 
   @override
@@ -450,9 +463,12 @@ class _TerminalActions extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final employeeId = employee.id;
 
-    final openSessionAsync =
-        ref.watch(watchOpenSessionForEmployeeProvider(employeeId));
-    final todaySessionsAsync = ref.watch(todaySessionsForEmployeeProvider(employeeId));
+    final openSessionAsync = ref.watch(
+      watchOpenSessionForEmployeeProvider(employeeId),
+    );
+    final todaySessionsAsync = ref.watch(
+      todaySessionsForEmployeeProvider(employeeId),
+    );
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
     final endMin =
         workingHoursAsync.valueOrNull?.endMin ?? defaultWorkingHoursEndMin;
@@ -461,8 +477,8 @@ class _TerminalActions extends ConsumerWidget {
       data: (open) {
         final isOpen = open != null;
         final openSession = open;
-        final showCloseBlock = openSession != null &&
-            _isPastWorkingDayEnd(openSession, endMin);
+        final showCloseBlock =
+            openSession != null && _isPastWorkingDayEnd(openSession, endMin);
 
         if (showCloseBlock) {
           final session = openSession;
@@ -477,8 +493,9 @@ class _TerminalActions extends ConsumerWidget {
                   children: [
                     _TerminalHeader(
                       employee: employee,
-                      onBack: () =>
-                          ref.read(terminalControllerProvider.notifier).clearSelection(),
+                      onBack: () => ref
+                          .read(terminalControllerProvider.notifier)
+                          .clearSelection(),
                       l10n: l10n,
                     ),
                     const SizedBox(height: 24),
@@ -511,8 +528,9 @@ class _TerminalActions extends ConsumerWidget {
                 children: [
                   _TerminalHeader(
                     employee: employee,
-                    onBack: () =>
-                        ref.read(terminalControllerProvider.notifier).clearSelection(),
+                    onBack: () => ref
+                        .read(terminalControllerProvider.notifier)
+                        .clearSelection(),
                     l10n: l10n,
                   ),
                   const SizedBox(height: 24),
@@ -553,12 +571,14 @@ class _TerminalActions extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(l10n.terminalFailedLoadEmployees(
-            errorMessageForUser(e, l10n.commonErrorOccurred))),
+        child: Text(
+          l10n.terminalFailedLoadEmployees(
+            errorMessageForUser(e, l10n.commonErrorOccurred),
+          ),
+        ),
       ),
     );
   }
-
 }
 
 /// Header with back action and employee name.
@@ -595,8 +615,12 @@ class _TerminalHeader extends StatelessWidget {
         const SizedBox(width: 16),
         Expanded(
           child: Text(
-            EmployeeDisplayName.of(EmployeeDisplay(
-            firstName: employee.firstName, lastName: employee.lastName)),
+            EmployeeDisplayName.of(
+              EmployeeDisplay(
+                firstName: employee.firstName,
+                lastName: employee.lastName,
+              ),
+            ),
             style: Theme.of(context).textTheme.headlineSmall,
           ),
         ),
@@ -785,21 +809,18 @@ class _TerminalActionButton extends StatelessWidget {
         children: [
           Icon(icon, size: 24),
           const SizedBox(width: 12),
-          Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          ),
         ],
       ),
     );
 
     if (isPrimary) {
-      return FilledButton(
-        onPressed: onPressed,
-        child: child,
-      );
+      return FilledButton(onPressed: onPressed, child: child);
     }
-    return FilledButton.tonal(
-      onPressed: onPressed,
-      child: child,
-    );
+    return FilledButton.tonal(onPressed: onPressed, child: child);
   }
 }
 
@@ -848,8 +869,9 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
         if (sessions.isEmpty) return const SizedBox.shrink();
 
         final nowMs = DateTime.now().millisecondsSinceEpoch;
-        final displaySessions =
-            _expanded ? sessions : sessions.take(3).toList();
+        final displaySessions = _expanded
+            ? sessions
+            : sessions.take(3).toList();
         final hasMore = sessions.length > 3;
         final hiddenCount = sessions.length - 3;
 
@@ -904,7 +926,9 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
               const Divider(height: 1),
               const SizedBox(height: 8),
               Text(
-                l10n.terminalTotalTodayWithValue(_formatDuration(l10n, totalMin)),
+                l10n.terminalTotalTodayWithValue(
+                  _formatDuration(l10n, totalMin),
+                ),
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
                 ),
@@ -954,10 +978,9 @@ class _TerminalSessionRow extends StatelessWidget {
     } else {
       trailing = l10n.commonOngoing;
     }
-    final endStr =
-        session.endTs != null
-            ? TimeFormat.formatTimeOnly(session.endTs!)
-            : '…';
+    final endStr = session.endTs != null
+        ? TimeFormat.formatTimeOnly(session.endTs!)
+        : '…';
 
     return Material(
       color: isOpen ? cs.primaryContainer.withValues(alpha: 0.5) : null,
@@ -1056,10 +1079,9 @@ Future<void> _handleMyPdf(
   final l10n = AppLocalizations.of(context);
   final period = await _showMyPdfPeriodDialog(context, l10n);
   if (period == null || !context.mounted) return;
-  final employeeName = EmployeeDisplayName.of(EmployeeDisplay(
-    firstName: employee.firstName,
-    lastName: employee.lastName,
-  ));
+  final employeeName = EmployeeDisplayName.of(
+    EmployeeDisplay(firstName: employee.firstName, lastName: employee.lastName),
+  );
   await exportEmployeeDailyPdf(
     context,
     dayReportUseCase: ref.read(employeeDayReportUseCaseProvider),
@@ -1075,93 +1097,115 @@ Future<void> _handleMyPdf(
 }
 
 Future<void> _handleClockIn(
-    BuildContext context,
-    WidgetRef ref,
-    int employeeId,
-  ) async {
-    unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-      event: DiagnosticEvent.terminalClockIn,
-      ts: DateTime.now().toUtc().toIso8601String(),
-    )));
-    final l10n = AppLocalizations.of(context);
-    final workingHours =
-        ref.read(workingHoursSettingsProvider).valueOrNull ??
-            (startMin: defaultWorkingHoursStartMin, endMin: defaultWorkingHoursEndMin);
-    final now = DateTime.now();
-    final nowMin = now.hour * 60 + now.minute;
-    if (nowMin < workingHours.startMin) {
-      showAppSnack(context, l10n.terminalErrorClockInBeforeStart, isError: true);
-      return;
-    }
-    if (nowMin > workingHours.endMin) {
-      showAppSnack(context, l10n.terminalErrorClockInAfterEnd, isError: true);
-      return;
-    }
-    final result = await ref.read(clockInUseCaseProvider)(employeeId);
-    if (!context.mounted) return;
-    if (result is ClockSaved) {
-      unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-        event: DiagnosticEvent.terminalClockInSuccess,
+  BuildContext context,
+  WidgetRef ref,
+  int employeeId,
+) async {
+  unawaited(
+    DiagnosticLog.append(
+      DiagnosticLogEntry(
+        event: DiagnosticEvent.terminalClockIn,
         ts: DateTime.now().toUtc().toIso8601String(),
-      )));
-      final barrierColor = Theme.of(context).brightness == Brightness.light
-          ? Colors.black26
-          : Colors.black54;
-      await showDialog<void>(
-        context: context,
-        barrierColor: barrierColor,
-        barrierDismissible: false,
-        builder: (context) => _ClockInSuccessDialog(message: l10n.terminalSuccessClockIn),
+      ),
+    ),
+  );
+  final l10n = AppLocalizations.of(context);
+  final workingHours =
+      ref.read(workingHoursSettingsProvider).valueOrNull ??
+      (
+        startMin: defaultWorkingHoursStartMin,
+        endMin: defaultWorkingHoursEndMin,
       );
-      if (context.mounted) {
-        ref.read(terminalControllerProvider.notifier).clearSelection();
-      }
-      return;
+  final now = DateTime.now();
+  final nowMin = now.hour * 60 + now.minute;
+  if (nowMin < workingHours.startMin) {
+    showAppSnack(context, l10n.terminalErrorClockInBeforeStart, isError: true);
+    return;
+  }
+  if (nowMin > workingHours.endMin) {
+    showAppSnack(context, l10n.terminalErrorClockInAfterEnd, isError: true);
+    return;
+  }
+  final result = await ref.read(clockInUseCaseProvider)(employeeId);
+  if (!context.mounted) return;
+  if (result is ClockSaved) {
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: DiagnosticEvent.terminalClockInSuccess,
+          ts: DateTime.now().toUtc().toIso8601String(),
+        ),
+      ),
+    );
+    final barrierColor = Theme.of(context).brightness == Brightness.light
+        ? Colors.black26
+        : Colors.black54;
+    await showDialog<void>(
+      context: context,
+      barrierColor: barrierColor,
+      barrierDismissible: false,
+      builder: (context) =>
+          _ClockInSuccessDialog(message: l10n.terminalSuccessClockIn),
+    );
+    if (context.mounted) {
+      ref.read(terminalControllerProvider.notifier).clearSelection();
     }
-    _showClockResult(context, result, isClockIn: true);
+    return;
+  }
+  _showClockResult(context, result, isClockIn: true);
 }
 
 Future<void> _handleClockOut(
-    BuildContext context,
-    WidgetRef ref,
-    int employeeId,
-  ) async {
-    unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-      event: DiagnosticEvent.terminalClockOut,
-      ts: DateTime.now().toUtc().toIso8601String(),
-    )));
-    final result = await ref.read(clockOutUseCaseProvider)(employeeId);
-    if (!context.mounted) return;
-    if (result is ClockSaved) {
-      unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-        event: DiagnosticEvent.terminalClockOutSuccess,
+  BuildContext context,
+  WidgetRef ref,
+  int employeeId,
+) async {
+  unawaited(
+    DiagnosticLog.append(
+      DiagnosticLogEntry(
+        event: DiagnosticEvent.terminalClockOut,
         ts: DateTime.now().toUtc().toIso8601String(),
-      )));
-      final l10n = AppLocalizations.of(context);
-      final overlay = Overlay.of(context);
-      final barrierColor = Theme.of(context).brightness == Brightness.light
-          ? Colors.black26
-          : Colors.black54;
-      late OverlayEntry entry;
-      entry = OverlayEntry(
-        builder: (context) => ColoredBox(
-          color: barrierColor,
-          child: Center(
-            child: _AnimatedCheckmarkSuccess(message: l10n.terminalSuccessClockOut),
+      ),
+    ),
+  );
+  final result = await ref.read(clockOutUseCaseProvider)(employeeId);
+  if (!context.mounted) return;
+  if (result is ClockSaved) {
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: DiagnosticEvent.terminalClockOutSuccess,
+          ts: DateTime.now().toUtc().toIso8601String(),
+        ),
+      ),
+    );
+    final l10n = AppLocalizations.of(context);
+    final overlay = Overlay.of(context);
+    final barrierColor = Theme.of(context).brightness == Brightness.light
+        ? Colors.black26
+        : Colors.black54;
+    late OverlayEntry entry;
+    entry = OverlayEntry(
+      builder: (context) => ColoredBox(
+        color: barrierColor,
+        child: Center(
+          child: _AnimatedCheckmarkSuccess(
+            message: l10n.terminalSuccessClockOut,
           ),
         ),
-      );
-      overlay.insert(entry);
-      final notifier = ref.read(terminalControllerProvider.notifier);
-      Future.delayed(const Duration(milliseconds: 1200), () {
-        entry.remove();
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          notifier.clearSelection();
-        });
+      ),
+    );
+    overlay.insert(entry);
+    final notifier = ref.read(terminalControllerProvider.notifier);
+    Future.delayed(const Duration(milliseconds: 1200), () {
+      entry.remove();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifier.clearSelection();
       });
-      return;
-    }
-    _showClockResult(context, result, isClockIn: false);
+    });
+    return;
+  }
+  _showClockResult(context, result, isClockIn: false);
 }
 
 void _showClockResult(
@@ -1170,21 +1214,27 @@ void _showClockResult(
   required bool isClockIn,
 }) {
   if (result is ClockError) {
-    unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-      event: isClockIn ? DiagnosticEvent.terminalClockInFail : DiagnosticEvent.terminalClockOutFail,
-      ts: DateTime.now().toUtc().toIso8601String(),
-      errorType: result.kind.name,
-    )));
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: isClockIn
+              ? DiagnosticEvent.terminalClockInFail
+              : DiagnosticEvent.terminalClockOutFail,
+          ts: DateTime.now().toUtc().toIso8601String(),
+          errorType: result.kind.name,
+        ),
+      ),
+    );
   }
   final l10n = AppLocalizations.of(context);
   final text = switch (result) {
     ClockSaved() => l10n.terminalSaved,
     ClockError(:final kind) => switch (kind) {
-        ClockErrorKind.sessionAlreadyOpen => l10n.terminalErrorSessionAlreadyOpen,
-        ClockErrorKind.noOpenSession => l10n.terminalErrorNoOpenSession,
-        ClockErrorKind.employeeInactive => l10n.employeeInactive,
-        ClockErrorKind.hasApprovedAbsence => l10n.terminalErrorHasApprovedAbsence,
-      },
+      ClockErrorKind.sessionAlreadyOpen => l10n.terminalErrorSessionAlreadyOpen,
+      ClockErrorKind.noOpenSession => l10n.terminalErrorNoOpenSession,
+      ClockErrorKind.employeeInactive => l10n.employeeInactive,
+      ClockErrorKind.hasApprovedAbsence => l10n.terminalErrorHasApprovedAbsence,
+    },
   };
   showAppSnack(context, text, isError: result is ClockError);
 }
@@ -1213,12 +1263,14 @@ class _AnimatedCheckmarkSuccessState extends State<_AnimatedCheckmarkSuccess>
       duration: const Duration(milliseconds: 400),
       vsync: this,
     );
-    _scale = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
-    _opacity = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeOut),
-    );
+    _scale = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
+    _opacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _controller.forward();
   }
 
@@ -1245,11 +1297,7 @@ class _AnimatedCheckmarkSuccessState extends State<_AnimatedCheckmarkSuccess>
               scale: _scale,
               child: FadeTransition(
                 opacity: _opacity,
-                child: Icon(
-                  Icons.check_circle,
-                  size: 120,
-                  color: cs.primary,
-                ),
+                child: Icon(Icons.check_circle, size: 120, color: cs.primary),
               ),
             ),
             const SizedBox(height: 16),
@@ -1257,7 +1305,9 @@ class _AnimatedCheckmarkSuccessState extends State<_AnimatedCheckmarkSuccess>
               opacity: _opacity,
               child: Text(
                 widget.message,
-                style: theme.textTheme.titleLarge?.copyWith(color: cs.onSurface),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  color: cs.onSurface,
+                ),
               ),
             ),
           ],
@@ -1292,9 +1342,7 @@ class _ClockInSuccessDialogState extends State<_ClockInSuccessDialog> {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: _AnimatedCheckmarkSuccess(message: widget.message),
-    );
+    return Center(child: _AnimatedCheckmarkSuccess(message: widget.message));
   }
 }
 
@@ -1314,8 +1362,7 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
     final l10n = AppLocalizations.of(context);
     final theme = Theme.of(context);
     final cs = theme.colorScheme;
-    final startTimeStr =
-        TimeFormat.formatLocalFromUtcMs(openSession.startTs);
+    final startTimeStr = TimeFormat.formatLocalFromUtcMs(openSession.startTs);
 
     return Card(
       child: Padding(
@@ -1325,11 +1372,7 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(
-                  Icons.warning_amber_rounded,
-                  size: 24,
-                  color: cs.primary,
-                ),
+                Icon(Icons.warning_amber_rounded, size: 24, color: cs.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -1387,11 +1430,15 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
     required int endMin,
     required AppLocalizations l10n,
   }) async {
-    final sessionStartLocal =
-        DateTime.fromMillisecondsSinceEpoch(openSession.startTs, isUtc: true)
-            .toLocal();
+    final sessionStartLocal = DateTime.fromMillisecondsSinceEpoch(
+      openSession.startTs,
+      isUtc: true,
+    ).toLocal();
     final sessionDate = DateTime(
-        sessionStartLocal.year, sessionStartLocal.month, sessionStartLocal.day);
+      sessionStartLocal.year,
+      sessionStartLocal.month,
+      sessionStartLocal.day,
+    );
 
     final date = await showDatePicker(
       context: context,
@@ -1412,21 +1459,29 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
 
       final endUtcMs = picked.toUtc().millisecondsSinceEpoch;
       if (endUtcMs <= openSession.startTs) {
-        showAppSnack(context, l10n.terminalUnclosedSessionErrorEndBeforeStart,
-            isError: true);
+        showAppSnack(
+          context,
+          l10n.terminalUnclosedSessionErrorEndBeforeStart,
+          isError: true,
+        );
         continue;
       }
       if (endUtcMs > UtcClock.nowMs()) {
-        showAppSnack(context, l10n.terminalUnclosedSessionErrorEndInFuture,
-            isError: true);
+        showAppSnack(
+          context,
+          l10n.terminalUnclosedSessionErrorEndInFuture,
+          isError: true,
+        );
         continue;
       }
 
       final pickedMin = picked.hour * 60 + picked.minute;
       if (pickedMin > endMin) {
         showAppSnack(
-            context, l10n.terminalUnclosedSessionErrorEndAfterWorkingHours,
-            isError: true);
+          context,
+          l10n.terminalUnclosedSessionErrorEndAfterWorkingHours,
+          isError: true,
+        );
         continue;
       }
 
@@ -1436,13 +1491,16 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
     final endUtcMs = picked.toUtc().millisecondsSinceEpoch;
     try {
       final ok = await ref.read(closeOpenSessionWithEndUseCaseProvider)(
-            employeeId: employee.id,
-            endUtcMs: endUtcMs,
-          );
+        employeeId: employee.id,
+        endUtcMs: endUtcMs,
+      );
       if (!context.mounted) return;
       if (!ok) {
-        showAppSnack(context, l10n.terminalUnclosedSessionErrorEndBeforeStart,
-            isError: true);
+        showAppSnack(
+          context,
+          l10n.terminalUnclosedSessionErrorEndBeforeStart,
+          isError: true,
+        );
       }
     } on DomainValidationException catch (e) {
       if (!context.mounted) return;

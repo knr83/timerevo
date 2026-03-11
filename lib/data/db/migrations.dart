@@ -112,7 +112,9 @@ WHERE (first_name = '' AND last_name = '') AND full_name IS NOT NULL;
         // Repair migration: older DBs may still have employees.full_name NOT NULL
         // even after upgrading to schema v3 before the rebuild logic existed.
         await db.transaction(() async {
-          final cols = await db.customSelect('PRAGMA table_info(employees);').get();
+          final cols = await db
+              .customSelect('PRAGMA table_info(employees);')
+              .get();
           final names = cols.map((r) => r.read<String>('name')).toSet();
           final hasFullName = names.contains('full_name');
 
@@ -176,16 +178,23 @@ SELECT id, code, first_name, last_name, is_active, created_at
 FROM employees;
 ''');
           await db.customStatement('DROP TABLE employees;');
-          await db.customStatement('ALTER TABLE employees_new RENAME TO employees;');
+          await db.customStatement(
+            'ALTER TABLE employees_new RENAME TO employees;',
+          );
           await db.customStatement('PRAGMA foreign_keys=ON;');
 
           // Sanity check: full_name must be gone after rebuild.
-          final colsAfter =
-              await db.customSelect('PRAGMA table_info(employees);').get();
-          final namesAfter = colsAfter.map((r) => r.read<String>('name')).toSet();
+          final colsAfter = await db
+              .customSelect('PRAGMA table_info(employees);')
+              .get();
+          final namesAfter = colsAfter
+              .map((r) => r.read<String>('name'))
+              .toSet();
           if (namesAfter.contains('full_name')) {
             // Keep it non-fatal but surface a clear message for troubleshooting.
-            throw StateError('Migration failed: employees.full_name still exists.');
+            throw StateError(
+              'Migration failed: employees.full_name still exists.',
+            );
           }
         });
       }
@@ -257,4 +266,3 @@ CREATE TABLE IF NOT EXISTS app_settings (
     },
   );
 }
-

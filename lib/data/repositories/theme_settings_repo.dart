@@ -22,4 +22,3 @@ class ThemeSettingsRepo {
     await _appSettings.set(_selectionKey, v);
   }
 }
-

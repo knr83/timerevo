@@ -49,7 +49,8 @@ final themeSettingsRepoProvider = Provider<ThemeSettingsRepo>((ref) {
   return ThemeSettingsRepo(ref.watch(appSettingsRepoProvider));
 });
 
-final workingHoursSettingsRepoProvider =
-    Provider<WorkingHoursSettingsRepo>((ref) {
+final workingHoursSettingsRepoProvider = Provider<WorkingHoursSettingsRepo>((
+  ref,
+) {
   return WorkingHoursSettingsRepo(ref.watch(appSettingsRepoProvider));
 });

@@ -25,19 +25,23 @@ class EmployeesPage extends ConsumerWidget {
 
     return employeesAsync.when(
       data: (employees) {
-        final templates = templatesAsync.valueOrNull ?? const <ScheduleTemplateInfo>[];
-        final effectiveSelectedId = selectedId ??
+        final templates =
+            templatesAsync.valueOrNull ?? const <ScheduleTemplateInfo>[];
+        final effectiveSelectedId =
+            selectedId ??
             (isAddingNew || employees.isEmpty ? null : employees.first.id);
         if (effectiveSelectedId != selectedId && !isAddingNew) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(selectedEmployeeIdProvider.notifier).state = effectiveSelectedId;
+            ref.read(selectedEmployeeIdProvider.notifier).state =
+                effectiveSelectedId;
           });
         }
         EmployeeInfo? effectiveSelectedEmployee;
         if (effectiveSelectedId != null) {
           try {
-            effectiveSelectedEmployee =
-                employees.firstWhere((e) => e.id == effectiveSelectedId);
+            effectiveSelectedEmployee = employees.firstWhere(
+              (e) => e.id == effectiveSelectedId,
+            );
           } on StateError {
             // Selected employee was removed from list; treat as no selection.
             effectiveSelectedEmployee = null;
@@ -70,8 +74,11 @@ class EmployeesPage extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(l10n.terminalFailedLoadEmployees(
-        errorMessageForUser(e, l10n.commonErrorOccurred))),
+        child: Text(
+          l10n.terminalFailedLoadEmployees(
+            errorMessageForUser(e, l10n.commonErrorOccurred),
+          ),
+        ),
       ),
     );
   }
@@ -132,19 +139,23 @@ class _EmployeesList extends ConsumerWidget {
                                 ? Icon(
                                     Icons.person_off_outlined,
                                     size: 20,
-                                    color: Theme.of(context)
-                                        .colorScheme
-                                        .onSurfaceVariant,
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurfaceVariant,
                                   )
                                 : null,
                             title: Text(
-                              EmployeeDisplayName.of(EmployeeDisplay(
-                              firstName: e.firstName, lastName: e.lastName)),
+                              EmployeeDisplayName.of(
+                                EmployeeDisplay(
+                                  firstName: e.firstName,
+                                  lastName: e.lastName,
+                                ),
+                              ),
                               style: isInactive
                                   ? TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onSurfaceVariant,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
                                     )
                                   : null,
                             ),
@@ -152,7 +163,9 @@ class _EmployeesList extends ConsumerWidget {
                                 ? const Icon(Icons.chevron_right)
                                 : null,
                             onTap: () {
-                              ref.read(selectedEmployeeIdProvider.notifier).state =
+                              ref
+                                      .read(selectedEmployeeIdProvider.notifier)
+                                      .state =
                                   e.id;
                               ref.read(isAddingNewProvider.notifier).state =
                                   false;
@@ -260,4 +273,3 @@ class _EmployeeCardPanelState extends ConsumerState<_EmployeeCardPanel> {
     );
   }
 }
-

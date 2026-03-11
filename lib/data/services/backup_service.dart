@@ -1,5 +1,13 @@
 import 'dart:async';
-import 'dart:io' show exit, File, FileSystemException, OSError, Platform, Process, ProcessStartMode;
+import 'dart:io'
+    show
+        exit,
+        File,
+        FileSystemException,
+        OSError,
+        Platform,
+        Process,
+        ProcessStartMode;
 
 import 'package:file_selector/file_selector.dart';
 import 'package:path/path.dart' as p;
@@ -31,6 +39,7 @@ BackupErrorCode _mapFileSystemException(FileSystemException e) {
 }
 
 const _schemaVersion = 8;
+
 /// Shared with app_init for pending restore.
 const restorePendingKey = 'restore_pending';
 
@@ -44,35 +53,49 @@ class BackupService {
 
   /// Creates a backup of the database to a user-selected location.
   /// Returns (path, null) on success, (null, errorCode) on failure, (null, null) if cancelled.
-  Future<({String? path, BackupErrorCode? error})> createBackupToFolder() async {
+  Future<({String? path, BackupErrorCode? error})>
+  createBackupToFolder() async {
     final saveLocation = await getSaveLocation(
-      suggestedName: 'timerevo_backup_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.sqlite',
+      suggestedName:
+          'timerevo_backup_${DateFormat('yyyy-MM-dd').format(DateTime.now())}.sqlite',
       acceptedTypeGroups: [
         const XTypeGroup(label: 'SQLite', extensions: ['sqlite']),
       ],
     );
     if (saveLocation == null) return (path: null, error: null);
 
-    unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-      event: DiagnosticEvent.backupStart,
-      ts: DateTime.now().toUtc().toIso8601String(),
-    )));
+    unawaited(
+      DiagnosticLog.append(
+        DiagnosticLogEntry(
+          event: DiagnosticEvent.backupStart,
+          ts: DateTime.now().toUtc().toIso8601String(),
+        ),
+      ),
+    );
     try {
       await _db.customStatement('PRAGMA wal_checkpoint(TRUNCATE)');
       final sourceFile = await getDatabaseFile();
       await sourceFile.copy(saveLocation.path);
-      unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-        event: DiagnosticEvent.backupSuccess,
-        ts: DateTime.now().toUtc().toIso8601String(),
-      )));
+      unawaited(
+        DiagnosticLog.append(
+          DiagnosticLogEntry(
+            event: DiagnosticEvent.backupSuccess,
+            ts: DateTime.now().toUtc().toIso8601String(),
+          ),
+        ),
+      );
       return (path: saveLocation.path, error: null);
     } on FileSystemException catch (e) {
       final code = _mapFileSystemException(e);
-      unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-        event: DiagnosticEvent.backupFail,
-        ts: DateTime.now().toUtc().toIso8601String(),
-        errorType: e.runtimeType.toString(),
-      )));
+      unawaited(
+        DiagnosticLog.append(
+          DiagnosticLogEntry(
+            event: DiagnosticEvent.backupFail,
+            ts: DateTime.now().toUtc().toIso8601String(),
+            errorType: e.runtimeType.toString(),
+          ),
+        ),
+      );
       return (path: null, error: code);
     }
   }
@@ -80,10 +103,8 @@ class BackupService {
   /// Restores the database from a user-selected backup file.
   /// Copies backup to a .pending file and schedules restore for next app start
   /// (avoids Windows file lock when DB is open). Returns (success, errorCode, needsRestart).
-  Future<({bool success, BackupErrorCode? error, bool needsRestart})> restoreFromBackup(
-    BuildContext context,
-    WidgetRef ref,
-  ) async {
+  Future<({bool success, BackupErrorCode? error, bool needsRestart})>
+  restoreFromBackup(BuildContext context, WidgetRef ref) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -102,27 +123,38 @@ class BackupService {
         ],
       ),
     );
-    if (confirmed != true) return (success: false, error: null, needsRestart: false);
+    if (confirmed != true)
+      return (success: false, error: null, needsRestart: false);
 
     final xFile = await openFile(
       acceptedTypeGroups: [
         const XTypeGroup(label: 'SQLite', extensions: ['sqlite']),
       ],
     );
-    if (xFile == null) return (success: false, error: null, needsRestart: false);
+    if (xFile == null)
+      return (success: false, error: null, needsRestart: false);
 
     final backupPath = xFile.path;
-    if (backupPath.isEmpty) return (success: false, error: null, needsRestart: false);
+    if (backupPath.isEmpty)
+      return (success: false, error: null, needsRestart: false);
 
     try {
       final db = sqlite3.open(backupPath);
       final version = db.userVersion;
       db.dispose();
       if (version < _schemaVersion) {
-        return (success: false, error: BackupErrorCode.invalidArchive, needsRestart: false);
+        return (
+          success: false,
+          error: BackupErrorCode.invalidArchive,
+          needsRestart: false,
+        );
       }
     } on SqliteException {
-      return (success: false, error: BackupErrorCode.invalidArchive, needsRestart: false);
+      return (
+        success: false,
+        error: BackupErrorCode.invalidArchive,
+        needsRestart: false,
+      );
     }
 
     try {
@@ -139,14 +171,17 @@ class BackupService {
       final didRestart = await _tryRestartApp();
       return (success: true, error: null, needsRestart: !didRestart);
     } on FileSystemException catch (e) {
-      return (success: false, error: _mapFileSystemException(e), needsRestart: false);
+      return (
+        success: false,
+        error: _mapFileSystemException(e),
+        needsRestart: false,
+      );
     }
   }
 
   /// Restore from backup without needing an open DB. Use when init fails due to DB error.
-  static Future<({bool success, BackupErrorCode? error, bool needsRestart})> performRestore(
-    BuildContext context,
-  ) async {
+  static Future<({bool success, BackupErrorCode? error, bool needsRestart})>
+  performRestore(BuildContext context) async {
     final l10n = AppLocalizations.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
@@ -165,14 +200,16 @@ class BackupService {
         ],
       ),
     );
-    if (confirmed != true) return (success: false, error: null, needsRestart: false);
+    if (confirmed != true)
+      return (success: false, error: null, needsRestart: false);
 
     final xFile = await openFile(
       acceptedTypeGroups: [
         const XTypeGroup(label: 'SQLite', extensions: ['sqlite']),
       ],
     );
-    if (xFile == null) return (success: false, error: null, needsRestart: false);
+    if (xFile == null)
+      return (success: false, error: null, needsRestart: false);
 
     final backupPath = xFile.path;
     if (backupPath.isEmpty) {
@@ -184,10 +221,18 @@ class BackupService {
       final version = db.userVersion;
       db.dispose();
       if (version < _schemaVersion) {
-        return (success: false, error: BackupErrorCode.invalidArchive, needsRestart: false);
+        return (
+          success: false,
+          error: BackupErrorCode.invalidArchive,
+          needsRestart: false,
+        );
       }
     } on SqliteException {
-      return (success: false, error: BackupErrorCode.invalidArchive, needsRestart: false);
+      return (
+        success: false,
+        error: BackupErrorCode.invalidArchive,
+        needsRestart: false,
+      );
     }
 
     try {
@@ -202,7 +247,11 @@ class BackupService {
       final didRestart = await _tryRestartApp();
       return (success: true, error: null, needsRestart: !didRestart);
     } on FileSystemException catch (e) {
-      return (success: false, error: _mapFileSystemException(e), needsRestart: false);
+      return (
+        success: false,
+        error: _mapFileSystemException(e),
+        needsRestart: false,
+      );
     }
   }
 
@@ -220,7 +269,8 @@ class BackupService {
   /// Attempts to restart the app. Returns true if restart was initiated (caller will exit).
   static Future<bool> _tryRestartApp() async {
     try {
-      if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS) return false;
+      if (!Platform.isWindows && !Platform.isLinux && !Platform.isMacOS)
+        return false;
       await Process.start(
         Platform.resolvedExecutable,
         List<String>.from(Platform.executableArguments),

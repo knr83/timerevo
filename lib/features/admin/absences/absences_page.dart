@@ -68,13 +68,13 @@ String _resolveAbsenceError(String key, AppLocalizations l10n) {
   };
 }
 
-final _absencesFiltersProvider =
-    StateProvider<_AbsencesFilters>((ref) => _AbsencesFilters.initial());
+final _absencesFiltersProvider = StateProvider<_AbsencesFilters>(
+  (ref) => _AbsencesFilters.initial(),
+);
 
 final _employeesAllProvider = watchAllEmployeesProvider;
 
-final _absencesProvider =
-    StreamProvider<List<AbsenceWithEmployeeInfo>>((ref) {
+final _absencesProvider = StreamProvider<List<AbsenceWithEmployeeInfo>>((ref) {
   final filters = ref.watch(_absencesFiltersProvider);
   String? fromDate;
   String? toDate;
@@ -84,7 +84,9 @@ final _absencesProvider =
   if (filters.toUtcMs != null) {
     toDate = _utcMsToYmd(filters.toUtcMs!);
   }
-  return ref.watch(watchAbsencesUseCaseProvider).streamAbsences(
+  return ref
+      .watch(watchAbsencesUseCaseProvider)
+      .streamAbsences(
         employeeId: filters.employeeId,
         fromDate: fromDate,
         toDate: toDate,
@@ -106,11 +108,11 @@ class _AbsencesFilters {
   final String? status;
 
   factory _AbsencesFilters.initial() => const _AbsencesFilters(
-        employeeId: null,
-        fromUtcMs: null,
-        toUtcMs: null,
-        status: null,
-      );
+    employeeId: null,
+    fromUtcMs: null,
+    toUtcMs: null,
+    status: null,
+  );
 
   _AbsencesFilters copyWith({
     Object? employeeId = _sentinel,
@@ -119,10 +121,12 @@ class _AbsencesFilters {
     Object? status = _sentinel,
   }) {
     return _AbsencesFilters(
-      employeeId:
-          identical(employeeId, _sentinel) ? this.employeeId : employeeId as int?,
-      fromUtcMs:
-          identical(fromUtcMs, _sentinel) ? this.fromUtcMs : fromUtcMs as int?,
+      employeeId: identical(employeeId, _sentinel)
+          ? this.employeeId
+          : employeeId as int?,
+      fromUtcMs: identical(fromUtcMs, _sentinel)
+          ? this.fromUtcMs
+          : fromUtcMs as int?,
       toUtcMs: identical(toUtcMs, _sentinel) ? this.toUtcMs : toUtcMs as int?,
       status: identical(status, _sentinel) ? this.status : status as String?,
     );
@@ -137,9 +141,10 @@ const _sortColumnDateFrom = 2;
 const _sortColumnDateTo = 3;
 const _sortColumnStatus = 4;
 
-final _absencesSortProvider = StateProvider<({int? columnIndex, bool ascending})>(
-  (ref) => (columnIndex: _sortColumnDateFrom, ascending: false),
-);
+final _absencesSortProvider =
+    StateProvider<({int? columnIndex, bool ascending})>(
+      (ref) => (columnIndex: _sortColumnDateFrom, ascending: false),
+    );
 
 List<AbsenceWithEmployeeInfo> _sortAbsences(
   List<AbsenceWithEmployeeInfo> rows,
@@ -157,7 +162,10 @@ List<AbsenceWithEmployeeInfo> _sortAbsences(
         cmp = employeeName(a.employee).compareTo(employeeName(b.employee));
         break;
       case _sortColumnType:
-        cmp = _typeLabel(a.absence.type, l10n).compareTo(_typeLabel(b.absence.type, l10n));
+        cmp = _typeLabel(
+          a.absence.type,
+          l10n,
+        ).compareTo(_typeLabel(b.absence.type, l10n));
         break;
       case _sortColumnDateFrom:
         cmp = a.absence.dateFrom.compareTo(b.absence.dateFrom);
@@ -166,7 +174,10 @@ List<AbsenceWithEmployeeInfo> _sortAbsences(
         cmp = a.absence.dateTo.compareTo(b.absence.dateTo);
         break;
       case _sortColumnStatus:
-        cmp = _statusLabel(a.absence.status, l10n).compareTo(_statusLabel(b.absence.status, l10n));
+        cmp = _statusLabel(
+          a.absence.status,
+          l10n,
+        ).compareTo(_statusLabel(b.absence.status, l10n));
         break;
       default:
         cmp = 0;
@@ -200,7 +211,8 @@ class AbsencesPage extends ConsumerWidget {
                 ),
                 const Spacer(),
                 FilledButton.icon(
-                  onPressed: () => _openAddDialog(context, ref, l10n, employeesAsync),
+                  onPressed: () =>
+                      _openAddDialog(context, ref, l10n, employeesAsync),
                   icon: const Icon(Icons.add),
                   label: Text(l10n.absencesAdd),
                 ),
@@ -219,18 +231,25 @@ class AbsencesPage extends ConsumerWidget {
                       label: Text(l10n.absencesEmployee),
                       initialSelection: filters.employeeId,
                       dropdownMenuEntries: [
-                        DropdownMenuEntry(value: null, label: l10n.sessionsEmployeeAll),
+                        DropdownMenuEntry(
+                          value: null,
+                          label: l10n.sessionsEmployeeAll,
+                        ),
                         ...employees.map(
                           (e) => DropdownMenuEntry(
                             value: e.id,
-                            label: EmployeeDisplayName.of(EmployeeDisplay(
-                            firstName: e.firstName, lastName: e.lastName)),
+                            label: EmployeeDisplayName.of(
+                              EmployeeDisplay(
+                                firstName: e.firstName,
+                                lastName: e.lastName,
+                              ),
+                            ),
                           ),
                         ),
                       ],
-                      onSelected: (v) => ref
-                          .read(_absencesFiltersProvider.notifier)
-                          .state = filters.copyWith(employeeId: v),
+                      onSelected: (v) =>
+                          ref.read(_absencesFiltersProvider.notifier).state =
+                              filters.copyWith(employeeId: v),
                     );
                   },
                   loading: () => const SizedBox(width: 180, height: 56),
@@ -241,34 +260,46 @@ class AbsencesPage extends ConsumerWidget {
                   label: Text(l10n.absencesStatus),
                   initialSelection: filters.status,
                   dropdownMenuEntries: [
-                    DropdownMenuEntry(value: null, label: l10n.sessionsEmployeeAll),
-                    DropdownMenuEntry(value: 'PENDING', label: l10n.absenceStatusPending),
-                    DropdownMenuEntry(value: 'APPROVED', label: l10n.absenceStatusApproved),
-                    DropdownMenuEntry(value: 'REJECTED', label: l10n.absenceStatusRejected),
+                    DropdownMenuEntry(
+                      value: null,
+                      label: l10n.sessionsEmployeeAll,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'PENDING',
+                      label: l10n.absenceStatusPending,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'APPROVED',
+                      label: l10n.absenceStatusApproved,
+                    ),
+                    DropdownMenuEntry(
+                      value: 'REJECTED',
+                      label: l10n.absenceStatusRejected,
+                    ),
                   ],
-                  onSelected: (v) => ref
-                      .read(_absencesFiltersProvider.notifier)
-                      .state = filters.copyWith(status: v),
+                  onSelected: (v) =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(status: v),
                 ),
                 DateTimeFilterChip(
                   label: l10n.sessionsFilterFrom,
                   valueUtcMs: filters.fromUtcMs,
-                  onPickedUtcMs: (v) => ref
-                      .read(_absencesFiltersProvider.notifier)
-                      .state = filters.copyWith(fromUtcMs: v),
-                  onCleared: () => ref
-                      .read(_absencesFiltersProvider.notifier)
-                      .state = filters.copyWith(fromUtcMs: null),
+                  onPickedUtcMs: (v) =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(fromUtcMs: v),
+                  onCleared: () =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(fromUtcMs: null),
                 ),
                 DateTimeFilterChip(
                   label: l10n.sessionsFilterTo,
                   valueUtcMs: filters.toUtcMs,
-                  onPickedUtcMs: (v) => ref
-                      .read(_absencesFiltersProvider.notifier)
-                      .state = filters.copyWith(toUtcMs: v),
-                  onCleared: () => ref
-                      .read(_absencesFiltersProvider.notifier)
-                      .state = filters.copyWith(toUtcMs: null),
+                  onPickedUtcMs: (v) =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(toUtcMs: v),
+                  onCleared: () =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(toUtcMs: null),
                 ),
               ],
             ),
@@ -286,8 +317,12 @@ class AbsencesPage extends ConsumerWidget {
                     sort.columnIndex,
                     sort.ascending,
                     l10n,
-                    (e) => EmployeeDisplayName.of(EmployeeDisplay(
-                      firstName: e.firstName, lastName: e.lastName)),
+                    (e) => EmployeeDisplayName.of(
+                      EmployeeDisplay(
+                        firstName: e.firstName,
+                        lastName: e.lastName,
+                      ),
+                    ),
                   );
                   return _AbsencesTable(
                     rows: sortedRows,
@@ -295,8 +330,10 @@ class AbsencesPage extends ConsumerWidget {
                     sortColumnIndex: sort.columnIndex,
                     sortAscending: sort.ascending,
                     onSort: (columnIndex, ascending) {
-                      ref.read(_absencesSortProvider.notifier).state =
-                          (columnIndex: columnIndex, ascending: ascending);
+                      ref.read(_absencesSortProvider.notifier).state = (
+                        columnIndex: columnIndex,
+                        ascending: ascending,
+                      );
                     },
                   );
                 },
@@ -363,92 +400,114 @@ class _AbsencesTable extends ConsumerWidget {
         columns: [
           DataColumn(
             label: Text(l10n.absencesEmployee),
-            onSort: onSort != null ? (_, ascending) => onSort!(_sortColumnEmployee, ascending) : null,
+            onSort: onSort != null
+                ? (_, ascending) => onSort!(_sortColumnEmployee, ascending)
+                : null,
           ),
           DataColumn(
             label: Text(l10n.absencesType),
-            onSort: onSort != null ? (_, ascending) => onSort!(_sortColumnType, ascending) : null,
+            onSort: onSort != null
+                ? (_, ascending) => onSort!(_sortColumnType, ascending)
+                : null,
           ),
           DataColumn(
             label: Text(l10n.absencesDateFrom),
-            onSort: onSort != null ? (_, ascending) => onSort!(_sortColumnDateFrom, ascending) : null,
+            onSort: onSort != null
+                ? (_, ascending) => onSort!(_sortColumnDateFrom, ascending)
+                : null,
           ),
           DataColumn(
             label: Text(l10n.absencesDateTo),
-            onSort: onSort != null ? (_, ascending) => onSort!(_sortColumnDateTo, ascending) : null,
+            onSort: onSort != null
+                ? (_, ascending) => onSort!(_sortColumnDateTo, ascending)
+                : null,
           ),
           DataColumn(
             label: Text(l10n.absencesStatus),
-            onSort: onSort != null ? (_, ascending) => onSort!(_sortColumnStatus, ascending) : null,
+            onSort: onSort != null
+                ? (_, ascending) => onSort!(_sortColumnStatus, ascending)
+                : null,
           ),
           DataColumn(label: Text(l10n.absencesApprovedBy)),
           DataColumn(label: Text(l10n.absencesApprovedAt)),
           DataColumn(label: Text(l10n.absencesActions)),
         ],
-        rows: rows.map((row) {
-          final a = row.absence;
-          final e = row.employee;
-          final isPending = a.status == 'PENDING';
+        rows: rows
+            .map((row) {
+              final a = row.absence;
+              final e = row.employee;
+              final isPending = a.status == 'PENDING';
 
-          final approvedByText = a.status != 'PENDING' ? (a.approvedBy ?? l10n.commonNotAvailable) : l10n.commonNotAvailable;
-          final approvedAtText = a.approvedAt != null
-              ? _utcMsToYmd(a.approvedAt!)
-              : l10n.commonNotAvailable;
+              final approvedByText = a.status != 'PENDING'
+                  ? (a.approvedBy ?? l10n.commonNotAvailable)
+                  : l10n.commonNotAvailable;
+              final approvedAtText = a.approvedAt != null
+                  ? _utcMsToYmd(a.approvedAt!)
+                  : l10n.commonNotAvailable;
 
-          return DataRow(
-            cells: [
-              DataCell(Text(EmployeeDisplayName.of(EmployeeDisplay(
-                    firstName: e.firstName, lastName: e.lastName)))),
-              DataCell(Text(_typeLabel(a.type, l10n))),
-              DataCell(Text(a.dateFrom)),
-              DataCell(Text(a.dateTo)),
-              DataCell(_statusChip(a.status, l10n, context)),
-              DataCell(Text(approvedByText)),
-              DataCell(Text(approvedAtText)),
-              DataCell(
-                isPending
-                    ? PopupMenuButton<String>(
-                        icon: const Icon(Icons.more_vert),
-                        onSelected: (value) {
-                          switch (value) {
-                            case 'edit':
-                              _edit(context, ref, a);
-                              break;
-                            case 'delete':
-                              _delete(context, ref, a.id, l10n);
-                              break;
-                            case 'approve':
-                              _approve(context, ref, a.id, l10n);
-                              break;
-                            case 'reject':
-                              _reject(context, ref, a.id, l10n);
-                              break;
-                          }
-                        },
-                        itemBuilder: (ctx) => [
-                          PopupMenuItem(
-                            value: 'edit',
-                            child: Text(l10n.absenceEdit),
-                          ),
-                          PopupMenuItem(
-                            value: 'delete',
-                            child: Text(l10n.absenceDelete),
-                          ),
-                          PopupMenuItem(
-                            value: 'approve',
-                            child: Text(l10n.absenceApprove),
-                          ),
-                          PopupMenuItem(
-                            value: 'reject',
-                            child: Text(l10n.absenceReject),
-                          ),
-                        ],
-                      )
-                    : const SizedBox.shrink(),
-              ),
-            ],
-          );
-        }).toList(growable: false),
+              return DataRow(
+                cells: [
+                  DataCell(
+                    Text(
+                      EmployeeDisplayName.of(
+                        EmployeeDisplay(
+                          firstName: e.firstName,
+                          lastName: e.lastName,
+                        ),
+                      ),
+                    ),
+                  ),
+                  DataCell(Text(_typeLabel(a.type, l10n))),
+                  DataCell(Text(a.dateFrom)),
+                  DataCell(Text(a.dateTo)),
+                  DataCell(_statusChip(a.status, l10n, context)),
+                  DataCell(Text(approvedByText)),
+                  DataCell(Text(approvedAtText)),
+                  DataCell(
+                    isPending
+                        ? PopupMenuButton<String>(
+                            icon: const Icon(Icons.more_vert),
+                            onSelected: (value) {
+                              switch (value) {
+                                case 'edit':
+                                  _edit(context, ref, a);
+                                  break;
+                                case 'delete':
+                                  _delete(context, ref, a.id, l10n);
+                                  break;
+                                case 'approve':
+                                  _approve(context, ref, a.id, l10n);
+                                  break;
+                                case 'reject':
+                                  _reject(context, ref, a.id, l10n);
+                                  break;
+                              }
+                            },
+                            itemBuilder: (ctx) => [
+                              PopupMenuItem(
+                                value: 'edit',
+                                child: Text(l10n.absenceEdit),
+                              ),
+                              PopupMenuItem(
+                                value: 'delete',
+                                child: Text(l10n.absenceDelete),
+                              ),
+                              PopupMenuItem(
+                                value: 'approve',
+                                child: Text(l10n.absenceApprove),
+                              ),
+                              PopupMenuItem(
+                                value: 'reject',
+                                child: Text(l10n.absenceReject),
+                              ),
+                            ],
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              );
+            })
+            .toList(growable: false),
       ),
     );
   }
@@ -504,7 +563,11 @@ class _AbsencesTable extends ConsumerWidget {
       }
     } on DomainException catch (e) {
       if (context.mounted) {
-        showAppSnack(context, _resolveAbsenceError(e.message, l10n), isError: true);
+        showAppSnack(
+          context,
+          _resolveAbsenceError(e.message, l10n),
+          isError: true,
+        );
       }
     }
   }
@@ -535,17 +598,19 @@ class _AbsencesTable extends ConsumerWidget {
     if (confirm != true || !context.mounted) return;
 
     try {
-      await ref.read(absencesAdminUseCaseProvider).updateAbsenceStatus(
-            id: id,
-            status: 'APPROVED',
-            approvedBy: 'admin',
-          );
+      await ref
+          .read(absencesAdminUseCaseProvider)
+          .updateAbsenceStatus(id: id, status: 'APPROVED', approvedBy: 'admin');
       if (context.mounted) {
         showAppSnack(context, l10n.absenceApproved);
       }
     } on DomainException catch (e) {
       if (context.mounted) {
-        showAppSnack(context, _resolveAbsenceError(e.message, l10n), isError: true);
+        showAppSnack(
+          context,
+          _resolveAbsenceError(e.message, l10n),
+          isError: true,
+        );
       }
     }
   }
@@ -578,8 +643,8 @@ class _AbsencesTable extends ConsumerWidget {
               Text(
                 l10n.absenceRejectConfirmHint,
                 style: Theme.of(ctx).textTheme.bodySmall?.copyWith(
-                      color: Theme.of(ctx).colorScheme.onSurfaceVariant,
-                    ),
+                  color: Theme.of(ctx).colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -604,7 +669,9 @@ class _AbsencesTable extends ConsumerWidget {
     if (reason.isEmpty) return;
 
     try {
-      await ref.read(absencesAdminUseCaseProvider).updateAbsenceStatus(
+      await ref
+          .read(absencesAdminUseCaseProvider)
+          .updateAbsenceStatus(
             id: id,
             status: 'REJECTED',
             approvedBy: 'admin',
@@ -615,7 +682,11 @@ class _AbsencesTable extends ConsumerWidget {
       }
     } on DomainException catch (e) {
       if (context.mounted) {
-        showAppSnack(context, _resolveAbsenceError(e.message, l10n), isError: true);
+        showAppSnack(
+          context,
+          _resolveAbsenceError(e.message, l10n),
+          isError: true,
+        );
       }
     }
   }

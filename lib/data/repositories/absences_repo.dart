@@ -11,10 +11,7 @@ import '../db/app_db.dart';
 import 'repo_guard.dart';
 
 class AbsenceWithEmployee {
-  const AbsenceWithEmployee({
-    required this.absence,
-    required this.employee,
-  });
+  const AbsenceWithEmployee({required this.absence, required this.employee});
 
   final Absence absence;
   final Employee employee;
@@ -39,36 +36,35 @@ class AbsencesRepo implements IAbsencesRepo {
   final AppDb _db;
 
   static AbsenceInfo _toAbsenceInfo(Absence a) => AbsenceInfo(
-        id: a.id,
-        employeeId: a.employeeId,
-        dateFrom: a.dateFrom,
-        dateTo: a.dateTo,
-        type: a.type,
-        note: a.note,
-        status: a.status,
-        approvedAt: a.approvedAt,
-        approvedBy: a.approvedBy,
-        rejectReason: a.rejectReason,
-        createdAt: a.createdAt,
-        createdByEmployeeId: a.createdByEmployeeId,
-      );
+    id: a.id,
+    employeeId: a.employeeId,
+    dateFrom: a.dateFrom,
+    dateTo: a.dateTo,
+    type: a.type,
+    note: a.note,
+    status: a.status,
+    approvedAt: a.approvedAt,
+    approvedBy: a.approvedBy,
+    rejectReason: a.rejectReason,
+    createdAt: a.createdAt,
+    createdByEmployeeId: a.createdByEmployeeId,
+  );
 
   static EmployeeInfo _toEmployeeInfo(Employee e) => EmployeeInfo(
-        id: e.id,
-        firstName: e.firstName,
-        lastName: e.lastName,
-        isActive: e.isActive == 1,
-        usePin: e.usePin == 1,
-        policyAcknowledged: e.policyAcknowledged == 1,
-      );
+    id: e.id,
+    firstName: e.firstName,
+    lastName: e.lastName,
+    isActive: e.isActive == 1,
+    usePin: e.usePin == 1,
+    policyAcknowledged: e.policyAcknowledged == 1,
+  );
 
   static AbsenceWithEmployeeInfo _toAbsenceWithEmployeeInfo(
     AbsenceWithEmployee row,
-  ) =>
-      AbsenceWithEmployeeInfo(
-        absence: _toAbsenceInfo(row.absence),
-        employee: _toEmployeeInfo(row.employee),
-      );
+  ) => AbsenceWithEmployeeInfo(
+    absence: _toAbsenceInfo(row.absence),
+    employee: _toEmployeeInfo(row.employee),
+  );
 
   @override
   Stream<List<AbsenceWithEmployeeInfo>> streamAbsences({
@@ -98,17 +94,23 @@ class AbsencesRepo implements IAbsencesRepo {
     switch (type) {
       case 'vacation':
         if (dateFrom.compareTo(today) < 0) {
-          throw const DomainValidationException('absenceErrorDateRestrictionVacation');
+          throw const DomainValidationException(
+            'absenceErrorDateRestrictionVacation',
+          );
         }
         break;
       case 'sick_leave':
         if (dateFrom.compareTo(threeDaysAgo) < 0) {
-          throw const DomainValidationException('absenceErrorDateRestrictionSickLeave');
+          throw const DomainValidationException(
+            'absenceErrorDateRestrictionSickLeave',
+          );
         }
         break;
       default:
         if (dateFrom.compareTo(today) < 0) {
-          throw const DomainValidationException('absenceErrorDateRestrictionVacation');
+          throw const DomainValidationException(
+            'absenceErrorDateRestrictionVacation',
+          );
         }
     }
   }
@@ -144,11 +146,9 @@ class AbsencesRepo implements IAbsencesRepo {
       vars.add(Variable.withInt(excludeId));
     }
 
-    final q = await _db.customSelect(
-      sql,
-      variables: vars,
-      readsFrom: {_db.absences},
-    ).get();
+    final q = await _db
+        .customSelect(sql, variables: vars, readsFrom: {_db.absences})
+        .get();
 
     return q.isNotEmpty;
   }
@@ -163,35 +163,40 @@ class AbsencesRepo implements IAbsencesRepo {
   }
 
   @override
-  Future<List<({DateTime dateFrom, DateTime dateTo})>> getApprovedAbsenceRangesForEmployeeInPeriod(
+  Future<List<({DateTime dateFrom, DateTime dateTo})>>
+  getApprovedAbsenceRangesForEmployeeInPeriod(
     int employeeId,
     String fromYmd,
     String toYmd,
   ) async {
-    final rows = await (_db.select(_db.absences)
-          ..where((a) =>
-              a.employeeId.equals(employeeId) &
-              a.status.equals(_statusApproved) &
-              a.dateTo.isBiggerOrEqualValue(fromYmd) &
-              a.dateFrom.isSmallerOrEqualValue(toYmd)))
-        .get();
-    return rows
-        .map((a) => (
-              dateFrom: _ymdToDate(a.dateFrom),
-              dateTo: _ymdToDate(a.dateTo),
+    final rows =
+        await (_db.select(_db.absences)..where(
+              (a) =>
+                  a.employeeId.equals(employeeId) &
+                  a.status.equals(_statusApproved) &
+                  a.dateTo.isBiggerOrEqualValue(fromYmd) &
+                  a.dateFrom.isSmallerOrEqualValue(toYmd),
             ))
+            .get();
+    return rows
+        .map(
+          (a) =>
+              (dateFrom: _ymdToDate(a.dateFrom), dateTo: _ymdToDate(a.dateTo)),
+        )
         .toList();
   }
 
   @override
   Future<bool> hasApprovedAbsenceOnDate(int employeeId, String dateYmd) async {
-    final rows = await (_db.select(_db.absences)
-          ..where((a) =>
-              a.employeeId.equals(employeeId) &
-              a.status.equals(_statusApproved) &
-              a.dateFrom.isSmallerOrEqualValue(dateYmd) &
-              a.dateTo.isBiggerOrEqualValue(dateYmd)))
-        .get();
+    final rows =
+        await (_db.select(_db.absences)..where(
+              (a) =>
+                  a.employeeId.equals(employeeId) &
+                  a.status.equals(_statusApproved) &
+                  a.dateFrom.isSmallerOrEqualValue(dateYmd) &
+                  a.dateTo.isBiggerOrEqualValue(dateYmd),
+            ))
+            .get();
     return rows.isNotEmpty;
   }
 
@@ -218,7 +223,9 @@ class AbsencesRepo implements IAbsencesRepo {
 
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
-      return _db.into(_db.absences).insert(
+      return _db
+          .into(_db.absences)
+          .insert(
             AbsencesCompanion.insert(
               employeeId: employeeId,
               dateFrom: dateFrom,
@@ -244,7 +251,9 @@ class AbsencesRepo implements IAbsencesRepo {
     String? type,
     String? note,
   }) async {
-    final existing = await (_db.select(_db.absences)..where((a) => a.id.equals(id))).getSingleOrNull();
+    final existing = await (_db.select(
+      _db.absences,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
     if (existing == null) {
       throw const DomainNotFoundException('Absence not found');
     }
@@ -258,26 +267,33 @@ class AbsencesRepo implements IAbsencesRepo {
       throw const DomainValidationException('absenceErrorDateOrder');
     }
 
-    final overlap = await hasOverlap(existing.employeeId, df, dt, excludeId: id);
+    final overlap = await hasOverlap(
+      existing.employeeId,
+      df,
+      dt,
+      excludeId: id,
+    );
     if (overlap) {
       throw const DomainValidationException('absenceErrorOverlap');
     }
 
     await guardRepoCall(() async {
       await (_db.update(_db.absences)..where((a) => a.id.equals(id))).write(
-            AbsencesCompanion(
-              dateFrom: Value(df),
-              dateTo: Value(dt),
-              type: Value(type ?? existing.type),
-              note: Value(note ?? existing.note),
-            ),
-          );
+        AbsencesCompanion(
+          dateFrom: Value(df),
+          dateTo: Value(dt),
+          type: Value(type ?? existing.type),
+          note: Value(note ?? existing.note),
+        ),
+      );
     });
   }
 
   @override
   Future<void> deleteAbsence(int id) async {
-    final existing = await (_db.select(_db.absences)..where((a) => a.id.equals(id))).getSingleOrNull();
+    final existing = await (_db.select(
+      _db.absences,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
     if (existing == null) {
       throw const DomainNotFoundException('Absence not found');
     }
@@ -300,29 +316,34 @@ class AbsencesRepo implements IAbsencesRepo {
     if (status != _statusApproved && status != _statusRejected) {
       throw DomainValidationException('Invalid status: $status');
     }
-    if (status == _statusRejected && (rejectReason == null || rejectReason.trim().isEmpty)) {
+    if (status == _statusRejected &&
+        (rejectReason == null || rejectReason.trim().isEmpty)) {
       throw const DomainValidationException('absenceErrorRejectReasonRequired');
     }
 
-    final existing = await (_db.select(_db.absences)..where((a) => a.id.equals(id))).getSingleOrNull();
+    final existing = await (_db.select(
+      _db.absences,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
     if (existing == null) {
       throw const DomainNotFoundException('Absence not found');
     }
     if (existing.status != _statusPending) {
-      throw const DomainValidationException('absenceErrorApproveRejectPendingOnly');
+      throw const DomainValidationException(
+        'absenceErrorApproveRejectPendingOnly',
+      );
     }
 
     final now = UtcClock.nowMs();
 
     await guardRepoCall(() async {
       await (_db.update(_db.absences)..where((a) => a.id.equals(id))).write(
-            AbsencesCompanion(
-              status: Value(status),
-              approvedAt: Value(now),
-              approvedBy: Value(approvedBy),
-              rejectReason: Value(rejectReason?.trim()),
-            ),
-          );
+        AbsencesCompanion(
+          status: Value(status),
+          approvedAt: Value(now),
+          approvedBy: Value(approvedBy),
+          rejectReason: Value(rejectReason?.trim()),
+        ),
+      );
     });
   }
 
@@ -333,7 +354,10 @@ class AbsencesRepo implements IAbsencesRepo {
     String? status,
   }) {
     final select = _db.select(_db.absences).join([
-      innerJoin(_db.employees, _db.employees.id.equalsExp(_db.absences.employeeId)),
+      innerJoin(
+        _db.employees,
+        _db.employees.id.equalsExp(_db.absences.employeeId),
+      ),
     ]);
 
     if (employeeId != null) {
@@ -352,18 +376,20 @@ class AbsencesRepo implements IAbsencesRepo {
     select.orderBy([OrderingTerm.desc(_db.absences.createdAt)]);
 
     return select.watch().map(
-          (rows) => rows
-              .map(
-                (r) => AbsenceWithEmployee(
-                  absence: r.readTable(_db.absences),
-                  employee: r.readTable(_db.employees),
-                ),
-              )
-              .toList(growable: false),
-        );
+      (rows) => rows
+          .map(
+            (r) => AbsenceWithEmployee(
+              absence: r.readTable(_db.absences),
+              employee: r.readTable(_db.employees),
+            ),
+          )
+          .toList(growable: false),
+    );
   }
 
   Future<Absence?> getAbsence(int id) async {
-    return (_db.select(_db.absences)..where((a) => a.id.equals(id))).getSingleOrNull();
+    return (_db.select(
+      _db.absences,
+    )..where((a) => a.id.equals(id))).getSingleOrNull();
   }
 }

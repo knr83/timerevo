@@ -24,10 +24,7 @@ void main() {
         isDayOff: true,
         intervals: [],
       );
-      expect(
-        ReportNormCalculator.dayNormMinutes(s, false),
-        0,
-      );
+      expect(ReportNormCalculator.dayNormMinutes(s, false), 0);
     });
 
     test('returns 0 when approved absence', () {

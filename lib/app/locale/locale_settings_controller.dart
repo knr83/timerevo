@@ -7,8 +7,8 @@ import '../../data/repositories/repo_providers.dart';
 /// Locale override stored locally. `null` means "use system locale".
 final localeOverrideLanguageCodeProvider =
     AsyncNotifierProvider<LocaleOverrideLanguageCodeController, String?>(
-  LocaleOverrideLanguageCodeController.new,
-);
+      LocaleOverrideLanguageCodeController.new,
+    );
 
 class LocaleOverrideLanguageCodeController extends AsyncNotifier<String?> {
   @override
@@ -45,4 +45,3 @@ String? _normalizeOrNull(String? code) {
   if (v == null || v.isEmpty) return null;
   return v;
 }
-

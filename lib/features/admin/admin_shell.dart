@@ -98,7 +98,9 @@ class _AdminPinGateState extends ConsumerState<_AdminPinGate> {
     final l10n = AppLocalizations.of(context);
 
     setState(() => _verifying = true);
-    await ref.read(adminAuthControllerProvider.notifier).unlockWithPin(
+    await ref
+        .read(adminAuthControllerProvider.notifier)
+        .unlockWithPin(
           pin,
           invalidPinMessage: l10n.adminInvalidPin,
           invalidFormatMessage: l10n.adminPinInvalidFormat,
@@ -118,7 +120,9 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _maybeShowLegalNotice());
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _maybeShowLegalNotice(),
+    );
   }
 
   Future<void> _maybeShowLegalNotice() async {
@@ -205,9 +209,7 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
                   break;
                 case 'about':
                   Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => const AboutPage(),
-                    ),
+                    MaterialPageRoute<void>(builder: (_) => const AboutPage()),
                   );
                   break;
               }
@@ -217,15 +219,9 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
                 value: 'privacy',
                 child: Text(l10n.settingsPrivacyPolicy),
               ),
-              PopupMenuItem(
-                value: 'terms',
-                child: Text(l10n.legalTerms),
-              ),
+              PopupMenuItem(value: 'terms', child: Text(l10n.legalTerms)),
               const PopupMenuDivider(),
-              PopupMenuItem(
-                value: 'about',
-                child: Text(l10n.aboutTitle),
-              ),
+              PopupMenuItem(value: 'about', child: Text(l10n.aboutTitle)),
             ],
           ),
         ],
@@ -234,4 +230,3 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
     );
   }
 }
-

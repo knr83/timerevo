@@ -35,19 +35,17 @@ class DiagnosticExportService {
 
       // meta.json
       final meta = _buildMeta(locale);
-      archive.addFile(ArchiveFile(
-        'meta.json',
-        meta.length,
-        utf8.encode(meta),
-      ));
+      archive.addFile(ArchiveFile('meta.json', meta.length, utf8.encode(meta)));
 
       // recent_logs.ndjson
       final logsContent = await _buildRecentLogs();
-      archive.addFile(ArchiveFile(
-        'recent_logs.ndjson',
-        logsContent.length,
-        utf8.encode(logsContent),
-      ));
+      archive.addFile(
+        ArchiveFile(
+          'recent_logs.ndjson',
+          logsContent.length,
+          utf8.encode(logsContent),
+        ),
+      );
 
       final zipData = ZipEncoder().encode(archive);
       if (zipData.isEmpty) return (path: null, error: 'Failed to create ZIP');

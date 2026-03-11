@@ -4,4 +4,3 @@ class AppRoutes {
   static const legalPrivacy = '/legal/privacy';
   static const legalTerms = '/legal/terms';
 }
-

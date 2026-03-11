@@ -12,20 +12,27 @@ import '../data/repositories/app_settings_repo.dart';
 import '../data/repositories/repo_providers.dart';
 import '../data/services/backup_service.dart';
 
-Future<void> _migratePrefsToAppSettings(AppSettingsRepo appSettings, AppDb db) async {
-  final count = await db.customSelect(
-    'SELECT count(*) as c FROM app_settings',
-    readsFrom: {db.appSettings},
-  ).getSingle();
+Future<void> _migratePrefsToAppSettings(
+  AppSettingsRepo appSettings,
+  AppDb db,
+) async {
+  final count = await db
+      .customSelect(
+        'SELECT count(*) as c FROM app_settings',
+        readsFrom: {db.appSettings},
+      )
+      .getSingle();
   if (count.read<int>('c') > 0) return;
 
   final prefs = await SharedPreferences.getInstance();
 
   final startMin = prefs.getInt('working_hours_start_min');
-  if (startMin != null) await appSettings.set('working_hours_start_min', startMin.toString());
+  if (startMin != null)
+    await appSettings.set('working_hours_start_min', startMin.toString());
 
   final endMin = prefs.getInt('working_hours_end_min');
-  if (endMin != null) await appSettings.set('working_hours_end_min', endMin.toString());
+  if (endMin != null)
+    await appSettings.set('working_hours_end_min', endMin.toString());
 
   final locale = prefs.getString('locale_override');
   if (locale != null && locale.trim().isNotEmpty) {
@@ -79,9 +86,12 @@ final appInitProvider = FutureProvider<void>((ref) async {
   await ref.read(authRepoProvider).ensureDefaultAdmin();
   await ref.read(employeesRepoProvider).ensureDemoEmployees();
 
-  unawaited(DiagnosticLog.append(DiagnosticLogEntry(
-    event: DiagnosticEvent.appStart,
-    ts: DateTime.now().toUtc().toIso8601String(),
-  )));
+  unawaited(
+    DiagnosticLog.append(
+      DiagnosticLogEntry(
+        event: DiagnosticEvent.appStart,
+        ts: DateTime.now().toUtc().toIso8601String(),
+      ),
+    ),
+  );
 });
-

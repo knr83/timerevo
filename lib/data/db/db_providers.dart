@@ -7,4 +7,3 @@ final appDbProvider = Provider<AppDb>((ref) {
   ref.onDispose(db.close);
   return db;
 });
-

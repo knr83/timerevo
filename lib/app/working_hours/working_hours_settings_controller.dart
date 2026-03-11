@@ -9,8 +9,10 @@ const int defaultWorkingHoursStartMin = 360;
 const int defaultWorkingHoursEndMin = 1260;
 
 final workingHoursSettingsProvider =
-    AsyncNotifierProvider<WorkingHoursSettingsController,
-        ({int startMin, int endMin})>(WorkingHoursSettingsController.new);
+    AsyncNotifierProvider<
+      WorkingHoursSettingsController,
+      ({int startMin, int endMin})
+    >(WorkingHoursSettingsController.new);
 
 class WorkingHoursSettingsController
     extends AsyncNotifier<({int startMin, int endMin})> {

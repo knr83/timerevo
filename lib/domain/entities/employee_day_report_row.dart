@@ -12,6 +12,7 @@ class EmployeeDayReportRow {
   final int workedMs;
   final int normMs;
   final int deltaMs;
+
   /// True when ResolvedSchedule.source != 'none' for that date.
   final bool hasSchedule;
 }

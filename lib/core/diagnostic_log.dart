@@ -44,14 +44,12 @@ class DiagnosticLogEntry {
 
   final DiagnosticEvent event;
   final String ts;
+
   /// Only exception runtimeType (e.g. "SqliteException"); no message.
   final String? errorType;
 
   Map<String, Object?> toJson() {
-    final m = <String, Object?>{
-      'event': event.name,
-      'ts': ts,
-    };
+    final m = <String, Object?>{'event': event.name, 'ts': ts};
     if (errorType != null) m['errorType'] = errorType;
     return m;
   }
@@ -119,7 +117,10 @@ Future<List<String>> _readLastLinesImpl(int n) async {
     final f = _logFile!;
     if (!await f.exists()) return [];
     final content = await f.readAsString();
-    final lines = content.split('\n').where((s) => s.trim().isNotEmpty).toList();
+    final lines = content
+        .split('\n')
+        .where((s) => s.trim().isNotEmpty)
+        .toList();
     if (lines.length <= n) return lines;
     return lines.sublist(lines.length - n);
   } catch (_) {

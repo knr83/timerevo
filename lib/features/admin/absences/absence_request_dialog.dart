@@ -20,8 +20,11 @@ const _absenceTypes = [
   ('other', 'absenceTypeOther'),
 ];
 
-Future<DateTime?> _pickDate(BuildContext context,
-    {DateTime? firstDate, DateTime? initialDate}) async {
+Future<DateTime?> _pickDate(
+  BuildContext context, {
+  DateTime? firstDate,
+  DateTime? initialDate,
+}) async {
   final now = DateTime.now();
   final first = firstDate ?? DateTime(now.year - 1);
   final last = DateTime(now.year + 2);
@@ -187,100 +190,122 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
       content: Stack(
         children: [
           SizedBox(
-        width: 400,
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (widget.isAdminContext) ...[
-                DropdownButtonFormField<int?>(
-                  initialValue: _selectedEmployeeId,
-                  decoration: InputDecoration(
-                    labelText: l10n.absencesEmployee,
-                    border: const OutlineInputBorder(),
-                  ),
-                  items: [
-                    for (final e in widget.employees)
-                      DropdownMenuItem(
-                        value: e.id,
-                        child: Text(EmployeeDisplayName.of(EmployeeDisplay(
-                        firstName: e.firstName, lastName: e.lastName))),
-                      ),
-                  ],
-                  onChanged: (v) => setState(() => _selectedEmployeeId = v),
-                ),
-                const SizedBox(height: 12),
-              ],
-              DropdownButtonFormField<String>(
-                initialValue: _type,
-                decoration: InputDecoration(
-                  labelText: l10n.absencesType,
-                  border: const OutlineInputBorder(),
-                ),
-                items: [
-                  for (final t in _absenceTypes)
-                    DropdownMenuItem(
-                      value: t.$1,
-                      child: Text(_typeLabel(t.$2, l10n)),
-                    ),
-                ],
-                onChanged: (v) => setState(() => _type = v ?? _type),
-              ),
-              const SizedBox(height: 12),
-              Row(
+            width: 400,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        final first = widget.isAdminContext
-                            ? null
-                            : _type == 'sick_leave'
-                                ? DateTime.now().subtract(const Duration(days: 3))
-                                : DateTime.now();
-                        final picked = await _pickDate(context,
-                            firstDate: first, initialDate: _dateFrom);
-                        if (picked != null) setState(() => _dateFrom = picked);
-                      },
-                      child: Text(_dateFrom != null
-                          ? dateToYmd(_dateFrom!)
-                          : l10n.absencesDateFrom),
+                  if (widget.isAdminContext) ...[
+                    DropdownButtonFormField<int?>(
+                      initialValue: _selectedEmployeeId,
+                      decoration: InputDecoration(
+                        labelText: l10n.absencesEmployee,
+                        border: const OutlineInputBorder(),
+                      ),
+                      items: [
+                        for (final e in widget.employees)
+                          DropdownMenuItem(
+                            value: e.id,
+                            child: Text(
+                              EmployeeDisplayName.of(
+                                EmployeeDisplay(
+                                  firstName: e.firstName,
+                                  lastName: e.lastName,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                      onChanged: (v) => setState(() => _selectedEmployeeId = v),
                     ),
+                    const SizedBox(height: 12),
+                  ],
+                  DropdownButtonFormField<String>(
+                    initialValue: _type,
+                    decoration: InputDecoration(
+                      labelText: l10n.absencesType,
+                      border: const OutlineInputBorder(),
+                    ),
+                    items: [
+                      for (final t in _absenceTypes)
+                        DropdownMenuItem(
+                          value: t.$1,
+                          child: Text(_typeLabel(t.$2, l10n)),
+                        ),
+                    ],
+                    onChanged: (v) => setState(() => _type = v ?? _type),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: OutlinedButton(
-                      onPressed: () async {
-                        final first = _dateFrom ?? DateTime.now();
-                        final picked = await _pickDate(context,
-                            firstDate: first,
-                            initialDate: _dateTo ?? _dateFrom ?? DateTime.now());
-                        if (picked != null) setState(() => _dateTo = picked);
-                      },
-                      child: Text(_dateTo != null
-                          ? dateToYmd(_dateTo!)
-                          : l10n.absencesDateTo),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final first = widget.isAdminContext
+                                ? null
+                                : _type == 'sick_leave'
+                                ? DateTime.now().subtract(
+                                    const Duration(days: 3),
+                                  )
+                                : DateTime.now();
+                            final picked = await _pickDate(
+                              context,
+                              firstDate: first,
+                              initialDate: _dateFrom,
+                            );
+                            if (picked != null)
+                              setState(() => _dateFrom = picked);
+                          },
+                          child: Text(
+                            _dateFrom != null
+                                ? dateToYmd(_dateFrom!)
+                                : l10n.absencesDateFrom,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () async {
+                            final first = _dateFrom ?? DateTime.now();
+                            final picked = await _pickDate(
+                              context,
+                              firstDate: first,
+                              initialDate:
+                                  _dateTo ?? _dateFrom ?? DateTime.now(),
+                            );
+                            if (picked != null)
+                              setState(() => _dateTo = picked);
+                          },
+                          child: Text(
+                            _dateTo != null
+                                ? dateToYmd(_dateTo!)
+                                : l10n.absencesDateTo,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _noteCtrl,
+                    decoration: InputDecoration(
+                      labelText: l10n.sessionsTableNote,
+                      border: const OutlineInputBorder(),
                     ),
+                    maxLines: 2,
                   ),
                 ],
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _noteCtrl,
-                decoration: InputDecoration(
-                  labelText: l10n.sessionsTableNote,
-                  border: const OutlineInputBorder(),
-                ),
-                maxLines: 2,
-              ),
-            ],
+            ),
           ),
-        ),
-        ),
-        if (_isSaving)
+          if (_isSaving)
             Positioned.fill(
               child: Container(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.7),
+                color: Theme.of(
+                  context,
+                ).colorScheme.surface.withValues(alpha: 0.7),
                 child: const Center(child: CircularProgressIndicator()),
               ),
             ),

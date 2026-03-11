@@ -23,4 +23,3 @@ class NotFoundException extends DataException {
 class UnknownDataException extends DataException {
   const UnknownDataException(super.message, {super.cause});
 }
-

@@ -43,10 +43,7 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
   final toNormalized = DateTime(toDate.year, toDate.month, toDate.day);
   final fromRange = localDayRangeUtcMs(fromNormalized);
   final toRange = localDayRangeUtcMs(toNormalized);
-  return (
-    fromUtcMs: fromRange.fromUtcMs,
-    toUtcMs: toRange.toUtcMs,
-  );
+  return (fromUtcMs: fromRange.fromUtcMs, toUtcMs: toRange.toUtcMs);
 }
 
 /// Report period preset: today only.
@@ -59,14 +56,23 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
 ({int fromUtcMs, int toUtcMs}) reportPeriodWeek() {
   final now = DateTime.now();
   final weekday = now.weekday;
-  final startOfWeek = DateTime(now.year, now.month, now.day)
-      .subtract(Duration(days: weekday - 1));
+  final startOfWeek = DateTime(
+    now.year,
+    now.month,
+    now.day,
+  ).subtract(Duration(days: weekday - 1));
   final endOfWeek = startOfWeek.add(const Duration(days: 6));
   return (
     fromUtcMs: startOfWeek.toUtc().millisecondsSinceEpoch,
-    toUtcMs: DateTime(endOfWeek.year, endOfWeek.month, endOfWeek.day, 23, 59, 59, 999)
-        .toUtc()
-        .millisecondsSinceEpoch,
+    toUtcMs: DateTime(
+      endOfWeek.year,
+      endOfWeek.month,
+      endOfWeek.day,
+      23,
+      59,
+      59,
+      999,
+    ).toUtc().millisecondsSinceEpoch,
   );
 }
 
@@ -74,12 +80,22 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
 ({int fromUtcMs, int toUtcMs}) reportPeriodMonth() {
   final now = DateTime.now();
   final start = DateTime(now.year, now.month, 1);
-  final end = DateTime(now.year, now.month + 1, 1).subtract(const Duration(days: 1));
+  final end = DateTime(
+    now.year,
+    now.month + 1,
+    1,
+  ).subtract(const Duration(days: 1));
   return (
     fromUtcMs: start.toUtc().millisecondsSinceEpoch,
-    toUtcMs: DateTime(end.year, end.month, end.day, 23, 59, 59, 999)
-        .toUtc()
-        .millisecondsSinceEpoch,
+    toUtcMs: DateTime(
+      end.year,
+      end.month,
+      end.day,
+      23,
+      59,
+      59,
+      999,
+    ).toUtc().millisecondsSinceEpoch,
   );
 }
 
@@ -87,11 +103,21 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
 ({int fromUtcMs, int toUtcMs}) reportPeriodLastMonth() {
   final now = DateTime.now();
   final start = DateTime(now.year, now.month - 1, 1);
-  final end = DateTime(now.year, now.month, 1).subtract(const Duration(days: 1));
+  final end = DateTime(
+    now.year,
+    now.month,
+    1,
+  ).subtract(const Duration(days: 1));
   return (
     fromUtcMs: start.toUtc().millisecondsSinceEpoch,
-    toUtcMs: DateTime(end.year, end.month, end.day, 23, 59, 59, 999)
-        .toUtc()
-        .millisecondsSinceEpoch,
+    toUtcMs: DateTime(
+      end.year,
+      end.month,
+      end.day,
+      23,
+      59,
+      59,
+      999,
+    ).toUtc().millisecondsSinceEpoch,
   );
 }

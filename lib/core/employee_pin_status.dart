@@ -1,5 +1,2 @@
 /// PIN status for an employee. Used by terminal/auth flows.
-enum EmployeePinStatus {
-  set,
-  notSet,
-}
+enum EmployeePinStatus { set, notSet }

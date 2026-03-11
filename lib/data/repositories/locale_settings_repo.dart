@@ -22,4 +22,3 @@ class LocaleSettingsRepo {
     await _appSettings.set(_overrideKey, code);
   }
 }
-

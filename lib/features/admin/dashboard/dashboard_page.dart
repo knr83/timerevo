@@ -28,7 +28,6 @@ String _formatDuration(AppLocalizations l10n, int totalMin) {
   return l10n.durationHm(h, m);
 }
 
-
 class _DashboardSessionRow extends StatelessWidget {
   const _DashboardSessionRow({
     required this.session,
@@ -59,10 +58,9 @@ class _DashboardSessionRow extends StatelessWidget {
     } else {
       trailing = l10n.commonOngoing;
     }
-    final endStr =
-        session.endTs != null
-            ? TimeFormat.formatTimeOnly(session.endTs!)
-            : '…';
+    final endStr = session.endTs != null
+        ? TimeFormat.formatTimeOnly(session.endTs!)
+        : '…';
     final cs = Theme.of(context).colorScheme;
     final theme = Theme.of(context);
 
@@ -114,15 +112,14 @@ class _EmployeeSessionsBlock extends ConsumerWidget {
   final int employeeId;
   final int? openSessionId;
   final AppLocalizations l10n;
+
   /// When true, fetches sessions for last 7 days (for Recent Activity context).
   final bool useRecentRange;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final sessionsAsync = useRecentRange
-        ? ref.watch(
-            watchSessionsForEmployeeLastDaysProvider((employeeId, 7)),
-          )
+        ? ref.watch(watchSessionsForEmployeeLastDaysProvider((employeeId, 7)))
         : ref.watch(watchSessionsForEmployeeTodayProvider(employeeId));
 
     return sessionsAsync.when(
@@ -159,10 +156,7 @@ class _EmployeeSessionsBlock extends ConsumerWidget {
 }
 
 class DashboardPage extends ConsumerStatefulWidget {
-  const DashboardPage({
-    super.key,
-    this.onViewAllSessions,
-  });
+  const DashboardPage({super.key, this.onViewAllSessions});
 
   final VoidCallback? onViewAllSessions;
 
@@ -177,15 +171,17 @@ class _DashboardPageState extends ConsumerState<DashboardPage> {
 
   void _toggleExpandInNowAtWork(int employeeId) {
     setState(() {
-      _expandedInNowAtWork =
-          _expandedInNowAtWork == employeeId ? null : employeeId;
+      _expandedInNowAtWork = _expandedInNowAtWork == employeeId
+          ? null
+          : employeeId;
     });
   }
 
   void _toggleExpandInTodayEmployees(int employeeId) {
     setState(() {
-      _expandedInTodayEmployees =
-          _expandedInTodayEmployees == employeeId ? null : employeeId;
+      _expandedInTodayEmployees = _expandedInTodayEmployees == employeeId
+          ? null
+          : employeeId;
     });
   }
 
@@ -269,7 +265,8 @@ class _DashboardNowAtWork extends ConsumerStatefulWidget {
   final void Function(int employeeId) onExpandSessions;
 
   @override
-  ConsumerState<_DashboardNowAtWork> createState() => _DashboardNowAtWorkState();
+  ConsumerState<_DashboardNowAtWork> createState() =>
+      _DashboardNowAtWorkState();
 }
 
 class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
@@ -302,9 +299,9 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
           children: [
             Text(
               l10n.dashboardNowAtWork,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             openAsync.when(
@@ -322,8 +319,8 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
                       Text(
                         l10n.dashboardNoOneAtWork,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
-                            ),
+                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        ),
                       ),
                     ],
                   );
@@ -345,8 +342,7 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
                           openSessionId: sw.session.id,
                           l10n: l10n,
                         ),
-                      if (sw != sessions.last)
-                        const Divider(height: 1),
+                      if (sw != sessions.last) const Divider(height: 1),
                     ],
                   ],
                 );
@@ -357,8 +353,11 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
                   child: CircularProgressIndicator(),
                 ),
               ),
-              error: (e, _) => Text(l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred))),
+              error: (e, _) => Text(
+                l10n.terminalFailedLoadEmployees(
+                  errorMessageForUser(e, l10n.commonErrorOccurred),
+                ),
+              ),
             ),
           ],
         ),
@@ -455,8 +454,12 @@ class _NowAtWorkRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           _EmployeeNameTap(
-            name: EmployeeDisplayName.of(EmployeeDisplay(
-                firstName: employee.firstName, lastName: employee.lastName)),
+            name: EmployeeDisplayName.of(
+              EmployeeDisplay(
+                firstName: employee.firstName,
+                lastName: employee.lastName,
+              ),
+            ),
             onTap: () => onExpandSessions(employee.id),
             isExpanded: isExpanded,
           ),
@@ -464,8 +467,8 @@ class _NowAtWorkRow extends StatelessWidget {
           Text(
             durationStr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -496,7 +499,16 @@ List<_TodayEmployeeRow> _aggregateTodayEmployees(
   for (final sw in openSessions) {
     openByEmployee[sw.employee.id] = sw.session.id;
   }
-  final map = <int, ({EmployeeInfo employee, int totalMs, bool isAtWork, int? openSessionId})>{};
+  final map =
+      <
+        int,
+        ({
+          EmployeeInfo employee,
+          int totalMs,
+          bool isAtWork,
+          int? openSessionId,
+        })
+      >{};
 
   for (final sw in todaySessions) {
     final e = sw.employee;
@@ -518,12 +530,14 @@ List<_TodayEmployeeRow> _aggregateTodayEmployees(
   }
 
   return map.values
-      .map((e) => _TodayEmployeeRow(
-            employee: e.employee,
-            totalMin: (e.totalMs / 60000).floor(),
-            isAtWork: e.isAtWork,
-            openSessionId: e.openSessionId,
-          ))
+      .map(
+        (e) => _TodayEmployeeRow(
+          employee: e.employee,
+          totalMin: (e.totalMs / 60000).floor(),
+          isAtWork: e.isAtWork,
+          openSessionId: e.openSessionId,
+        ),
+      )
       .toList()
     ..sort((a, b) {
       if (a.isAtWork != b.isAtWork) return a.isAtWork ? -1 : 1;
@@ -545,7 +559,8 @@ class _DashboardTodayEmployees extends ConsumerStatefulWidget {
       _DashboardTodayEmployeesState();
 }
 
-class _DashboardTodayEmployeesState extends ConsumerState<_DashboardTodayEmployees> {
+class _DashboardTodayEmployeesState
+    extends ConsumerState<_DashboardTodayEmployees> {
   Timer? _timer;
 
   @override
@@ -576,21 +591,24 @@ class _DashboardTodayEmployeesState extends ConsumerState<_DashboardTodayEmploye
           children: [
             Text(
               l10n.dashboardToday,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 12),
             todayAsync.when(
               data: (todaySessions) {
                 final openSessions = openAsync.valueOrNull ?? [];
-                final rows = _aggregateTodayEmployees(todaySessions, openSessions);
+                final rows = _aggregateTodayEmployees(
+                  todaySessions,
+                  openSessions,
+                );
                 if (rows.isEmpty) {
                   return Text(
                     l10n.dashboardNoEmployeesToday,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   );
                 }
                 return Column(
@@ -620,8 +638,11 @@ class _DashboardTodayEmployeesState extends ConsumerState<_DashboardTodayEmploye
                   child: CircularProgressIndicator(),
                 ),
               ),
-              error: (e, _) => Text(l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred))),
+              error: (e, _) => Text(
+                l10n.terminalFailedLoadEmployees(
+                  errorMessageForUser(e, l10n.commonErrorOccurred),
+                ),
+              ),
             ),
           ],
         ),
@@ -661,8 +682,12 @@ class _TodayEmployeeListRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           _EmployeeNameTap(
-            name: EmployeeDisplayName.of(EmployeeDisplay(
-                firstName: row.employee.firstName, lastName: row.employee.lastName)),
+            name: EmployeeDisplayName.of(
+              EmployeeDisplay(
+                firstName: row.employee.firstName,
+                lastName: row.employee.lastName,
+              ),
+            ),
             onTap: () => onExpandSessions(row.employee.id),
             isExpanded: isExpanded,
           ),
@@ -670,8 +695,8 @@ class _TodayEmployeeListRow extends StatelessWidget {
           Text(
             durationStr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),
@@ -712,8 +737,8 @@ class _DashboardRecentActivity extends ConsumerWidget {
                   child: Text(
                     l10n.dashboardRecentActivity,
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
                 if (onViewAllSessions != null)
@@ -730,8 +755,8 @@ class _DashboardRecentActivity extends ConsumerWidget {
                   return Text(
                     l10n.dashboardNoRecentActivity,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   );
                 }
                 return Column(
@@ -761,8 +786,11 @@ class _DashboardRecentActivity extends ConsumerWidget {
                   child: CircularProgressIndicator(),
                 ),
               ),
-              error: (e, _) => Text(l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred))),
+              error: (e, _) => Text(
+                l10n.terminalFailedLoadEmployees(
+                  errorMessageForUser(e, l10n.commonErrorOccurred),
+                ),
+              ),
             ),
           ],
         ),
@@ -804,8 +832,12 @@ class _RecentActivityRow extends StatelessWidget {
           ),
           const SizedBox(width: 12),
           _EmployeeNameTap(
-            name: EmployeeDisplayName.of(EmployeeDisplay(
-                firstName: employee.firstName, lastName: employee.lastName)),
+            name: EmployeeDisplayName.of(
+              EmployeeDisplay(
+                firstName: employee.firstName,
+                lastName: employee.lastName,
+              ),
+            ),
             onTap: () => onExpandSession(session.id),
             isExpanded: isExpanded,
           ),
@@ -813,8 +845,8 @@ class _RecentActivityRow extends StatelessWidget {
           Text(
             timeStr,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
         ],
       ),

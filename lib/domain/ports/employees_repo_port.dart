@@ -14,7 +14,10 @@ abstract interface class IEmployeesRepo {
   Stream<List<EmployeeInfo>> streamAllEmployees();
 
   Future<EmployeePinStatus> getPinStatus(int employeeId);
-  Future<bool> verifyEmployeePin({required int employeeId, required String pin});
+  Future<bool> verifyEmployeePin({
+    required int employeeId,
+    required String pin,
+  });
   Future<void> updateEmployeePolicyAcknowledged(
     int employeeId, {
     required bool acknowledged,

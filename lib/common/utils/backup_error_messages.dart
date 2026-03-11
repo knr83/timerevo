@@ -5,7 +5,8 @@ import 'package:timerevo/l10n/app_localizations.dart';
 /// Never exposes raw exception text or file paths.
 String messageForBackupError(BackupErrorCode code, AppLocalizations l10n) {
   return switch (code) {
-    BackupErrorCode.permissionDenied => l10n.settingsBackupErrorPermissionDenied,
+    BackupErrorCode.permissionDenied =>
+      l10n.settingsBackupErrorPermissionDenied,
     BackupErrorCode.notFound => l10n.settingsBackupErrorNotFound,
     BackupErrorCode.invalidArchive => l10n.settingsBackupErrorInvalidArchive,
     BackupErrorCode.ioFailure => l10n.settingsBackupErrorIoFailure,
@@ -17,7 +18,8 @@ String messageForBackupError(BackupErrorCode code, AppLocalizations l10n) {
 /// Maps BackupErrorCode to localized user-facing messages for restore operations.
 String messageForRestoreError(BackupErrorCode code, AppLocalizations l10n) {
   return switch (code) {
-    BackupErrorCode.permissionDenied => l10n.settingsRestoreErrorPermissionDenied,
+    BackupErrorCode.permissionDenied =>
+      l10n.settingsRestoreErrorPermissionDenied,
     BackupErrorCode.notFound => l10n.settingsRestoreErrorNotFound,
     BackupErrorCode.invalidArchive => l10n.settingsRestoreErrorInvalidArchive,
     BackupErrorCode.ioFailure => l10n.settingsRestoreErrorIoFailure,

@@ -7,7 +7,10 @@ class TimeFormat {
 
   /// Short time for display (e.g. "09:00").
   static String formatTimeOnly(int utcMs) {
-    final dt = DateTime.fromMillisecondsSinceEpoch(utcMs, isUtc: true).toLocal();
+    final dt = DateTime.fromMillisecondsSinceEpoch(
+      utcMs,
+      isUtc: true,
+    ).toLocal();
     return _timeOnly.format(dt);
   }
 
@@ -15,13 +18,19 @@ class TimeFormat {
   static String formatNow() => _timeOnly.format(DateTime.now());
 
   static String formatLocalFromUtcMs(int utcMs) {
-    final dt = DateTime.fromMillisecondsSinceEpoch(utcMs, isUtc: true).toLocal();
+    final dt = DateTime.fromMillisecondsSinceEpoch(
+      utcMs,
+      isUtc: true,
+    ).toLocal();
     return _dt.format(dt);
   }
 
   /// Date and time without seconds (e.g. "2025-01-15 09:00").
   static String formatLocalDateTimeNoSeconds(int utcMs) {
-    final dt = DateTime.fromMillisecondsSinceEpoch(utcMs, isUtc: true).toLocal();
+    final dt = DateTime.fromMillisecondsSinceEpoch(
+      utcMs,
+      isUtc: true,
+    ).toLocal();
     return DateFormat('yyyy-MM-dd HH:mm').format(dt);
   }
 
@@ -46,4 +55,3 @@ class TimeFormat {
     return TimeOfDay(hour: min ~/ 60, minute: min % 60);
   }
 }
-

@@ -149,10 +149,9 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
     }
 
     try {
-      final ok = await ref.read(changeAdminPinUseCaseProvider).changeAdminPin(
-            currentPin: currentPin,
-            newPin: newPin,
-          );
+      final ok = await ref
+          .read(changeAdminPinUseCaseProvider)
+          .changeAdminPin(currentPin: currentPin, newPin: newPin);
 
       if (!mounted) return;
       if (!ok) {
@@ -168,11 +167,11 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
       if (!mounted) return;
       setState(() {
         _isSaving = false;
-        _error = e is DomainValidationException && e.message == 'invalid_pin_format'
+        _error =
+            e is DomainValidationException && e.message == 'invalid_pin_format'
             ? l10n.changePinInvalidFormat
             : errorMessageForUser(e, l10n.commonErrorOccurred);
       });
     }
   }
 }
-

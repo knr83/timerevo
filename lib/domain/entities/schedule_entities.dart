@@ -1,19 +1,13 @@
 /// Domain value objects for schedule intervals and day schedules.
 class ScheduleInterval {
-  const ScheduleInterval({
-    required this.startMin,
-    required this.endMin,
-  });
+  const ScheduleInterval({required this.startMin, required this.endMin});
 
   final int startMin;
   final int endMin;
 }
 
 class DaySchedule {
-  const DaySchedule({
-    required this.isDayOff,
-    required this.intervals,
-  });
+  const DaySchedule({required this.isDayOff, required this.intervals});
 
   final bool isDayOff;
   final List<ScheduleInterval> intervals;

@@ -45,7 +45,10 @@ class ScheduleDraft {
 
 String _uniqueDefaultName(List<String> existingNames) {
   const base = 'New schedule';
-  final names = existingNames.map((s) => s.trim()).where((s) => s.isNotEmpty).toSet();
+  final names = existingNames
+      .map((s) => s.trim())
+      .where((s) => s.isNotEmpty)
+      .toSet();
   if (!names.contains(base)) return base;
   for (var n = 2; n < 1000; n++) {
     final candidate = '$base ($n)';
@@ -123,11 +126,7 @@ class ScheduleDraftNotifier extends Notifier<ScheduleDraftState?> {
     Map<int, DaySchedule> week,
   ) {
     final base = _deepCopyWeek(week);
-    final draft = ScheduleDraft(
-      name: name,
-      isActive: isActive,
-      days: base,
-    );
+    final draft = ScheduleDraft(name: name, isActive: isActive, days: base);
     state = ScheduleDraftState(
       draft: draft,
       source: ScheduleDraftSourceExisting(templateId),
@@ -214,10 +213,7 @@ class ScheduleDraftNotifier extends Notifier<ScheduleDraftState?> {
           isDayOff: e.value.isDayOff,
           intervals: [
             for (final i in e.value.intervals)
-              ScheduleInterval(
-                startMin: i.startMin,
-                endMin: i.endMin,
-              ),
+              ScheduleInterval(startMin: i.startMin, endMin: i.endMin),
           ],
         ),
     };
@@ -226,8 +222,8 @@ class ScheduleDraftNotifier extends Notifier<ScheduleDraftState?> {
 
 final scheduleDraftProvider =
     NotifierProvider<ScheduleDraftNotifier, ScheduleDraftState?>(
-  ScheduleDraftNotifier.new,
-);
+      ScheduleDraftNotifier.new,
+    );
 
 /// Derived: whether the draft has unsaved changes.
 final scheduleDraftDirtyProvider = Provider<bool>((ref) {

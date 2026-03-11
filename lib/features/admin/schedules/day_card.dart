@@ -57,10 +57,7 @@ class WeekEditorDayCard extends ConsumerWidget {
     if (result == null || !context.mounted) return;
     final intervals = [
       ...day.intervals,
-      ScheduleInterval(
-        startMin: result.startMin,
-        endMin: result.endMin,
-      ),
+      ScheduleInterval(startMin: result.startMin, endMin: result.endMin),
     ];
     onUpdateDay(DaySchedule(isDayOff: false, intervals: intervals));
   }
@@ -84,10 +81,7 @@ class WeekEditorDayCard extends ConsumerWidget {
   void _deleteInterval(int index) {
     final intervals = [...day.intervals];
     intervals.removeAt(index);
-    onUpdateDay(DaySchedule(
-      isDayOff: intervals.isEmpty,
-      intervals: intervals,
-    ));
+    onUpdateDay(DaySchedule(isDayOff: intervals.isEmpty, intervals: intervals));
   }
 
   @override
@@ -105,44 +99,41 @@ class WeekEditorDayCard extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(12),
           child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  label,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-                if (hasIntervals && totalMin > 0) ...[
-                  const Spacer(),
-                  Text(
-                    _formatTotalHours(l10n, totalMin),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                        ),
-                  ),
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Text(label, style: Theme.of(context).textTheme.titleMedium),
+                  if (hasIntervals && totalMin > 0) ...[
+                    const Spacer(),
+                    Text(
+                      _formatTotalHours(l10n, totalMin),
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ],
                 ],
-              ],
-            ),
-            const SizedBox(height: 8),
-            if (hasIntervals)
-              ...day.intervals.asMap().entries.map((e) {
-                final idx = e.key;
-                final interval = e.value;
-                return ScheduleIntervalDisplayRow(
-                  interval: interval,
-                  onTap: () => _editInterval(context, idx),
-                  onDelete: () => _deleteInterval(idx),
-                );
-              }),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: () => _addInterval(context),
-              icon: const Icon(Icons.add, size: 18),
-              label: Text(l10n.schedulesAddInterval),
-            ),
-          ],
-        ),
+              ),
+              const SizedBox(height: 8),
+              if (hasIntervals)
+                ...day.intervals.asMap().entries.map((e) {
+                  final idx = e.key;
+                  final interval = e.value;
+                  return ScheduleIntervalDisplayRow(
+                    interval: interval,
+                    onTap: () => _editInterval(context, idx),
+                    onDelete: () => _deleteInterval(idx),
+                  );
+                }),
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: () => _addInterval(context),
+                icon: const Icon(Icons.add, size: 18),
+                label: Text(l10n.schedulesAddInterval),
+              ),
+            ],
+          ),
         ),
       ),
     );

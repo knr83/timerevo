@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
-void showAppSnack(
-  BuildContext context,
-  String text, {
-  bool isError = false,
-}) {
+void showAppSnack(BuildContext context, String text, {bool isError = false}) {
   final messenger = ScaffoldMessenger.maybeOf(context);
   if (messenger == null) return;
 
@@ -17,10 +13,11 @@ void showAppSnack(
     SnackBar(
       behavior: SnackBarBehavior.floating,
       margin: const EdgeInsets.all(16),
-      duration: isError ? const Duration(seconds: 4) : const Duration(seconds: 2),
+      duration: isError
+          ? const Duration(seconds: 4)
+          : const Duration(seconds: 2),
       backgroundColor: bg,
       content: Text(text, style: TextStyle(color: fg)),
     ),
   );
 }
-

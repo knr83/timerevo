@@ -6,7 +6,8 @@ abstract interface class IAbsencesRepo {
 
   /// Returns APPROVED absence date ranges for [employeeId] overlapping [fromYmd]..[toYmd].
   /// Each range is a local date without time: DateTime(y, m, d).
-  Future<List<({DateTime dateFrom, DateTime dateTo})>> getApprovedAbsenceRangesForEmployeeInPeriod(
+  Future<List<({DateTime dateFrom, DateTime dateTo})>>
+  getApprovedAbsenceRangesForEmployeeInPeriod(
     int employeeId,
     String fromYmd,
     String toYmd,

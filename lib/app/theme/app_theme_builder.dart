@@ -93,10 +93,12 @@ AppThemeConfig buildAppTheme(AppThemeSelection selection) {
   };
 
   // Only let OS high-contrast affect UI when selection is System.
-  final effectiveHighContrastTheme =
-      selection == AppThemeSelection.system ? hcLight : theme;
-  final effectiveHighContrastDarkTheme =
-      selection == AppThemeSelection.system ? hcDark : darkTheme;
+  final effectiveHighContrastTheme = selection == AppThemeSelection.system
+      ? hcLight
+      : theme;
+  final effectiveHighContrastDarkTheme = selection == AppThemeSelection.system
+      ? hcDark
+      : darkTheme;
 
   return AppThemeConfig(
     theme: theme,

@@ -67,12 +67,9 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
                 templates: templates,
                 onLoaded: (week) {
                   final t = templates.first;
-                  ref.read(scheduleDraftProvider.notifier).loadFromTemplateWithName(
-                        t.id,
-                        t.name,
-                        t.isActive,
-                        week,
-                      );
+                  ref
+                      .read(scheduleDraftProvider.notifier)
+                      .loadFromTemplateWithName(t.id, t.name, t.isActive, week);
                 },
               );
             }
@@ -84,8 +81,11 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
-            child: Text(l10n.schedulesFailedLoad(
-                errorMessageForUser(e, l10n.commonErrorOccurred))),
+            child: Text(
+              l10n.schedulesFailedLoad(
+                errorMessageForUser(e, l10n.commonErrorOccurred),
+              ),
+            ),
           ),
         ),
       ),
@@ -105,8 +105,7 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
             child: Text(l10n.commonCancel),
           ),
           TextButton(
-            onPressed: () =>
-                Navigator.of(context).pop(_GuardAction.discard),
+            onPressed: () => Navigator.of(context).pop(_GuardAction.discard),
             child: Text(l10n.schedulesDiscardChanges),
           ),
           FilledButton(
@@ -130,7 +129,9 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           name: draftState.draft.name,
           days: draftState.draft.days,
         );
-        ref.read(scheduleDraftProvider.notifier).markSaved(draftState.draft.days);
+        ref
+            .read(scheduleDraftProvider.notifier)
+            .markSaved(draftState.draft.days);
         ref.read(scheduleDraftProvider.notifier).setSourceExisting(id);
       } else {
         final src = draftState.source as ScheduleDraftSourceExisting;
@@ -138,7 +139,9 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           templateId: src.templateId,
           days: draftState.draft.days,
         );
-        ref.read(scheduleDraftProvider.notifier).markSaved(draftState.draft.days);
+        ref
+            .read(scheduleDraftProvider.notifier)
+            .markSaved(draftState.draft.days);
       }
       return true;
     } catch (e) {
@@ -146,8 +149,11 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
       final l10n = AppLocalizations.of(ctx);
       ScaffoldMessenger.of(ctx).showSnackBar(
         SnackBar(
-          content: Text(l10n.schedulesSaveFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred))),
+          content: Text(
+            l10n.schedulesSaveFailed(
+              errorMessageForUser(e, l10n.commonErrorOccurred),
+            ),
+          ),
         ),
       );
       return false;
@@ -193,8 +199,11 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
   Future<void> _save() async {
     final name = _controller.text.trim();
     if (name.isEmpty) {
-      setState(() => _fieldError =
-          AppLocalizations.of(context).schedulesNameRequiredError);
+      setState(
+        () => _fieldError = AppLocalizations.of(
+          context,
+        ).schedulesNameRequiredError,
+      );
       return;
     }
     setState(() {
@@ -213,8 +222,9 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
     } on DomainConstraintException {
       if (mounted) {
         setState(() {
-          _fieldError =
-              AppLocalizations.of(context).schedulesNameAlreadyExistsError;
+          _fieldError = AppLocalizations.of(
+            context,
+          ).schedulesNameAlreadyExistsError;
           _isSaving = false;
         });
       }
@@ -225,8 +235,11 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
           SnackBar(
             content: Text(
               AppLocalizations.of(context).schedulesSaveFailed(
-                  errorMessageForUser(
-                      e, AppLocalizations.of(context).commonErrorOccurred)),
+                errorMessageForUser(
+                  e,
+                  AppLocalizations.of(context).commonErrorOccurred,
+                ),
+              ),
             ),
           ),
         );
@@ -293,8 +306,14 @@ class _InitialTemplateLoader extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(AppLocalizations.of(context).schedulesFailedLoadTemplate(
-            errorMessageForUser(e, AppLocalizations.of(context).commonErrorOccurred))),
+        child: Text(
+          AppLocalizations.of(context).schedulesFailedLoadTemplate(
+            errorMessageForUser(
+              e,
+              AppLocalizations.of(context).commonErrorOccurred,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -326,10 +345,7 @@ class _EmptyState extends StatelessWidget {
 }
 
 class _WeekEditorContent extends ConsumerWidget {
-  const _WeekEditorContent({
-    required this.templates,
-    required this.draftState,
-  });
+  const _WeekEditorContent({required this.templates, required this.draftState});
 
   final List<ScheduleTemplateInfo> templates;
   final ScheduleDraftState draftState;
@@ -365,9 +381,10 @@ class _WeekEditorContent extends ConsumerWidget {
           child: LayoutBuilder(
             builder: (context, constraints) {
               const spacing = 12.0;
-              final cols = (constraints.maxWidth / _minCardWidth)
-                  .floor()
-                  .clamp(1, 7);
+              final cols = (constraints.maxWidth / _minCardWidth).floor().clamp(
+                1,
+                7,
+              );
               final cardWidth =
                   (constraints.maxWidth - (cols - 1) * spacing) / cols;
               return SingleChildScrollView(
@@ -380,7 +397,8 @@ class _WeekEditorContent extends ConsumerWidget {
                         width: cardWidth,
                         child: WeekEditorDayCard(
                           weekday: wd,
-                          day: draft.days[wd] ??
+                          day:
+                              draft.days[wd] ??
                               const DaySchedule(isDayOff: true, intervals: []),
                           onUpdateDay: (day) => ref
                               .read(scheduleDraftProvider.notifier)
@@ -457,20 +475,26 @@ class _WeekEditorContent extends ConsumerWidget {
     if (action == _GuardAction.cancel) return;
     if (action == _GuardAction.discard) {
       ref.read(scheduleDraftProvider.notifier).resetToBase();
-      if (context.mounted) await _showDeleteConfirmDialog(context, ref, templateId);
+      if (context.mounted)
+        await _showDeleteConfirmDialog(context, ref, templateId);
       return;
     }
     if (action == _GuardAction.save) {
       final ok = await _save(context, ref);
-      if (context.mounted && ok) await _showDeleteConfirmDialog(context, ref, templateId);
+      if (context.mounted && ok)
+        await _showDeleteConfirmDialog(context, ref, templateId);
     }
   }
 
   Future<void> _showDeleteConfirmDialog(
-      BuildContext context, WidgetRef ref, int templateId) async {
+    BuildContext context,
+    WidgetRef ref,
+    int templateId,
+  ) async {
     final l10n = AppLocalizations.of(context);
 
-    final assigned = await ref.read(schedulesTemplatesUseCaseProvider)
+    final assigned = await ref
+        .read(schedulesTemplatesUseCaseProvider)
         .hasAssignments(templateId);
     if (assigned) {
       if (!context.mounted) return;
@@ -514,7 +538,9 @@ class _WeekEditorContent extends ConsumerWidget {
     if (confirmed != true || !context.mounted) return;
 
     try {
-      await ref.read(schedulesTemplatesUseCaseProvider).deleteTemplate(templateId);
+      await ref
+          .read(schedulesTemplatesUseCaseProvider)
+          .deleteTemplate(templateId);
       ref.read(scheduleDraftProvider.notifier).clear();
       ref.invalidate(watchScheduleTemplatesProvider(false));
     } on DomainConstraintException catch (e) {
@@ -540,8 +566,11 @@ class _WeekEditorContent extends ConsumerWidget {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.schedulesDeleteFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred))),
+          content: Text(
+            l10n.schedulesDeleteFailed(
+              errorMessageForUser(e, l10n.commonErrorOccurred),
+            ),
+          ),
         ),
       );
     }
@@ -558,9 +587,12 @@ class _WeekEditorContent extends ConsumerWidget {
     final templates = ref.read(watchScheduleTemplatesProvider(false)).value;
     final t = templates?.firstWhere(
       (x) => x.id == templateId,
-      orElse: () => ScheduleTemplateInfo(id: templateId, name: '', isActive: true),
+      orElse: () =>
+          ScheduleTemplateInfo(id: templateId, name: '', isActive: true),
     );
-    ref.read(scheduleDraftProvider.notifier).loadFromTemplateWithName(
+    ref
+        .read(scheduleDraftProvider.notifier)
+        .loadFromTemplateWithName(
           templateId,
           t?.name ?? '',
           t?.isActive ?? true,
@@ -591,10 +623,7 @@ class _WeekEditorContent extends ConsumerWidget {
       final ok = await _save(context, ref);
       if (context.mounted && ok) {
         final draft = ref.read(scheduleDraftProvider);
-        final names = [
-          ...existingNames,
-          if (draft != null) draft.draft.name,
-        ];
+        final names = [...existingNames, if (draft != null) draft.draft.name];
         ref
             .read(scheduleDraftProvider.notifier)
             .createNewDraft(existingNames: names);
@@ -637,8 +666,11 @@ class _WeekEditorContent extends ConsumerWidget {
       final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.schedulesSaveFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred))),
+          content: Text(
+            l10n.schedulesSaveFailed(
+              errorMessageForUser(e, l10n.commonErrorOccurred),
+            ),
+          ),
         ),
       );
       return false;
@@ -671,13 +703,16 @@ class _WeekEditorContent extends ConsumerWidget {
   }
 
   Future<void> _showRenameScheduleDialog(
-      BuildContext context, WidgetRef ref) async {
+    BuildContext context,
+    WidgetRef ref,
+  ) async {
     final draftState = ref.read(scheduleDraftProvider);
     if (draftState == null) return;
     final initialName = draftState.draft.name;
     final isExisting = draftState.source is ScheduleDraftSourceExisting;
-    final templateId =
-        isExisting ? (draftState.source as ScheduleDraftSourceExisting).templateId : null;
+    final templateId = isExisting
+        ? (draftState.source as ScheduleDraftSourceExisting).templateId
+        : null;
 
     if (!context.mounted) return;
     await showDialog<void>(
@@ -733,15 +768,12 @@ class _WeekEditorControlRow extends StatelessWidget {
         DropdownMenu<int>(
           initialSelection: isNew ? -1 : currentId,
           dropdownMenuEntries: [
-            if (isNew)
-              DropdownMenuEntry(
-                value: -1,
-                label: fullLabel,
-              ),
+            if (isNew) DropdownMenuEntry(value: -1, label: fullLabel),
             ...templates.map(
               (t) => DropdownMenuEntry(
                 value: t.id,
-                label: '${t.name}${t.isActive ? l10n.schedulesScheduleActiveSuffix : l10n.schedulesScheduleInactiveSuffix}',
+                label:
+                    '${t.name}${t.isActive ? l10n.schedulesScheduleActiveSuffix : l10n.schedulesScheduleInactiveSuffix}',
               ),
             ),
           ],
@@ -753,10 +785,7 @@ class _WeekEditorControlRow extends StatelessWidget {
         ),
         Tooltip(
           message: l10n.schedulesRenameScheduleTooltip,
-          child: IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: onRename,
-          ),
+          child: IconButton(icon: const Icon(Icons.edit), onPressed: onRename),
         ),
         Tooltip(
           message: l10n.schedulesDeleteScheduleTooltip,

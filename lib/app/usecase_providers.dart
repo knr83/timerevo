@@ -31,8 +31,9 @@ final employeesAdminUseCaseProvider = Provider<EmployeesAdminUseCase>((ref) {
   );
 });
 
-final schedulesTemplatesUseCaseProvider =
-    Provider<SchedulesTemplatesUseCase>((ref) {
+final schedulesTemplatesUseCaseProvider = Provider<SchedulesTemplatesUseCase>((
+  ref,
+) {
   return SchedulesTemplatesUseCase(ref.watch(schedulesRepoProvider));
 });
 
@@ -42,15 +43,16 @@ final changeAdminPinUseCaseProvider = Provider<ChangeAdminPinUseCase>((ref) {
 
 final employeeReportWithNormUseCaseProvider =
     Provider<EmployeeReportWithNormUseCase>((ref) {
-  return EmployeeReportWithNormUseCase(
-    ref.watch(sessionsRepoProvider),
-    ref.watch(schedulesRepoProvider),
-    ref.watch(absencesRepoProvider),
-  );
-});
+      return EmployeeReportWithNormUseCase(
+        ref.watch(sessionsRepoProvider),
+        ref.watch(schedulesRepoProvider),
+        ref.watch(absencesRepoProvider),
+      );
+    });
 
-final employeeDayReportUseCaseProvider =
-    Provider<EmployeeDayReportUseCase>((ref) {
+final employeeDayReportUseCaseProvider = Provider<EmployeeDayReportUseCase>((
+  ref,
+) {
   return EmployeeDayReportUseCase(
     ref.watch(sessionsRepoProvider),
     ref.watch(schedulesRepoProvider),
@@ -62,13 +64,13 @@ final employeeDayReportUseCaseProvider =
 /// Default period: current month.
 final reportFiltersProvider =
     StateProvider<({int? fromUtcMs, int? toUtcMs, int? employeeId})>((ref) {
-  final month = reportPeriodMonth();
-  return (
-    fromUtcMs: month.fromUtcMs,
-    toUtcMs: month.toUtcMs,
-    employeeId: null,
-  );
-});
+      final month = reportPeriodMonth();
+      return (
+        fromUtcMs: month.fromUtcMs,
+        toUtcMs: month.toUtcMs,
+        employeeId: null,
+      );
+    });
 
 /// Selected employee for details drawer. Null when drawer is closed.
 final selectedEmployeeForDetailsProvider = StateProvider<int?>((ref) => null);
@@ -76,33 +78,34 @@ final selectedEmployeeForDetailsProvider = StateProvider<int?>((ref) => null);
 /// Stream of per-day report rows for the selected employee and period. Empty when drawer closed or period missing.
 final watchEmployeeDayReportProvider =
     StreamProvider<List<EmployeeDayReportRow>>((ref) {
-  final filters = ref.watch(reportFiltersProvider);
-  final selectedId = ref.watch(selectedEmployeeForDetailsProvider);
-  if (selectedId == null ||
-      filters.fromUtcMs == null ||
-      filters.toUtcMs == null) {
-    return Stream.value([]);
-  }
-  return ref
-      .watch(employeeDayReportUseCaseProvider)
-      .streamEmployeeDayReport(
-        employeeId: selectedId,
-        fromUtcMs: filters.fromUtcMs!,
-        toUtcMs: filters.toUtcMs!,
-      );
-});
+      final filters = ref.watch(reportFiltersProvider);
+      final selectedId = ref.watch(selectedEmployeeForDetailsProvider);
+      if (selectedId == null ||
+          filters.fromUtcMs == null ||
+          filters.toUtcMs == null) {
+        return Stream.value([]);
+      }
+      return ref
+          .watch(employeeDayReportUseCaseProvider)
+          .streamEmployeeDayReport(
+            employeeId: selectedId,
+            fromUtcMs: filters.fromUtcMs!,
+            toUtcMs: filters.toUtcMs!,
+          );
+    });
 
 /// Stream of employee report rows with norm and delta.
-final watchReportWithNormProvider =
-    StreamProvider<List<EmployeeReportRowInfo>>((ref) {
-  final filters = ref.watch(reportFiltersProvider);
-  return ref
-      .watch(employeeReportWithNormUseCaseProvider)
-      .streamEmployeeReportWithNorm(
-        fromUtcMs: filters.fromUtcMs,
-        toUtcMs: filters.toUtcMs,
-      );
-});
+final watchReportWithNormProvider = StreamProvider<List<EmployeeReportRowInfo>>(
+  (ref) {
+    final filters = ref.watch(reportFiltersProvider);
+    return ref
+        .watch(employeeReportWithNormUseCaseProvider)
+        .streamEmployeeReportWithNorm(
+          fromUtcMs: filters.fromUtcMs,
+          toUtcMs: filters.toUtcMs,
+        );
+  },
+);
 
 /// Stream of active employees (domain types). Use instead of direct repo access.
 ///
@@ -120,8 +123,7 @@ final watchReportWithNormProvider =
 ///   error: (e, _) => Text(l10n.commonErrorOccurred),
 /// );
 /// ```
-final watchActiveEmployeesProvider =
-    StreamProvider<List<EmployeeInfo>>((ref) {
+final watchActiveEmployeesProvider = StreamProvider<List<EmployeeInfo>>((ref) {
   return ref.watch(watchEmployeesUseCaseProvider).streamActiveEmployees();
 });
 
@@ -133,21 +135,23 @@ final watchAllEmployeesProvider = StreamProvider<List<EmployeeInfo>>((ref) {
 /// Use onlyActive: true for dropdowns (e.g. employees), false for admin list.
 final watchScheduleTemplatesProvider =
     StreamProvider.family<List<ScheduleTemplateInfo>, bool>((ref, onlyActive) {
-  return ref
-      .watch(schedulesRepoProvider)
-      .streamTemplateInfos(onlyActive: onlyActive);
-});
+      return ref
+          .watch(schedulesRepoProvider)
+          .streamTemplateInfos(onlyActive: onlyActive);
+    });
 
 /// Convenience: active templates only (for dropdowns).
 final watchActiveScheduleTemplatesProvider =
     StreamProvider<List<ScheduleTemplateInfo>>((ref) {
-  return ref.watch(schedulesRepoProvider).streamTemplateInfos(onlyActive: true);
-});
+      return ref
+          .watch(schedulesRepoProvider)
+          .streamTemplateInfos(onlyActive: true);
+    });
 
 /// Stream of template week (weekday -> DaySchedule).
 final watchTemplateWeekProvider =
     StreamProvider.family<Map<int, DaySchedule>, int>((ref, templateId) {
-  return ref
-      .watch(schedulesTemplatesUseCaseProvider)
-      .streamTemplateWeek(templateId);
-});
+      return ref
+          .watch(schedulesTemplatesUseCaseProvider)
+          .streamTemplateWeek(templateId);
+    });

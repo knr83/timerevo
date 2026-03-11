@@ -14,10 +14,7 @@ import '../db/work_session_db_values.dart';
 import 'repo_guard.dart';
 
 class SessionWithEmployee {
-  const SessionWithEmployee({
-    required this.session,
-    required this.employee,
-  });
+  const SessionWithEmployee({required this.session, required this.employee});
 
   final WorkSession session;
   final Employee employee;
@@ -46,12 +43,14 @@ class SessionsRepo implements ISessionsRepo {
     int employeeId,
   ) {
     return (_db.select(_db.workSessions)
-          ..where((s) =>
-              s.employeeId.equals(employeeId) &
-              s.endTs.isNull() &
-              s.status.equals(WorkSessionStatusDb.open))
-          ..orderBy([(s) => OrderingTerm.desc(s.startTs)])
-          ..limit(1));
+      ..where(
+        (s) =>
+            s.employeeId.equals(employeeId) &
+            s.endTs.isNull() &
+            s.status.equals(WorkSessionStatusDb.open),
+      )
+      ..orderBy([(s) => OrderingTerm.desc(s.startTs)])
+      ..limit(1));
   }
 
   Stream<WorkSession?> watchOpenSessionForEmployee(int employeeId) {
@@ -69,40 +68,41 @@ class SessionsRepo implements ISessionsRepo {
   }
 
   static SessionInfo _toSessionInfo(WorkSession w) => SessionInfo(
-        id: w.id,
-        startTs: w.startTs,
-        endTs: w.endTs,
-        status: w.status,
-        note: w.note,
-      );
+    id: w.id,
+    startTs: w.startTs,
+    endTs: w.endTs,
+    status: w.status,
+    note: w.note,
+  );
 
   static EmployeeInfo _toEmployeeInfo(Employee e) => EmployeeInfo(
-        id: e.id,
-        firstName: e.firstName,
-        lastName: e.lastName,
-        isActive: e.isActive == 1,
-        usePin: e.usePin == 1,
-        policyAcknowledged: e.policyAcknowledged == 1,
-      );
+    id: e.id,
+    firstName: e.firstName,
+    lastName: e.lastName,
+    isActive: e.isActive == 1,
+    usePin: e.usePin == 1,
+    policyAcknowledged: e.policyAcknowledged == 1,
+  );
 
   static SessionWithEmployeeInfo _toSessionWithEmployeeInfo(
     SessionWithEmployee sw,
-  ) =>
-      SessionWithEmployeeInfo(
-        session: _toSessionInfo(sw.session),
-        employee: _toEmployeeInfo(sw.employee),
-      );
+  ) => SessionWithEmployeeInfo(
+    session: _toSessionInfo(sw.session),
+    employee: _toEmployeeInfo(sw.employee),
+  );
 
   @override
   Stream<SessionInfo?> streamOpenSessionForEmployee(int employeeId) {
-    return watchOpenSessionForEmployee(employeeId)
-        .map((w) => w != null ? _toSessionInfo(w) : null);
+    return watchOpenSessionForEmployee(
+      employeeId,
+    ).map((w) => w != null ? _toSessionInfo(w) : null);
   }
 
   @override
   Stream<List<SessionInfo>> streamSessionsForEmployeeToday(int employeeId) {
-    return watchSessionsForEmployeeToday(employeeId)
-        .map((list) => list.map(_toSessionInfo).toList());
+    return watchSessionsForEmployeeToday(
+      employeeId,
+    ).map((list) => list.map(_toSessionInfo).toList());
   }
 
   @override
@@ -123,8 +123,10 @@ class SessionsRepo implements ISessionsRepo {
     int employeeId,
     DateTime date,
   ) {
-    return watchSessionsForEmployeeOnDate(employeeId, date)
-        .map((list) => list.map(_toSessionInfo).toList());
+    return watchSessionsForEmployeeOnDate(
+      employeeId,
+      date,
+    ).map((list) => list.map(_toSessionInfo).toList());
   }
 
   @override
@@ -132,8 +134,10 @@ class SessionsRepo implements ISessionsRepo {
     int employeeId,
     int days,
   ) {
-    return watchSessionsForEmployeeLastDays(employeeId, days)
-        .map((list) => list.map(_toSessionInfo).toList());
+    return watchSessionsForEmployeeLastDays(
+      employeeId,
+      days,
+    ).map((list) => list.map(_toSessionInfo).toList());
   }
 
   @override
@@ -151,16 +155,18 @@ class SessionsRepo implements ISessionsRepo {
 
   @override
   Stream<List<SessionWithEmployeeInfo>> streamOpenSessionsWithEmployee() {
-    return watchOpenSessionsWithEmployee()
-        .map((list) => list.map(_toSessionWithEmployeeInfo).toList());
+    return watchOpenSessionsWithEmployee().map(
+      (list) => list.map(_toSessionWithEmployeeInfo).toList(),
+    );
   }
 
   @override
   Stream<List<SessionWithEmployeeInfo>> streamRecentSessionsWithEmployee({
     int limit = 10,
   }) {
-    return watchRecentSessionsWithEmployee(limit: limit)
-        .map((list) => list.map(_toSessionWithEmployeeInfo).toList());
+    return watchRecentSessionsWithEmployee(
+      limit: limit,
+    ).map((list) => list.map(_toSessionWithEmployeeInfo).toList());
   }
 
   @override
@@ -173,7 +179,9 @@ class SessionsRepo implements ISessionsRepo {
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
-      return _db.into(_db.workSessions).insert(
+      return _db
+          .into(_db.workSessions)
+          .insert(
             WorkSessionsCompanion.insert(
               employeeId: employeeId,
               deviceId: Value(deviceId),
@@ -204,17 +212,18 @@ class SessionsRepo implements ISessionsRepo {
         if (open == null) return false;
 
         final now = UtcClock.nowMs();
-        final rows = await (_db.update(_db.workSessions)
-              ..where((s) => s.id.equals(open.id)))
-            .write(
-          WorkSessionsCompanion(
-            endTs: Value(now),
-            status: const Value(WorkSessionStatusDb.closed),
-            source: Value(source),
-            updatedAt: Value(now),
-            updatedBy: Value(updatedBy),
-          ),
-        );
+        final rows =
+            await (_db.update(
+              _db.workSessions,
+            )..where((s) => s.id.equals(open.id))).write(
+              WorkSessionsCompanion(
+                endTs: Value(now),
+                status: const Value(WorkSessionStatusDb.closed),
+                source: Value(source),
+                updatedAt: Value(now),
+                updatedBy: Value(updatedBy),
+              ),
+            );
         return rows > 0;
       });
     });
@@ -240,18 +249,19 @@ class SessionsRepo implements ISessionsRepo {
         }
 
         final now = UtcClock.nowMs();
-        final rows = await (_db.update(_db.workSessions)
-              ..where((s) => s.id.equals(open.id)))
-            .write(
-          WorkSessionsCompanion(
-            endTs: Value(endUtcMs),
-            status: const Value(WorkSessionStatusDb.closed),
-            note: Value(note),
-            source: Value(source),
-            updatedAt: Value(now),
-            updatedBy: Value(updatedBy),
-          ),
-        );
+        final rows =
+            await (_db.update(
+              _db.workSessions,
+            )..where((s) => s.id.equals(open.id))).write(
+              WorkSessionsCompanion(
+                endTs: Value(endUtcMs),
+                status: const Value(WorkSessionStatusDb.closed),
+                note: Value(note),
+                source: Value(source),
+                updatedAt: Value(now),
+                updatedBy: Value(updatedBy),
+              ),
+            );
         return rows > 0;
       });
     });
@@ -342,15 +352,15 @@ class SessionsRepo implements ISessionsRepo {
     join.orderBy([OrderingTerm.desc(ws.startTs)]);
 
     return join.watch().map(
-          (rows) => rows
-              .map(
-                (r) => SessionWithEmployee(
-                  session: r.readTable(ws),
-                  employee: r.readTable(e),
-                ),
-              )
-              .toList(growable: false),
-        );
+      (rows) => rows
+          .map(
+            (r) => SessionWithEmployee(
+              session: r.readTable(ws),
+              employee: r.readTable(e),
+            ),
+          )
+          .toList(growable: false),
+    );
   }
 
   /// All open sessions (status=OPEN, endTs IS NULL) with employee data.
@@ -367,15 +377,15 @@ class SessionsRepo implements ISessionsRepo {
     join.orderBy([OrderingTerm.desc(ws.startTs)]);
 
     return join.watch().map(
-          (rows) => rows
-              .map(
-                (r) => SessionWithEmployee(
-                  session: r.readTable(ws),
-                  employee: r.readTable(e),
-                ),
-              )
-              .toList(growable: false),
-        );
+      (rows) => rows
+          .map(
+            (r) => SessionWithEmployee(
+              session: r.readTable(ws),
+              employee: r.readTable(e),
+            ),
+          )
+          .toList(growable: false),
+    );
   }
 
   /// Recent sessions with employee data, limited to [limit] rows.
@@ -393,15 +403,15 @@ class SessionsRepo implements ISessionsRepo {
     join.limit(limit);
 
     return join.watch().map(
-          (rows) => rows
-              .map(
-                (r) => SessionWithEmployee(
-                  session: r.readTable(ws),
-                  employee: r.readTable(e),
-                ),
-              )
-              .toList(growable: false),
-        );
+      (rows) => rows
+          .map(
+            (r) => SessionWithEmployee(
+              session: r.readTable(ws),
+              employee: r.readTable(e),
+            ),
+          )
+          .toList(growable: false),
+    );
   }
 
   @override
@@ -428,8 +438,9 @@ class SessionsRepo implements ISessionsRepo {
       final status = endUtcMs == null
           ? WorkSessionStatusDb.open
           : WorkSessionStatusDb.closed;
-      await (_db.update(_db.workSessions)..where((s) => s.id.equals(sessionId)))
-          .write(
+      await (_db.update(
+        _db.workSessions,
+      )..where((s) => s.id.equals(sessionId))).write(
         WorkSessionsCompanion(
           startTs: Value(startUtcMs),
           endTs: Value(endUtcMs),
@@ -438,8 +449,9 @@ class SessionsRepo implements ISessionsRepo {
           source: const Value(WorkSessionSourceDb.admin),
           updatedAt: Value(now),
           updatedBy: Value(updatedBy),
-          updateReason:
-              Value(updateReason.trim().isEmpty ? null : updateReason.trim()),
+          updateReason: Value(
+            updateReason.trim().isEmpty ? null : updateReason.trim(),
+          ),
         ),
       );
     });
@@ -450,10 +462,7 @@ class SessionsRepo implements ISessionsRepo {
     int? fromUtcMs,
     int? toUtcMs,
   }) {
-    return watchEmployeeReport(
-      fromUtcMs: fromUtcMs,
-      toUtcMs: toUtcMs,
-    ).map(
+    return watchEmployeeReport(fromUtcMs: fromUtcMs, toUtcMs: toUtcMs).map(
       (list) => list
           .map(
             (r) => EmployeeReportRowInfo(
@@ -489,9 +498,12 @@ class SessionsRepo implements ISessionsRepo {
       conditions.add('ws.start_ts <= ?');
       vars.add(Variable<int>(to));
     }
-    final onExtra = conditions.isEmpty ? '' : ' AND ${conditions.join(' AND ')}';
+    final onExtra = conditions.isEmpty
+        ? ''
+        : ' AND ${conditions.join(' AND ')}';
 
-    final sql = '''
+    final sql =
+        '''
 SELECT
   e.id AS employee_id,
   (e.last_name || ' ' || e.first_name) AS employee_name,
@@ -525,4 +537,3 @@ ORDER BY e.last_name ASC, e.first_name ASC;
         );
   }
 }
-

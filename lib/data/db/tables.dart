@@ -13,20 +13,20 @@ class Employees extends Table {
 
   IntColumn get hireDate => integer().named('hire_date').nullable()();
 
-  TextColumn get employeeRole => text()
-      .named('employee_role')
-      .withDefault(const Constant('employee'))();
+  TextColumn get employeeRole =>
+      text().named('employee_role').withDefault(const Constant('employee'))();
 
-  IntColumn get usePin => integer().named('use_pin').withDefault(const Constant(0))();
+  IntColumn get usePin =>
+      integer().named('use_pin').withDefault(const Constant(0))();
 
-  IntColumn get useNfc => integer().named('use_nfc').withDefault(const Constant(0))();
+  IntColumn get useNfc =>
+      integer().named('use_nfc').withDefault(const Constant(0))();
 
   TextColumn get accessToken => text().named('access_token').nullable()();
 
   TextColumn get accessNote => text().named('access_note').nullable()();
 
-  TextColumn get employmentType =>
-      text().named('employment_type').nullable()();
+  TextColumn get employmentType => text().named('employment_type').nullable()();
 
   RealColumn get weeklyHours => real().named('weekly_hours').nullable()();
 
@@ -77,8 +77,9 @@ class Users extends Table {
 
   TextColumn get passwordHash => text().named('password_hash')();
 
-  TextColumn get role =>
-      text().customConstraint("NOT NULL CHECK (role IN ('ADMIN','OPERATOR'))")();
+  TextColumn get role => text().customConstraint(
+    "NOT NULL CHECK (role IN ('ADMIN','OPERATOR'))",
+  )();
 
   IntColumn get isActive =>
       integer().named('is_active').withDefault(const Constant(1))();
@@ -116,8 +117,8 @@ class WorkSessions extends Table {
       text().customConstraint("NOT NULL CHECK (status IN ('OPEN','CLOSED'))")();
 
   TextColumn get source => text().customConstraint(
-        "NOT NULL CHECK (source IN ('terminal','admin','import'))",
-      )();
+    "NOT NULL CHECK (source IN ('terminal','admin','import'))",
+  )();
 
   TextColumn get note => text().nullable()();
 
@@ -132,9 +133,9 @@ class WorkSessions extends Table {
 
   @override
   List<String> get customConstraints => [
-        'CHECK (end_ts IS NULL OR end_ts >= start_ts)',
-        "CHECK ((status = 'OPEN' AND end_ts IS NULL) OR (status = 'CLOSED' AND end_ts IS NOT NULL))",
-      ];
+    'CHECK (end_ts IS NULL OR end_ts >= start_ts)',
+    "CHECK ((status = 'OPEN' AND end_ts IS NULL) OR (status = 'CLOSED' AND end_ts IS NOT NULL))",
+  ];
 }
 
 class ShiftScheduleTemplates extends Table {
@@ -151,9 +152,8 @@ class ShiftScheduleTemplates extends Table {
 class ShiftScheduleTemplateDays extends Table {
   IntColumn get id => integer().autoIncrement()();
 
-  IntColumn get templateId => integer()
-      .named('template_id')
-      .references(ShiftScheduleTemplates, #id)();
+  IntColumn get templateId =>
+      integer().named('template_id').references(ShiftScheduleTemplates, #id)();
 
   IntColumn get weekday => integer()();
 
@@ -162,8 +162,8 @@ class ShiftScheduleTemplateDays extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {templateId, weekday},
-      ];
+    {templateId, weekday},
+  ];
 }
 
 class ShiftScheduleTemplateIntervals extends Table {
@@ -176,18 +176,16 @@ class ShiftScheduleTemplateIntervals extends Table {
   IntColumn get startMin => integer().named('start_min')();
   IntColumn get endMin => integer().named('end_min')();
 
-  IntColumn get crossesMidnight => integer()
-      .named('crosses_midnight')
-      .withDefault(const Constant(0))();
+  IntColumn get crossesMidnight =>
+      integer().named('crosses_midnight').withDefault(const Constant(0))();
 }
 
 class EmployeeScheduleAssignments extends Table {
   IntColumn get employeeId =>
       integer().named('employee_id').references(Employees, #id)();
 
-  IntColumn get templateId => integer()
-      .named('template_id')
-      .references(ShiftScheduleTemplates, #id)();
+  IntColumn get templateId =>
+      integer().named('template_id').references(ShiftScheduleTemplates, #id)();
 
   IntColumn get createdAt => integer().named('created_at')();
 
@@ -205,14 +203,14 @@ class Absences extends Table {
   TextColumn get dateTo => text().named('date_to')();
 
   TextColumn get type => text().customConstraint(
-        "NOT NULL CHECK (type IN ('vacation','sick_leave','unpaid_leave','parental_leave','study_leave','other'))",
-      )();
+    "NOT NULL CHECK (type IN ('vacation','sick_leave','unpaid_leave','parental_leave','study_leave','other'))",
+  )();
 
   TextColumn get note => text().nullable()();
 
   TextColumn get status => text().customConstraint(
-        "NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED'))",
-      )();
+    "NOT NULL DEFAULT 'PENDING' CHECK (status IN ('PENDING','APPROVED','REJECTED'))",
+  )();
 
   IntColumn get createdAt => integer().named('created_at')();
 
@@ -235,4 +233,3 @@ class AppSettings extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
-

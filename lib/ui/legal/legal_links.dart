@@ -22,7 +22,8 @@ class LegalLinks extends StatelessWidget {
         ListTile(
           leading: const Icon(Icons.privacy_tip_outlined),
           title: Text(privacyTitle),
-          onTap: () => _openDoc(context, privacyTitle, LegalDocPage.privacyPath),
+          onTap: () =>
+              _openDoc(context, privacyTitle, LegalDocPage.privacyPath),
         ),
         ListTile(
           leading: const Icon(Icons.description_outlined),

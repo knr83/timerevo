@@ -29,8 +29,10 @@ class DateFilterChip extends StatelessWidget {
     final valueStr = valueUtcMs == null
         ? anyLabel
         : DateFormat('yyyy-MM-dd').format(
-            DateTime.fromMillisecondsSinceEpoch(valueUtcMs!, isUtc: true)
-                .toLocal(),
+            DateTime.fromMillisecondsSinceEpoch(
+              valueUtcMs!,
+              isUtc: true,
+            ).toLocal(),
           );
     final text = '$label: $valueStr';
 
@@ -39,8 +41,10 @@ class DateFilterChip extends StatelessWidget {
       onPressed: () async {
         DateTime? initial;
         if (valueUtcMs != null) {
-          initial = DateTime.fromMillisecondsSinceEpoch(valueUtcMs!, isUtc: true)
-              .toLocal();
+          initial = DateTime.fromMillisecondsSinceEpoch(
+            valueUtcMs!,
+            isUtc: true,
+          ).toLocal();
           initial = DateTime(initial.year, initial.month, initial.day);
         }
         final date = await pickLocalDateOnly(context, initialDate: initial);

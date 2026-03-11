@@ -10,4 +10,3 @@ class EmployeeDisplayName {
     return '$last $first';
   }
 }
-

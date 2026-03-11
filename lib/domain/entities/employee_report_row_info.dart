@@ -16,6 +16,7 @@ class EmployeeReportRowInfo {
   final int closedSessionsCount;
   final int normMs;
   final int deltaMs;
+
   /// True if at least one day in the period had ResolvedSchedule.source != 'none'.
   final bool anyDayHasSchedule;
 }

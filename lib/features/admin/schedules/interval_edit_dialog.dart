@@ -66,10 +66,7 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
     if (_endMin <= _startMin) {
       return l10n.schedulesIntervalEndBeforeStartError;
     }
-    final edited = ScheduleInterval(
-      startMin: _startMin,
-      endMin: _endMin,
-    );
+    final edited = ScheduleInterval(startMin: _startMin, endMin: _endMin);
     if (_overlapsWithOthers(edited, widget.existingIntervals, widget.initial)) {
       return l10n.schedulesIntervalOverlapError;
     }
@@ -120,17 +117,18 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
 
   void _trySave() {
     if (_validate() == null) {
-      Navigator.of(context).pop(IntervalDialogResult(
-        startMin: _startMin,
-        endMin: _endMin,
-      ));
+      Navigator.of(
+        context,
+      ).pop(IntervalDialogResult(startMin: _startMin, endMin: _endMin));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final title = widget.isAdd ? l10n.schedulesAddIntervalTitle : l10n.schedulesEditIntervalTitle;
+    final title = widget.isAdd
+        ? l10n.schedulesAddIntervalTitle
+        : l10n.schedulesEditIntervalTitle;
     final error = _validate();
 
     return CallbackShortcuts(
@@ -143,62 +141,59 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
         child: AlertDialog(
           title: Text(title),
           content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(l10n.schedulesStartTimeLabel),
-                    const SizedBox(height: 4),
-                    OutlinedButton(
-                      onPressed: _pickStart,
-                      child: Text(TimeFormat.formatMinutes(_startMin)),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(l10n.schedulesStartTimeLabel),
+                        const SizedBox(height: 4),
+                        OutlinedButton(
+                          onPressed: _pickStart,
+                          child: Text(TimeFormat.formatMinutes(_startMin)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
-              ),
-              const SizedBox(width: 16),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(l10n.schedulesEndTimeLabel),
-                    const SizedBox(height: 4),
-                    OutlinedButton(
-                      onPressed: _pickEnd,
-                      child: Text(TimeFormat.formatMinutes(_endMin)),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(l10n.schedulesEndTimeLabel),
+                        const SizedBox(height: 4),
+                        OutlinedButton(
+                          onPressed: _pickEnd,
+                          child: Text(TimeFormat.formatMinutes(_endMin)),
+                        ),
+                      ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
+              if (error != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  error,
+                  style: TextStyle(color: Theme.of(context).colorScheme.error),
+                ),
+              ],
             ],
           ),
-          if (error != null) ...[
-            const SizedBox(height: 12),
-            Text(
-              error,
-              style: TextStyle(color: Theme.of(context).colorScheme.error),
+          actions: [
+            TextButton(onPressed: _cancel, child: Text(l10n.commonCancel)),
+            FilledButton(
+              onPressed: error != null ? null : _trySave,
+              child: Text(l10n.commonSave),
             ),
           ],
-        ],
-      ),
-      actions: [
-        TextButton(
-          onPressed: _cancel,
-          child: Text(l10n.commonCancel),
-        ),
-        FilledButton(
-          onPressed: error != null ? null : _trySave,
-          child: Text(l10n.commonSave),
-        ),
-      ],
         ),
       ),
     );

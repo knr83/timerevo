@@ -39,7 +39,9 @@ class IntervalRow extends StatelessWidget {
               : () async {
                   final picked = await showTimePicker(
                     context: context,
-                    initialTime: TimeFormat.timeOfDayFromMinutes(interval.startMin),
+                    initialTime: TimeFormat.timeOfDayFromMinutes(
+                      interval.startMin,
+                    ),
                   );
                   if (picked == null) return;
                   onChanged!(
@@ -58,7 +60,9 @@ class IntervalRow extends StatelessWidget {
               : () async {
                   final picked = await showTimePicker(
                     context: context,
-                    initialTime: TimeFormat.timeOfDayFromMinutes(interval.endMin),
+                    initialTime: TimeFormat.timeOfDayFromMinutes(
+                      interval.endMin,
+                    ),
                   );
                   if (picked == null) return;
                   onChanged!(
@@ -99,4 +103,3 @@ class IntervalRow extends StatelessWidget {
     );
   }
 }
-

@@ -49,18 +49,15 @@ class EmployeesRepo implements IEmployeesRepo {
     ];
 
     await _db.batch((b) {
-      b.insertAll(
-        _db.employees,
-        [
-          for (var idx = 0; idx < demo.length; idx++)
-            EmployeesCompanion.insert(
-              code: 'E${(idx + 1).toString().padLeft(4, '0')}',
-              firstName: demo[idx].firstName,
-              lastName: demo[idx].lastName,
-              createdAt: now,
-            ),
-        ],
-      );
+      b.insertAll(_db.employees, [
+        for (var idx = 0; idx < demo.length; idx++)
+          EmployeesCompanion.insert(
+            code: 'E${(idx + 1).toString().padLeft(4, '0')}',
+            firstName: demo[idx].firstName,
+            lastName: demo[idx].lastName,
+            createdAt: now,
+          ),
+      ]);
     });
   }
 
@@ -75,40 +72,47 @@ class EmployeesRepo implements IEmployeesRepo {
   }
 
   Stream<List<Employee>> watchAllEmployees() {
-    return (_db.select(_db.employees)
-          ..orderBy([
-            (e) => OrderingTerm.asc(e.lastName),
-            (e) => OrderingTerm.asc(e.firstName),
-          ]))
+    return (_db.select(_db.employees)..orderBy([
+          (e) => OrderingTerm.asc(e.lastName),
+          (e) => OrderingTerm.asc(e.firstName),
+        ]))
         .watch();
   }
 
   @override
   Stream<List<EmployeeInfo>> streamActiveEmployees() {
-    return watchActiveEmployees().map((list) => list
-        .map((e) => EmployeeInfo(
+    return watchActiveEmployees().map(
+      (list) => list
+          .map(
+            (e) => EmployeeInfo(
               id: e.id,
               firstName: e.firstName,
               lastName: e.lastName,
               isActive: e.isActive == 1,
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
-            ))
-        .toList());
+            ),
+          )
+          .toList(),
+    );
   }
 
   @override
   Stream<List<EmployeeInfo>> streamAllEmployees() {
-    return watchAllEmployees().map((list) => list
-        .map((e) => EmployeeInfo(
+    return watchAllEmployees().map(
+      (list) => list
+          .map(
+            (e) => EmployeeInfo(
               id: e.id,
               firstName: e.firstName,
               lastName: e.lastName,
               isActive: e.isActive == 1,
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
-            ))
-        .toList());
+            ),
+          )
+          .toList(),
+    );
   }
 
   Future<int> createEmployee({
@@ -119,7 +123,9 @@ class EmployeesRepo implements IEmployeesRepo {
       return _db.transaction(() async {
         final now = UtcClock.nowMs();
         final code = await _generateEmployeeCode();
-        return _db.into(_db.employees).insert(
+        return _db
+            .into(_db.employees)
+            .insert(
               EmployeesCompanion.insert(
                 code: code,
                 firstName: firstName.trim(),
@@ -140,7 +146,9 @@ class EmployeesRepo implements IEmployeesRepo {
       return _db.transaction(() async {
         final now = UtcClock.nowMs();
         final code = await _generateEmployeeCode();
-        final employeeId = await _db.into(_db.employees).insert(
+        final employeeId = await _db
+            .into(_db.employees)
+            .insert(
               EmployeesCompanion.insert(
                 code: code,
                 firstName: firstName.trim(),
@@ -150,7 +158,9 @@ class EmployeesRepo implements IEmployeesRepo {
             );
 
         if (templateId != null) {
-          await _db.into(_db.employeeScheduleAssignments).insert(
+          await _db
+              .into(_db.employeeScheduleAssignments)
+              .insert(
                 EmployeeScheduleAssignmentsCompanion(
                   employeeId: Value(employeeId),
                   templateId: Value(templateId),
@@ -204,13 +214,15 @@ class EmployeesRepo implements IEmployeesRepo {
         );
 
         if (templateId == null) {
-          await (_db.delete(_db.employeeScheduleAssignments)
-                ..where((a) => a.employeeId.equals(id)))
-              .go();
+          await (_db.delete(
+            _db.employeeScheduleAssignments,
+          )..where((a) => a.employeeId.equals(id))).go();
           return;
         }
 
-        await _db.into(_db.employeeScheduleAssignments).insert(
+        await _db
+            .into(_db.employeeScheduleAssignments)
+            .insert(
               EmployeeScheduleAssignmentsCompanion(
                 employeeId: Value(id),
                 templateId: Value(templateId),
@@ -241,21 +253,21 @@ class EmployeesRepo implements IEmployeesRepo {
   Future<bool> checkCodeUnique(String code, {int? excludeEmployeeId}) async {
     final trimmed = code.trim().toUpperCase();
     if (trimmed.isEmpty) return false;
-    final existing = await (_db.select(_db.employees)
-          ..where((e) {
-            final match = e.code.equals(trimmed);
-            if (excludeEmployeeId == null) return match;
-            return match & e.id.equals(excludeEmployeeId).not();
-          }))
-        .getSingleOrNull();
+    final existing =
+        await (_db.select(_db.employees)..where((e) {
+              final match = e.code.equals(trimmed);
+              if (excludeEmployeeId == null) return match;
+              return match & e.id.equals(excludeEmployeeId).not();
+            }))
+            .getSingleOrNull();
     return existing == null;
   }
 
   @override
   Future<EmployeePinStatus> getPinStatus(int employeeId) async {
-    final row = await (_db.select(_db.employeeAuths)
-          ..where((a) => a.employeeId.equals(employeeId)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.employeeAuths,
+    )..where((a) => a.employeeId.equals(employeeId))).getSingleOrNull();
     return row != null ? EmployeePinStatus.set : EmployeePinStatus.notSet;
   }
 
@@ -267,7 +279,9 @@ class EmployeesRepo implements IEmployeesRepo {
     return guardRepoCall(() async {
       final result = await PinHash.hashForEmployee(pin);
       final now = UtcClock.nowMs();
-      await _db.into(_db.employeeAuths).insert(
+      await _db
+          .into(_db.employeeAuths)
+          .insert(
             EmployeeAuthsCompanion.insert(
               employeeId: Value(employeeId),
               pinHash: result.pinHash,
@@ -281,8 +295,9 @@ class EmployeesRepo implements IEmployeesRepo {
 
   @override
   Future<EmployeeInfo?> getEmployee(int id) async {
-    final row = await (_db.select(_db.employees)..where((e) => e.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.employees,
+    )..where((e) => e.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
     return EmployeeInfo(
       id: row.id,
@@ -294,13 +309,15 @@ class EmployeesRepo implements IEmployeesRepo {
 
   @override
   Future<EmployeeDetails?> getEmployeeDetails(int id) async {
-    final row = await (_db.select(_db.employees)..where((e) => e.id.equals(id)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.employees,
+    )..where((e) => e.id.equals(id))).getSingleOrNull();
     if (row == null) return null;
-    final assignment = await (_db.select(_db.employeeScheduleAssignments)
-          ..where((a) => a.employeeId.equals(id))
-          ..limit(1))
-        .getSingleOrNull();
+    final assignment =
+        await (_db.select(_db.employeeScheduleAssignments)
+              ..where((a) => a.employeeId.equals(id))
+              ..limit(1))
+            .getSingleOrNull();
     return EmployeeDetails(
       id: row.id,
       code: row.code,
@@ -329,8 +346,9 @@ class EmployeesRepo implements IEmployeesRepo {
   }
 
   Future<Employee?> getEmployeeRaw(int id) async {
-    return (_db.select(_db.employees)..where((e) => e.id.equals(id)))
-        .getSingleOrNull();
+    return (_db.select(
+      _db.employees,
+    )..where((e) => e.id.equals(id))).getSingleOrNull();
   }
 
   @override
@@ -360,7 +378,9 @@ class EmployeesRepo implements IEmployeesRepo {
     return guardRepoCall(() async {
       return _db.transaction(() async {
         final now = UtcClock.nowMs();
-        final employeeId = await _db.into(_db.employees).insert(
+        final employeeId = await _db
+            .into(_db.employees)
+            .insert(
               EmployeesCompanion.insert(
                 code: code.trim().toUpperCase(),
                 firstName: firstName.trim(),
@@ -388,7 +408,9 @@ class EmployeesRepo implements IEmployeesRepo {
               ),
             );
         if (templateId != null) {
-          await _db.into(_db.employeeScheduleAssignments).insert(
+          await _db
+              .into(_db.employeeScheduleAssignments)
+              .insert(
                 EmployeeScheduleAssignmentsCompanion(
                   employeeId: Value(employeeId),
                   templateId: Value(templateId),
@@ -456,11 +478,13 @@ class EmployeesRepo implements IEmployeesRepo {
           ),
         );
         if (templateId == null) {
-          await (_db.delete(_db.employeeScheduleAssignments)
-                ..where((a) => a.employeeId.equals(id)))
-              .go();
+          await (_db.delete(
+            _db.employeeScheduleAssignments,
+          )..where((a) => a.employeeId.equals(id))).go();
         } else {
-          await _db.into(_db.employeeScheduleAssignments).insert(
+          await _db
+              .into(_db.employeeScheduleAssignments)
+              .insert(
                 EmployeeScheduleAssignmentsCompanion(
                   employeeId: Value(id),
                   templateId: Value(templateId),
@@ -478,9 +502,9 @@ class EmployeesRepo implements IEmployeesRepo {
     required int employeeId,
     required String pin,
   }) async {
-    final row = await (_db.select(_db.employeeAuths)
-          ..where((a) => a.employeeId.equals(employeeId)))
-        .getSingleOrNull();
+    final row = await (_db.select(
+      _db.employeeAuths,
+    )..where((a) => a.employeeId.equals(employeeId))).getSingleOrNull();
     if (row == null) return false;
 
     return PinHash.verifyForEmployee(
@@ -491,14 +515,16 @@ class EmployeesRepo implements IEmployeesRepo {
   }
 
   @override
-  Future<void> updateEmployeePolicyAcknowledged(int employeeId, {
+  Future<void> updateEmployeePolicyAcknowledged(
+    int employeeId, {
     required bool acknowledged,
     required int? acknowledgedAt,
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
-      await (_db.update(_db.employees)..where((e) => e.id.equals(employeeId)))
-          .write(
+      await (_db.update(
+        _db.employees,
+      )..where((e) => e.id.equals(employeeId))).write(
         EmployeesCompanion(
           policyAcknowledged: Value(acknowledged ? 1 : 0),
           policyAcknowledgedAt: Value(acknowledgedAt),
@@ -511,11 +537,9 @@ class EmployeesRepo implements IEmployeesRepo {
   @override
   Future<void> resetEmployeePin(int employeeId) async {
     return guardRepoCall(() async {
-      await (_db.delete(_db.employeeAuths)
-            ..where((a) => a.employeeId.equals(employeeId)))
-          .go();
+      await (_db.delete(
+        _db.employeeAuths,
+      )..where((a) => a.employeeId.equals(employeeId))).go();
     });
   }
-
 }
-

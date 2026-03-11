@@ -14,8 +14,8 @@ enum AppThemeSelection {
 
 final appThemeSelectionProvider =
     AsyncNotifierProvider<AppThemeSelectionController, AppThemeSelection>(
-  AppThemeSelectionController.new,
-);
+      AppThemeSelectionController.new,
+    );
 
 class AppThemeSelectionController extends AsyncNotifier<AppThemeSelection> {
   @override
@@ -55,4 +55,3 @@ String _serialize(AppThemeSelection selection) {
     AppThemeSelection.highContrastDark => 'hc_dark',
   };
 }
-
