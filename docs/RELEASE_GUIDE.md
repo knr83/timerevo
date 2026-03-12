@@ -27,11 +27,11 @@ Do not rely on outdated README text or assumptions.
 
 Timerevo uses the following release version format:
 
-    vYYYY.M.P
+    YYYY.M.P
 
 Example:
 
-    v2026.3.0
+    2026.3.0
 
 Rules:
 - `YYYY` = release year
@@ -39,9 +39,9 @@ Rules:
 - `P` = sequential release number within that month
 
 Examples:
-- `v2026.3.0` = first release in March 2026
-- `v2026.3.1` = second release in March 2026
-- `v2026.4.0` = first release in April 2026
+- `2026.3.0` = first release in March 2026
+- `2026.3.1` = second release in March 2026
+- `2026.4.0` = first release in April 2026
 
 When a new month starts, reset the last segment to `0`.
 
@@ -233,7 +233,7 @@ Use:
 
 Before creating a GitHub Release, verify:
 
-- version is correct and follows `vYYYY.M.P`
+- version is correct and follows `YYYY.M.P`
 - release tag is correct
 - release assets exist
 - artifact names follow the naming convention

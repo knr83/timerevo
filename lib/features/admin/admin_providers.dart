@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 /// Selected employee ID in Employees page. Shared with Dashboard for navigation.
 final selectedEmployeeIdProvider = StateProvider<int?>((ref) => null);

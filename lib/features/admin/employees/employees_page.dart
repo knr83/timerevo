@@ -26,7 +26,7 @@ class EmployeesPage extends ConsumerWidget {
     return employeesAsync.when(
       data: (employees) {
         final templates =
-            templatesAsync.valueOrNull ?? const <ScheduleTemplateInfo>[];
+            templatesAsync.value ?? const <ScheduleTemplateInfo>[];
         final effectiveSelectedId =
             selectedId ??
             (isAddingNew || employees.isEmpty ? null : employees.first.id);

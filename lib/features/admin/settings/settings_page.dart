@@ -23,11 +23,11 @@ class SettingsPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final localeAsync = ref.watch(localeOverrideLanguageCodeProvider);
-    final currentCode = localeAsync.valueOrNull; // null => system default
+    final currentCode = localeAsync.value; // null => system default
     final themeAsync = ref.watch(appThemeSelectionProvider);
-    final themeSelection = themeAsync.valueOrNull ?? AppThemeSelection.system;
+    final themeSelection = themeAsync.value ?? AppThemeSelection.system;
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
-    final workingHours = workingHoursAsync.valueOrNull;
+    final workingHours = workingHoursAsync.value;
 
     const formMaxWidth = 360.0;
     const formMinWidth = 280.0;

@@ -23,10 +23,10 @@ class App extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final init = ref.watch(appInitProvider);
     final overrideAsync = ref.watch(localeOverrideLanguageCodeProvider);
-    final overrideCode = overrideAsync.valueOrNull;
+    final overrideCode = overrideAsync.value;
     final themeSelectionAsync = ref.watch(appThemeSelectionProvider);
     final themeSelection =
-        themeSelectionAsync.valueOrNull ?? AppThemeSelection.system;
+        themeSelectionAsync.value ?? AppThemeSelection.system;
     final themeConfig = buildAppTheme(themeSelection);
 
     return MaterialApp(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/absences_providers.dart';
@@ -311,7 +312,7 @@ class AbsencesPage extends ConsumerWidget {
                     return Center(child: Text(l10n.absencesEmpty));
                   }
                   final sort = ref.watch(_absencesSortProvider);
-                  final employees = employeesAsync.valueOrNull ?? [];
+                  final employees = employeesAsync.value ?? [];
                   final sortedRows = _sortAbsences(
                     rows,
                     sort.columnIndex,
@@ -353,7 +354,7 @@ class AbsencesPage extends ConsumerWidget {
     AppLocalizations l10n,
     AsyncValue<List<EmployeeInfo>> employeesAsync,
   ) async {
-    final employees = employeesAsync.valueOrNull ?? [];
+    final employees = employeesAsync.value ?? [];
     if (employees.isEmpty) {
       showAppSnack(context, l10n.sessionsNoEmployeesAvailable, isError: true);
       return;

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../app/sessions_providers.dart';
 import '../../../app/usecase_providers.dart';

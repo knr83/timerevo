@@ -227,9 +227,9 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
 
     final sessionDays = <DateTime>{};
     final absenceDaysByStatus = <DateTime, Set<String>>{};
-    final sessions = sessionsAsync.valueOrNull;
+    final sessions = sessionsAsync.value;
     if (sessions != null) sessionDays.addAll(_sessionDays(sessions));
-    final absences = absencesAsync.valueOrNull;
+    final absences = absencesAsync.value;
     if (absences != null) {
       absenceDaysByStatus.addAll(_absenceDaysByStatus(absences));
     }

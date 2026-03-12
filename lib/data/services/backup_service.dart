@@ -144,7 +144,7 @@ class BackupService {
     try {
       final db = sqlite3.open(backupPath);
       final version = db.userVersion;
-      db.dispose();
+      db.close();
       if (version < _schemaVersion) {
         return (
           success: false,
@@ -224,7 +224,7 @@ class BackupService {
     try {
       final db = sqlite3.open(backupPath);
       final version = db.userVersion;
-      db.dispose();
+      db.close();
       if (version < _schemaVersion) {
         return (
           success: false,

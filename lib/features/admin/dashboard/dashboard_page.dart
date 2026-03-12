@@ -150,7 +150,7 @@ class _EmployeeSessionsBlock extends ConsumerWidget {
           child: CircularProgressIndicator(strokeWidth: 2),
         ),
       ),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -598,7 +598,7 @@ class _DashboardTodayEmployeesState
             const SizedBox(height: 12),
             todayAsync.when(
               data: (todaySessions) {
-                final openSessions = openAsync.valueOrNull ?? [];
+                final openSessions = openAsync.value ?? [];
                 final rows = _aggregateTodayEmployees(
                   todaySessions,
                   openSessions,
@@ -721,7 +721,7 @@ class _DashboardRecentActivity extends ConsumerWidget {
     final recentAsync = ref.watch(watchRecentSessionsProvider);
     final openAsync = ref.watch(watchOpenSessionsProvider);
     final openByEmployee = <int, int>{};
-    for (final sw in openAsync.valueOrNull ?? []) {
+    for (final sw in openAsync.value ?? []) {
       openByEmployee[sw.employee.id] = sw.session.id;
     }
 

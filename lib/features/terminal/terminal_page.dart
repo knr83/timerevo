@@ -471,7 +471,7 @@ class _TerminalActions extends ConsumerWidget {
     );
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
     final endMin =
-        workingHoursAsync.valueOrNull?.endMin ?? defaultWorkingHoursEndMin;
+        workingHoursAsync.value?.endMin ?? defaultWorkingHoursEndMin;
 
     return openSessionAsync.when(
       data: (open) {
@@ -900,7 +900,7 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: displaySessions.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              separatorBuilder: (_, _) => const Divider(height: 1),
               itemBuilder: (context, index) {
                 final s = displaySessions[index];
                 return _TerminalSessionRow(
@@ -938,7 +938,7 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
         );
       },
       loading: () => const SizedBox.shrink(),
-      error: (_, __) => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
     );
   }
 }
@@ -1111,7 +1111,7 @@ Future<void> _handleClockIn(
   );
   final l10n = AppLocalizations.of(context);
   final workingHours =
-      ref.read(workingHoursSettingsProvider).valueOrNull ??
+      ref.read(workingHoursSettingsProvider).value ??
       (
         startMin: defaultWorkingHoursStartMin,
         endMin: defaultWorkingHoursEndMin,

@@ -71,7 +71,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       }
     });
 
-    var rows = rowsAsync.valueOrNull ?? [];
+    var rows = rowsAsync.value ?? [];
     if (filters.employeeId != null) {
       rows = rows.where((r) => r.employeeId == filters.employeeId).toList();
     }
@@ -349,22 +349,22 @@ class _ReportTable extends ConsumerWidget {
         columns: [
           DataColumn(
             label: Text(l10n.reportsTableEmployee),
-            onSort: (_, __) =>
+            onSort: (_, _) =>
                 onSort(0, sortColumnIndex == 0 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTableWorked),
-            onSort: (_, __) =>
+            onSort: (_, _) =>
                 onSort(1, sortColumnIndex == 1 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTablePlanned),
-            onSort: (_, __) =>
+            onSort: (_, _) =>
                 onSort(2, sortColumnIndex == 2 ? !sortAscending : true),
           ),
           DataColumn(
             label: Text(l10n.reportsTableBalance),
-            onSort: (_, __) =>
+            onSort: (_, _) =>
                 onSort(3, sortColumnIndex == 3 ? !sortAscending : true),
           ),
         ],
