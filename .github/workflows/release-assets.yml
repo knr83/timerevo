@@ -69,8 +69,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: "3.41.0"
-          cache: true
+          flutter-version: "3.41.4"
+          cache: false
 
       - name: Install dependencies
         shell: pwsh
@@ -174,8 +174,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: "3.41.0"
-          cache: true
+          flutter-version: "3.41.4"
+          cache: false
 
       - name: Install Linux dependencies
         run: |
@@ -288,8 +288,8 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
-          flutter-version: "3.41.0"
-          cache: true
+          flutter-version: "3.41.4"
+          cache: false
 
       - name: Install dependencies
         run: flutter pub get
