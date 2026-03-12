@@ -1,5 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
@@ -440,7 +441,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
           leading: widget.embedded
               ? null
               : IconButton(
-                  icon: const Icon(Icons.close),
+                  icon: const Icon(Symbols.close),
                   tooltip: l10n.commonClose,
                   onPressed: () => Navigator.of(context).pop(false),
                 ),
@@ -463,7 +464,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               children: [
                 _SectionCard(
                   title: l10n.employeeSectionBasicInfo,
-                  icon: Icons.badge_outlined,
+                  icon: Symbols.badge,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -564,7 +565,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: l10n.employeeSectionEmployment,
-                  icon: Icons.work_outline,
+                  icon: Symbols.work,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -605,12 +606,14 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                   vertical: 12,
                                 ),
                               ),
-                              child: InkWell(
-                                onTap: _pickHireDate,
-                                child: Padding(
-                                  padding: EdgeInsets.zero,
-                                  child: Text(
-                                    _hireDate != null
+                              child: MouseRegion(
+                                cursor: SystemMouseCursors.click,
+                                child: InkWell(
+                                  onTap: _pickHireDate,
+                                  child: Padding(
+                                    padding: EdgeInsets.zero,
+                                    child: Text(
+                                      _hireDate != null
                                         ? DateFormat.yMd().format(
                                             DateTime.fromMillisecondsSinceEpoch(
                                               _hireDate!,
@@ -618,12 +621,13 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                             ),
                                           )
                                         : l10n.commonNone,
-                                    style: TextStyle(
-                                      color: _hireDate != null
-                                          ? null
-                                          : Theme.of(
+                                      style: TextStyle(
+                                        color: _hireDate != null
+                                            ? null
+                                            : Theme.of(
                                               context,
                                             ).colorScheme.onSurfaceVariant,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -712,7 +716,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: l10n.employeeSectionContact,
-                  icon: Icons.contact_phone_outlined,
+                  icon: Symbols.contact_phone,
                   child: Row(
                     children: [
                       Expanded(
@@ -743,7 +747,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: l10n.employeeSectionAccess,
-                  icon: Icons.key_outlined,
+                  icon: Symbols.key,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -848,7 +852,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: l10n.employeeSectionSchedule,
-                  icon: Icons.schedule,
+                  icon: Symbols.schedule,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -877,7 +881,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 const SizedBox(height: 12),
                 _SectionCard(
                   title: l10n.employeeSectionPolicy,
-                  icon: Icons.policy_outlined,
+                  icon: Symbols.policy,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -945,7 +949,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   const SizedBox(height: 12),
                   _SectionCard(
                     title: l10n.employeeSectionAudit,
-                    icon: Icons.history,
+                    icon: Symbols.history,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -1142,14 +1146,17 @@ class _CompactSwitch extends StatelessWidget {
   final ValueChanged<bool> onChanged;
   final String label;
 
+  static const double _defaultScale = 0.8;
+
   @override
   Widget build(BuildContext context) {
+    final switchWidget = Switch(value: value, onChanged: onChanged);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(label),
         const SizedBox(width: 12),
-        Switch(value: value, onChanged: onChanged),
+        Transform.scale(scale: _defaultScale, child: switchWidget),
       ],
     );
   }

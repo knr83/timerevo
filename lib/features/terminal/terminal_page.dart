@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -145,13 +146,16 @@ class _EmployeeSelector extends ConsumerWidget {
       itemBuilder: (context, index) {
         final e = employees[index];
         return Card(
-          child: ListTile(
-            title: Text(
-              EmployeeDisplayName.of(
-                EmployeeDisplay(firstName: e.firstName, lastName: e.lastName),
+          child: MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              title: Text(
+                EmployeeDisplayName.of(
+                  EmployeeDisplay(firstName: e.firstName, lastName: e.lastName),
+                ),
               ),
+              onTap: () => _onEmployeePressed(context, ref, e),
             ),
-            onTap: () => _onEmployeePressed(context, ref, e),
           ),
         );
       },
@@ -606,7 +610,7 @@ class _TerminalHeader extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.arrow_back, size: 20),
+              const Icon(Symbols.arrow_back, size: 20),
               const SizedBox(width: 8),
               Text(l10n.commonBack),
             ],
@@ -655,7 +659,7 @@ class _TerminalStatusCard extends StatelessWidget {
             Row(
               children: [
                 Icon(
-                  isOnShift ? Icons.schedule : Icons.timer_outlined,
+                  isOnShift ? Symbols.schedule : Symbols.timer,
                   size: 24,
                   color: isOnShift ? cs.primary : cs.onSurfaceVariant,
                 ),
@@ -724,7 +728,7 @@ class _TerminalActionButtons extends StatelessWidget {
           children: [
             Expanded(
               child: _TerminalActionButton(
-                icon: Icons.login_rounded,
+                icon: Symbols.login_rounded,
                 label: l10n.terminalIn,
                 isPrimary: !isOnShift,
                 onPressed: isOnShift ? null : onClockIn,
@@ -733,7 +737,7 @@ class _TerminalActionButtons extends StatelessWidget {
             const SizedBox(width: 16),
             Expanded(
               child: _TerminalActionButton(
-                icon: Icons.logout_rounded,
+                icon: Symbols.logout_rounded,
                 label: l10n.terminalOut,
                 isPrimary: isOnShift,
                 onPressed: isOnShift ? onClockOut : null,
@@ -754,7 +758,7 @@ class _TerminalActionButtons extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.calendar_month_outlined, size: 20),
+                const Icon(Symbols.calendar_month, size: 20),
                 const SizedBox(width: 8),
                 Text(l10n.terminalMyCalendar),
               ],
@@ -774,7 +778,7 @@ class _TerminalActionButtons extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.picture_as_pdf_outlined, size: 20),
+                const Icon(Symbols.picture_as_pdf, size: 20),
                 const SizedBox(width: 8),
                 Text(l10n.terminalMyPdf),
               ],
@@ -989,7 +993,7 @@ class _TerminalSessionRow extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              isOpen ? Icons.schedule : Icons.check_circle_outline,
+              isOpen ? Symbols.schedule : Symbols.check_circle,
               size: 20,
               color: isOpen ? cs.primary : cs.onSurfaceVariant,
             ),
@@ -1033,36 +1037,48 @@ Future<({int fromUtcMs, int toUtcMs})?> _showMyPdfPeriodDialog(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          ListTile(
-            title: Text(l10n.reportsPeriodPresetToday),
-            onTap: () {
-              selected = reportPeriodToday();
-              Navigator.of(ctx).pop();
-            },
-          ),
-          ListTile(
-            title: Text(l10n.reportsPeriodPresetWeek),
-            onTap: () {
-              selected = reportPeriodWeek();
-              Navigator.of(ctx).pop();
-            },
-          ),
-          ListTile(
-            title: Text(l10n.reportsPeriodPresetMonth),
-            onTap: () {
-              selected = reportPeriodMonth();
-              Navigator.of(ctx).pop();
-            },
-          ),
-          ListTile(
-            title: Text(l10n.reportsPeriodPresetCustom),
-            onTap: () async {
-              final range = await pickDateRange(ctx);
-              if (ctx.mounted && range != null) {
-                selected = range;
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              title: Text(l10n.reportsPeriodPresetToday),
+              onTap: () {
+                selected = reportPeriodToday();
                 Navigator.of(ctx).pop();
-              }
-            },
+              },
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              title: Text(l10n.reportsPeriodPresetWeek),
+              onTap: () {
+                selected = reportPeriodWeek();
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              title: Text(l10n.reportsPeriodPresetMonth),
+              onTap: () {
+                selected = reportPeriodMonth();
+                Navigator.of(ctx).pop();
+              },
+            ),
+          ),
+          MouseRegion(
+            cursor: SystemMouseCursors.click,
+            child: ListTile(
+              title: Text(l10n.reportsPeriodPresetCustom),
+              onTap: () async {
+                final range = await pickDateRange(ctx);
+                if (ctx.mounted && range != null) {
+                  selected = range;
+                  Navigator.of(ctx).pop();
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -1297,7 +1313,7 @@ class _AnimatedCheckmarkSuccessState extends State<_AnimatedCheckmarkSuccess>
               scale: _scale,
               child: FadeTransition(
                 opacity: _opacity,
-                child: Icon(Icons.check_circle, size: 120, color: cs.primary),
+                child: Icon(Symbols.check_circle, size: 120, color: cs.primary),
               ),
             ),
             const SizedBox(height: 16),
@@ -1372,7 +1388,7 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Icons.warning_amber_rounded, size: 24, color: cs.primary),
+                Icon(Symbols.warning_amber_rounded, size: 24, color: cs.primary),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

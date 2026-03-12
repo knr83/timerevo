@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -335,7 +336,7 @@ class _EmptyState extends StatelessWidget {
           const SizedBox(height: 16),
           FilledButton.icon(
             onPressed: onNewSchedule,
-            icon: const Icon(Icons.add),
+            icon: const Icon(Symbols.add),
             label: Text(l10n.schedulesNewSchedule),
           ),
         ],
@@ -787,12 +788,12 @@ class _WeekEditorControlRow extends StatelessWidget {
         ),
         Tooltip(
           message: l10n.schedulesRenameScheduleTooltip,
-          child: IconButton(icon: const Icon(Icons.edit), onPressed: onRename),
+          child: IconButton(icon: const Icon(Symbols.edit), onPressed: onRename),
         ),
         Tooltip(
           message: l10n.schedulesDeleteScheduleTooltip,
           child: IconButton(
-            icon: const Icon(Icons.delete_outline),
+            icon: const Icon(Symbols.delete),
             onPressed: isNew ? null : onDelete,
           ),
         ),
@@ -804,7 +805,7 @@ class _WeekEditorControlRow extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.add),
+                const Icon(Symbols.add),
                 const SizedBox(width: 8),
                 Text(l10n.schedulesNewSchedule),
               ],

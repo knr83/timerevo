@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -115,7 +116,7 @@ class _EmployeesList extends ConsumerWidget {
                   ref.read(selectedEmployeeIdProvider.notifier).state = null;
                   ref.read(isAddingNewProvider.notifier).state = true;
                 },
-                icon: const Icon(Icons.add),
+                icon: const Icon(Symbols.add),
                 tooltip: l10n.commonAdd,
               ),
             ],
@@ -133,11 +134,13 @@ class _EmployeesList extends ConsumerWidget {
                       return Opacity(
                         opacity: isInactive ? 0.6 : 1,
                         child: Card(
-                          child: ListTile(
-                            selected: isSelected,
-                            leading: isInactive
+                          child: MouseRegion(
+                            cursor: SystemMouseCursors.click,
+                            child: ListTile(
+                              selected: isSelected,
+                              leading: isInactive
                                 ? Icon(
-                                    Icons.person_off_outlined,
+                                    Symbols.person_off,
                                     size: 20,
                                     color: Theme.of(
                                       context,
@@ -159,17 +162,18 @@ class _EmployeesList extends ConsumerWidget {
                                     )
                                   : null,
                             ),
-                            trailing: isSelected
-                                ? const Icon(Icons.chevron_right)
-                                : null,
-                            onTap: () {
-                              ref
-                                      .read(selectedEmployeeIdProvider.notifier)
-                                      .state =
-                                  e.id;
-                              ref.read(isAddingNewProvider.notifier).state =
-                                  false;
-                            },
+                              trailing: isSelected
+                                  ? const Icon(Symbols.chevron_right)
+                                  : null,
+                              onTap: () {
+                                ref
+                                        .read(selectedEmployeeIdProvider.notifier)
+                                        .state =
+                                    e.id;
+                                ref.read(isAddingNewProvider.notifier).state =
+                                    false;
+                              },
+                            ),
                           ),
                         ),
                       );

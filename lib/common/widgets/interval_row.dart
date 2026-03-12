@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../domain/entities/schedule_entities.dart';
@@ -78,7 +79,7 @@ class IntervalRow extends StatelessWidget {
         const Spacer(),
         IconButton(
           onPressed: onDelete,
-          icon: const Icon(Icons.delete_outline),
+          icon: const Icon(Symbols.delete),
           tooltip: l10n.intervalRemoveTooltip,
         ),
       ],

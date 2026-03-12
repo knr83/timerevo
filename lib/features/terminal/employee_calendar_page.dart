@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:intl/intl.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
@@ -247,7 +248,7 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
           ),
         ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Symbols.arrow_back),
           tooltip: l10n.commonBack,
           onPressed: () => Navigator.of(context).pop(),
         ),
@@ -282,7 +283,7 @@ class _EmployeeCalendarPageState extends ConsumerState<EmployeeCalendarPage> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.today_outlined, size: 20),
+                        const Icon(Symbols.today, size: 20),
                         const SizedBox(width: 8),
                         Text(l10n.terminalSessionsToday),
                       ],
@@ -528,7 +529,7 @@ class _DayDetailBlock extends ConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.calendar_today,
+                        Symbols.calendar_today,
                         size: 48,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -542,7 +543,7 @@ class _DayDetailBlock extends ConsumerWidget {
                       const SizedBox(height: 16),
                       FilledButton.icon(
                         onPressed: () => _openCreateDialog(context, ref),
-                        icon: const Icon(Icons.add),
+                        icon: const Icon(Symbols.add),
                         label: Text(l10n.absenceCreateTitle),
                       ),
                     ],
@@ -599,7 +600,7 @@ class _DayDetailBlock extends ConsumerWidget {
                     ],
                     FilledButton.icon(
                       onPressed: () => _openCreateDialog(context, ref),
-                      icon: const Icon(Icons.add),
+                      icon: const Icon(Symbols.add),
                       label: Text(l10n.absenceCreateTitle),
                     ),
                   ],
@@ -771,7 +772,7 @@ class _SessionRow extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              isOpen ? Icons.schedule : Icons.check_circle_outline,
+              isOpen ? Symbols.schedule : Symbols.check_circle,
               size: 20,
               color: isOpen ? cs.primary : cs.onSurfaceVariant,
             ),
@@ -836,12 +837,12 @@ class _AbsenceCard extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit),
+                    icon: const Icon(Symbols.edit),
                     tooltip: l10n.absenceEdit,
                     onPressed: onEdit,
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete),
+                    icon: const Icon(Symbols.delete),
                     tooltip: l10n.absenceDelete,
                     onPressed: onDelete,
                   ),

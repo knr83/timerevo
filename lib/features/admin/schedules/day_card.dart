@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -127,10 +128,13 @@ class WeekEditorDayCard extends ConsumerWidget {
                   );
                 }),
               const SizedBox(height: 8),
-              TextButton.icon(
-                onPressed: () => _addInterval(context),
-                icon: const Icon(Icons.add, size: 18),
-                label: Text(l10n.schedulesAddInterval),
+              MouseRegion(
+                cursor: SystemMouseCursors.click,
+                child: TextButton.icon(
+                  onPressed: () => _addInterval(context),
+                  icon: const Icon(Symbols.add, size: 18),
+                  label: Text(l10n.schedulesAddInterval),
+                ),
               ),
             ],
           ),

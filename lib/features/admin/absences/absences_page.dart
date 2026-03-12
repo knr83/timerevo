@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
@@ -214,7 +215,7 @@ class AbsencesPage extends ConsumerWidget {
                 FilledButton.icon(
                   onPressed: () =>
                       _openAddDialog(context, ref, l10n, employeesAsync),
-                  icon: const Icon(Icons.add),
+                  icon: const Icon(Symbols.add),
                   label: Text(l10n.absencesAdd),
                 ),
               ],
@@ -467,7 +468,7 @@ class _AbsencesTable extends ConsumerWidget {
                   DataCell(
                     isPending
                         ? PopupMenuButton<String>(
-                            icon: const Icon(Icons.more_vert),
+                            icon: const Icon(Symbols.more_vert),
                             onSelected: (value) {
                               switch (value) {
                                 case 'edit':

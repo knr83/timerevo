@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
@@ -448,7 +449,7 @@ class _JournalTable extends ConsumerWidget {
                     DataCell(
                       Center(
                         child: Icon(
-                          isOpen ? Icons.schedule : Icons.check_circle_outline,
+                          isOpen ? Symbols.schedule : Symbols.check_circle,
                           size: 20,
                           color: isOpen
                               ? Theme.of(context).colorScheme.primary
@@ -459,7 +460,7 @@ class _JournalTable extends ConsumerWidget {
                     DataCell(
                       Center(
                         child: IconButton(
-                          icon: const Icon(Icons.edit_outlined),
+                          icon: const Icon(Symbols.edit),
                           tooltip: l10n.sessionsEdit,
                           onPressed: () => _openEditDialog(
                             context,

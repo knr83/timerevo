@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
@@ -23,7 +24,7 @@ class LegalDocPage extends StatelessWidget {
         title: Text(title),
         actions: [
           IconButton(
-            icon: const Icon(Icons.copy_outlined),
+            icon: const Icon(Symbols.content_copy),
             onPressed: () => _copyToClipboard(context),
             tooltip: AppLocalizations.of(context).legalCopy,
           ),
@@ -90,7 +91,7 @@ class _ErrorView extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              Icons.error_outline,
+              Symbols.error,
               size: 48,
               color: Theme.of(context).colorScheme.error,
             ),

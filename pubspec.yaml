@@ -28,6 +28,7 @@ dependencies:
   pdf: ^3.11.0
 
   # Utils
+  material_symbols_icons: ^4.2906.0
   table_calendar: ^3.2.0
   crypto: ^3.0.6
   cryptography: ^2.9.0

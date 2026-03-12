@@ -84,7 +84,8 @@ Use these targets consistently:
 
 ### One icon family
 
-- Use **Material icons / Material Symbols** consistently (prefer a rounded look for coherence).
+- Use **Material Symbols** (`Symbols.*` from `material_symbols_icons`) consistently. Prefer a rounded look for coherence.
+- For new code, avoid `Icons.*`; use `Symbols.*` instead.
 
 ### Sizes
 
@@ -134,6 +135,10 @@ Asset conventions:
 - **Secondary**: `FilledTonalButton` or `OutlinedButton` (depending on emphasis)
 - **Tertiary / inline**: `TextButton`
 - **Destructive**: keep style consistent, but use `colorScheme.error` for text/icon and require confirmation.
+
+### Switches
+
+- Use `Transform.scale(scale: 0.8)` for all Switch widgets.
 
 ### Cards & lists
 

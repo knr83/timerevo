@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import 'legal_doc_page.dart';
 
@@ -19,16 +20,22 @@ class LegalLinks extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       mainAxisSize: MainAxisSize.min,
       children: [
-        ListTile(
-          leading: const Icon(Icons.privacy_tip_outlined),
-          title: Text(privacyTitle),
-          onTap: () =>
-              _openDoc(context, privacyTitle, LegalDocPage.privacyPath),
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: ListTile(
+            leading: const Icon(Symbols.privacy_tip),
+            title: Text(privacyTitle),
+            onTap: () =>
+                _openDoc(context, privacyTitle, LegalDocPage.privacyPath),
+          ),
         ),
-        ListTile(
-          leading: const Icon(Icons.description_outlined),
-          title: Text(termsTitle),
-          onTap: () => _openDoc(context, termsTitle, LegalDocPage.termsPath),
+        MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: ListTile(
+            leading: const Icon(Symbols.description),
+            title: Text(termsTitle),
+            onTap: () => _openDoc(context, termsTitle, LegalDocPage.termsPath),
+          ),
         ),
       ],
     );

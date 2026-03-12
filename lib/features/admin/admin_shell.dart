@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -183,7 +184,7 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
         title: Text(l10n.adminTitle),
         actions: [
           PopupMenuButton<String>(
-            icon: const Icon(Icons.help_outline),
+            icon: const Icon(Symbols.help),
             tooltip: l10n.helpTitle,
             onSelected: (value) {
               switch (value) {

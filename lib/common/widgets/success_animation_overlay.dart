@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 /// Animated success overlay: scale + fade checkmark with message.
 /// Similar to clock-in/out success. Use in dialogs or overlays.
@@ -6,7 +7,7 @@ class SuccessAnimationOverlay extends StatefulWidget {
   const SuccessAnimationOverlay({
     super.key,
     required this.message,
-    this.icon = Icons.check_circle,
+    this.icon = Symbols.check_circle,
     this.iconSize = 120,
   });
 
@@ -96,7 +97,7 @@ class _SuccessAnimationOverlayState extends State<SuccessAnimationOverlay>
 Future<void> showSuccessAnimationDialog(
   BuildContext context, {
   required String message,
-  IconData icon = Icons.check_circle,
+  IconData icon = Symbols.check_circle,
   Duration autoCloseDuration = const Duration(milliseconds: 1200),
 }) async {
   final barrierColor = Theme.of(context).brightness == Brightness.light

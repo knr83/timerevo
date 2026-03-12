@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -71,7 +72,7 @@ class _DashboardSessionRow extends StatelessWidget {
         child: Row(
           children: [
             Icon(
-              isOpen ? Icons.schedule : Icons.check_circle_outline,
+              isOpen ? Symbols.schedule : Symbols.check_circle,
               size: 20,
               color: isOpen ? cs.primary : cs.onSurfaceVariant,
             ),
@@ -311,7 +312,7 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(
-                        Icons.people_outline,
+                        Symbols.people,
                         size: 48,
                         color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
@@ -389,31 +390,34 @@ class _EmployeeNameTap extends StatelessWidget {
 
     return Material(
       color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  name,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.primary,
-                    fontWeight: FontWeight.w500,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Flexible(
+                  child: Text(
+                    name,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
                 ),
-              ),
-              const SizedBox(width: 4),
-              Icon(
-                isExpanded ? Icons.expand_less : Icons.expand_more,
-                size: 18,
-                color: colorScheme.primary.withValues(alpha: 0.7),
-              ),
-            ],
+                const SizedBox(width: 4),
+                Icon(
+                  isExpanded ? Symbols.expand_less : Symbols.expand_more,
+                  size: 18,
+                  color: colorScheme.primary.withValues(alpha: 0.7),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -448,7 +452,7 @@ class _NowAtWorkRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            Icons.schedule,
+            Symbols.schedule,
             size: 20,
             color: Theme.of(context).colorScheme.primary,
           ),
@@ -674,7 +678,7 @@ class _TodayEmployeeListRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            row.isAtWork ? Icons.schedule : Icons.check_circle_outline,
+            row.isAtWork ? Symbols.schedule : Symbols.check_circle,
             size: 20,
             color: row.isAtWork
                 ? Theme.of(context).colorScheme.primary
@@ -824,7 +828,7 @@ class _RecentActivityRow extends StatelessWidget {
       child: Row(
         children: [
           Icon(
-            isOpen ? Icons.login_rounded : Icons.logout_rounded,
+            isOpen ? Symbols.login_rounded : Symbols.logout_rounded,
             size: 20,
             color: isOpen
                 ? Theme.of(context).colorScheme.primary

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../domain/entities/schedule_entities.dart';
@@ -33,6 +34,7 @@ class ScheduleIntervalDisplayRow extends StatelessWidget {
           Expanded(
             child: MouseRegion(
               cursor: SystemMouseCursors.click,
+              hitTestBehavior: HitTestBehavior.opaque,
               child: Material(
                 color: Colors.transparent,
                 child: InkWell(
@@ -54,7 +56,7 @@ class ScheduleIntervalDisplayRow extends StatelessWidget {
           ),
           IconButton(
             onPressed: onDelete,
-            icon: const Icon(Icons.delete_outline),
+            icon: const Icon(Symbols.delete),
             tooltip: l10n.intervalRemoveTooltip,
           ),
         ],

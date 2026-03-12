@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -118,7 +119,7 @@ class App extends ConsumerWidget {
                               );
                             }
                           },
-                          icon: const Icon(Icons.restore),
+                          icon: const Icon(Symbols.restore),
                           label: Text(l10n.initDbErrorRestore),
                         ),
                         const SizedBox(height: 8),
@@ -128,7 +129,7 @@ class App extends ConsumerWidget {
                             ref.invalidate(appDbProvider);
                             ref.invalidate(appInitProvider);
                           },
-                          icon: const Icon(Icons.delete_forever),
+                          icon: const Icon(Symbols.delete_forever),
                           label: Text(l10n.initDbErrorReinitialize),
                         ),
                         const SizedBox(height: 8),

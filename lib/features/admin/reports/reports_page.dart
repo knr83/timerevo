@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -102,7 +103,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                       sortAscending: _sortAscending,
                     );
                   },
-                  icon: const Icon(Icons.download),
+                  icon: const Icon(Symbols.download),
                   label: Text(l10n.reportsExportPdf),
                 ),
               ],

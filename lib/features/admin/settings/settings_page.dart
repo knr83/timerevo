@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -286,7 +287,7 @@ class SettingsPage extends ConsumerWidget {
                         showAppSnack(context, l10n.adminPinUpdated);
                       }
                     },
-                    icon: const Icon(Icons.lock_outline, size: 20),
+                    icon: const Icon(Symbols.lock, size: 20),
                     label: Text(l10n.adminChangePin),
                   ),
                   const SizedBox(height: 12),
@@ -300,7 +301,7 @@ class SettingsPage extends ConsumerWidget {
                         await showSuccessAnimationDialog(
                           context,
                           message: l10n.settingsBackupSuccessTitle,
-                          icon: Icons.backup_rounded,
+                          icon: Symbols.backup_rounded,
                         );
                       } else if (result.error != null) {
                         showAppSnack(
@@ -310,7 +311,7 @@ class SettingsPage extends ConsumerWidget {
                         );
                       }
                     },
-                    icon: const Icon(Icons.backup, size: 20),
+                    icon: const Icon(Symbols.backup, size: 20),
                     label: Text(l10n.settingsCreateBackup),
                   ),
                   const SizedBox(height: 12),
@@ -335,7 +336,7 @@ class SettingsPage extends ConsumerWidget {
                         );
                       }
                     },
-                    icon: const Icon(Icons.restore, size: 20),
+                    icon: const Icon(Symbols.restore, size: 20),
                     label: Text(l10n.settingsRestoreFromBackup),
                   ),
                   const SizedBox(height: 12),
@@ -383,7 +384,7 @@ class SettingsPage extends ConsumerWidget {
                         );
                       }
                     },
-                    icon: const Icon(Icons.bug_report_outlined, size: 20),
+                    icon: const Icon(Symbols.bug_report, size: 20),
                     label: Text(l10n.settingsExportDiagnostics),
                   ),
                 ],
