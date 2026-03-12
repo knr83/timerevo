@@ -12,7 +12,7 @@ $pubspec = Get-Content "pubspec.yaml" -Raw
 if ($pubspec -match 'version:\s*(\d+\.\d+\.\d+)') {
     $version = $Matches[1]
 } else {
-    $version = "2026.3.1"
+    $version = "2026.3.2"
 }
 
 $notesFile = ".cursor\RELEASE_NOTES.md"
