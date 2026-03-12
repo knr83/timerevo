@@ -788,7 +788,10 @@ class _WeekEditorControlRow extends StatelessWidget {
         ),
         Tooltip(
           message: l10n.schedulesRenameScheduleTooltip,
-          child: IconButton(icon: const Icon(Symbols.edit), onPressed: onRename),
+          child: IconButton(
+            icon: const Icon(Symbols.edit),
+            onPressed: onRename,
+          ),
         ),
         Tooltip(
           message: l10n.schedulesDeleteScheduleTooltip,

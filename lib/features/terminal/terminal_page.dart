@@ -474,8 +474,7 @@ class _TerminalActions extends ConsumerWidget {
       todaySessionsForEmployeeProvider(employeeId),
     );
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
-    final endMin =
-        workingHoursAsync.value?.endMin ?? defaultWorkingHoursEndMin;
+    final endMin = workingHoursAsync.value?.endMin ?? defaultWorkingHoursEndMin;
 
     return openSessionAsync.when(
       data: (open) {
@@ -1388,7 +1387,11 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
           children: [
             Row(
               children: [
-                Icon(Symbols.warning_amber_rounded, size: 24, color: cs.primary),
+                Icon(
+                  Symbols.warning_amber_rounded,
+                  size: 24,
+                  color: cs.primary,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

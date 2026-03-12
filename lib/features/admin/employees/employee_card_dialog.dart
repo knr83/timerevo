@@ -614,19 +614,19 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                     padding: EdgeInsets.zero,
                                     child: Text(
                                       _hireDate != null
-                                        ? DateFormat.yMd().format(
-                                            DateTime.fromMillisecondsSinceEpoch(
-                                              _hireDate!,
-                                              isUtc: true,
-                                            ),
-                                          )
-                                        : l10n.commonNone,
+                                          ? DateFormat.yMd().format(
+                                              DateTime.fromMillisecondsSinceEpoch(
+                                                _hireDate!,
+                                                isUtc: true,
+                                              ),
+                                            )
+                                          : l10n.commonNone,
                                       style: TextStyle(
                                         color: _hireDate != null
                                             ? null
                                             : Theme.of(
-                                              context,
-                                            ).colorScheme.onSurfaceVariant,
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
                                       ),
                                     ),
                                   ),

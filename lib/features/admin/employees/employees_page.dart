@@ -139,37 +139,37 @@ class _EmployeesList extends ConsumerWidget {
                             child: ListTile(
                               selected: isSelected,
                               leading: isInactive
-                                ? Icon(
-                                    Symbols.person_off,
-                                    size: 20,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  )
-                                : null,
-                            title: Text(
-                              EmployeeDisplayName.of(
-                                EmployeeDisplay(
-                                  firstName: e.firstName,
-                                  lastName: e.lastName,
-                                ),
-                              ),
-                              style: isInactive
-                                  ? TextStyle(
+                                  ? Icon(
+                                      Symbols.person_off,
+                                      size: 20,
                                       color: Theme.of(
                                         context,
                                       ).colorScheme.onSurfaceVariant,
                                     )
                                   : null,
-                            ),
+                              title: Text(
+                                EmployeeDisplayName.of(
+                                  EmployeeDisplay(
+                                    firstName: e.firstName,
+                                    lastName: e.lastName,
+                                  ),
+                                ),
+                                style: isInactive
+                                    ? TextStyle(
+                                        color: Theme.of(
+                                          context,
+                                        ).colorScheme.onSurfaceVariant,
+                                      )
+                                    : null,
+                              ),
                               trailing: isSelected
                                   ? const Icon(Symbols.chevron_right)
                                   : null,
                               onTap: () {
                                 ref
-                                        .read(selectedEmployeeIdProvider.notifier)
-                                        .state =
-                                    e.id;
+                                    .read(selectedEmployeeIdProvider.notifier)
+                                    .state = e
+                                    .id;
                                 ref.read(isAddingNewProvider.notifier).state =
                                     false;
                               },

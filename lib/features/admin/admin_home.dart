@@ -79,12 +79,12 @@ class _AdminNavRail extends StatelessWidget {
     final navTheme = theme.navigationRailTheme;
     final cs = theme.colorScheme;
 
-    final unselectedLabelStyle = navTheme.unselectedLabelTextStyle ??
-        theme.textTheme.labelMedium?.copyWith(
-          color: cs.onSurfaceVariant,
-        ) ??
+    final unselectedLabelStyle =
+        navTheme.unselectedLabelTextStyle ??
+        theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant) ??
         TextStyle(color: cs.onSurfaceVariant, fontSize: 12);
-    final selectedLabelStyle = navTheme.selectedLabelTextStyle ??
+    final selectedLabelStyle =
+        navTheme.selectedLabelTextStyle ??
         theme.textTheme.labelMedium?.copyWith(
           color: cs.primary,
           fontWeight: FontWeight.w500,
@@ -103,13 +103,13 @@ class _AdminNavRail extends StatelessWidget {
             children: [
               for (var i = 0; i < destinations.length; i++) ...[
                 _NavRailTile(
-                icon: destinations[i].icon,
-                label: destinations[i].label,
-                selected: i == selectedIndex,
-                onTap: () => onDestinationSelected(i),
-                unselectedLabelStyle: unselectedLabelStyle,
-                selectedLabelStyle: selectedLabelStyle,
-              ),
+                  icon: destinations[i].icon,
+                  label: destinations[i].label,
+                  selected: i == selectedIndex,
+                  onTap: () => onDestinationSelected(i),
+                  unselectedLabelStyle: unselectedLabelStyle,
+                  selectedLabelStyle: selectedLabelStyle,
+                ),
               ],
             ],
           ),
@@ -150,9 +150,7 @@ class _NavRailTile extends StatelessWidget {
       child: Material(
         type: MaterialType.transparency,
         child: Ink(
-          decoration: BoxDecoration(
-            color: selected ? selectedColor : null,
-          ),
+          decoration: BoxDecoration(color: selected ? selectedColor : null),
           child: InkWell(
             onTap: onTap,
             child: Padding(
@@ -161,21 +159,21 @@ class _NavRailTile extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                Icon(
-                  icon,
-                  size: 40,
-                  opticalSize: 40,
-                  fill: selected ? 1 : 0,
-                  color: selected ? cs.primary : cs.onSurfaceVariant,
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  softWrap: false,
-                  overflow: TextOverflow.visible,
-                  style: selected ? selectedLabelStyle : unselectedLabelStyle,
-                ),
+                  Icon(
+                    icon,
+                    size: 40,
+                    opticalSize: 40,
+                    fill: selected ? 1 : 0,
+                    color: selected ? cs.primary : cs.onSurfaceVariant,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    label,
+                    textAlign: TextAlign.center,
+                    softWrap: false,
+                    overflow: TextOverflow.visible,
+                    style: selected ? selectedLabelStyle : unselectedLabelStyle,
+                  ),
                 ],
               ),
             ),
