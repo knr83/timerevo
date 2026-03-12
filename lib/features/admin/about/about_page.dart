@@ -22,7 +22,7 @@ class AboutPage extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'v$appVersion',
+            appVersion,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),

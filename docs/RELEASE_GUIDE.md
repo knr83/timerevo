@@ -61,9 +61,9 @@ Recommended naming pattern:
 
 Examples:
 
-    timerevo-v2026.3.0-win64.zip
-    timerevo-v2026.3.0-linux-x64.tar.gz
-    timerevo-v2026.3.0-macos-universal.zip
+    timerevo-2026.3.0-win64.zip
+    timerevo-2026.3.0-linux-x64.tar.gz
+    timerevo-2026.3.0-macos-universal.zip
 
 Rules:
 - always include the full release version
@@ -76,7 +76,7 @@ Rules:
 ### 1. Confirm version
 Read the current version from the project source of truth and ensure it matches the required format:
 
-    vYYYY.M.P
+    YYYY.M.P
 
 ### 2. Identify release scope
 Compare:

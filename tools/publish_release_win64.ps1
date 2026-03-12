@@ -22,7 +22,7 @@ if (-not (Test-Path $notesFile)) {
     exit 1
 }
 
-$tag = "v$version"
+$tag = $version
 Write-Host "Creating release $tag on GitHub (CI will build and upload all platform assets)..." -ForegroundColor Cyan
 gh release create $tag --notes-file $notesFile
 
