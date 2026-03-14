@@ -33,7 +33,8 @@ Future<void> _handleSelectEmployee(
       content: Text(l10n.employeeUnsavedChangesMessage),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
           child: Text(l10n.commonCancel),
         ),
         TextButton(
@@ -42,8 +43,7 @@ Future<void> _handleSelectEmployee(
           child: Text(l10n.employeeDiscardChanges),
         ),
         FilledButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
+          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
           child: Text(l10n.commonSave),
         ),
       ],
@@ -86,7 +86,8 @@ Future<void> _handleSelectNewEmployee(
       content: Text(l10n.employeeUnsavedChangesMessage),
       actions: [
         TextButton(
-          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
           child: Text(l10n.commonCancel),
         ),
         TextButton(
@@ -95,8 +96,7 @@ Future<void> _handleSelectNewEmployee(
           child: Text(l10n.employeeDiscardChanges),
         ),
         FilledButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
+          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
           child: Text(l10n.commonSave),
         ),
       ],
@@ -271,11 +271,11 @@ class _EmployeesList extends ConsumerWidget {
                                   ? const Icon(Symbols.chevron_right)
                                   : null,
                               onTap: () => _handleSelectEmployee(
-                                  context,
-                                  ref,
-                                  l10n,
-                                  e.id,
-                                ),
+                                context,
+                                ref,
+                                l10n,
+                                e.id,
+                              ),
                             ),
                           ),
                         ),

@@ -10,15 +10,9 @@ abstract interface class ISessionsRepo {
   /// Returns the open session info for [employeeId], or null if none.
   Future<SessionInfo?> getOpenSessionInfoForEmployee(int employeeId);
 
-  Future<int> createOpenSession({
-    required int employeeId,
-    String? note,
-  });
+  Future<int> createOpenSession({required int employeeId, String? note});
 
-  Future<bool> closeOpenSession({
-    required int employeeId,
-    String? note,
-  });
+  Future<bool> closeOpenSession({required int employeeId, String? note});
 
   /// Closes the open session for [employeeId] with the given [endUtcMs].
   /// Returns false if no open session or if endUtcMs <= session.startTs.

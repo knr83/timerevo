@@ -10,12 +10,11 @@ import '../../common/utils/pin_hash.dart';
 import '../../common/utils/utc_clock.dart';
 import 'repo_guard.dart';
 
-String _statusToString(EmployeeStatus s) =>
-    switch (s) {
-      EmployeeStatus.active => 'active',
-      EmployeeStatus.inactive => 'inactive',
-      EmployeeStatus.archived => 'archived',
-    };
+String _statusToString(EmployeeStatus s) => switch (s) {
+  EmployeeStatus.active => 'active',
+  EmployeeStatus.inactive => 'inactive',
+  EmployeeStatus.archived => 'archived',
+};
 
 class EmployeesRepo implements IEmployeesRepo {
   EmployeesRepo(this._db);
@@ -248,8 +247,7 @@ class EmployeesRepo implements IEmployeesRepo {
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
-      final status =
-          isActive ? EmployeeStatus.active : EmployeeStatus.inactive;
+      final status = isActive ? EmployeeStatus.active : EmployeeStatus.inactive;
       await (_db.update(_db.employees)..where((e) => e.id.equals(id))).write(
         EmployeesCompanion(
           status: Value(_statusToString(status)),

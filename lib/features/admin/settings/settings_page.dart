@@ -40,9 +40,7 @@ class _ToleranceFieldState extends State<_ToleranceField> {
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController(
-      text: widget.initialValue.toString(),
-    );
+    _controller = TextEditingController(text: widget.initialValue.toString());
   }
 
   @override
@@ -120,9 +118,7 @@ class _AttendanceModeSection extends ConsumerWidget {
               context: context,
               builder: (ctx) => AlertDialog(
                 title: Text(l10n.settingsAttendanceModeChangeConfirmTitle),
-                content: Text(
-                  l10n.settingsAttendanceModeChangeConfirmMessage,
-                ),
+                content: Text(l10n.settingsAttendanceModeChangeConfirmMessage),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
@@ -147,9 +143,8 @@ class _AttendanceModeSection extends ConsumerWidget {
           _ToleranceField(
             initialValue: attendance.toleranceMinutes,
             label: l10n.settingsAttendanceToleranceLabel,
-            onSave: (n) => ref
-                .read(attendanceSettingsProvider.notifier)
-                .setTolerance(n),
+            onSave: (n) =>
+                ref.read(attendanceSettingsProvider.notifier).setTolerance(n),
           ),
         ],
       ],

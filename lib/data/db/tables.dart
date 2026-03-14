@@ -21,8 +21,7 @@ class Employees extends Table {
   IntColumn get vacationDaysPerYear =>
       integer().named('vacation_days_per_year').nullable()();
 
-  TextColumn get secondaryPhone =>
-      text().named('secondary_phone').nullable()();
+  TextColumn get secondaryPhone => text().named('secondary_phone').nullable()();
 
   IntColumn get hireDate => integer().named('hire_date').nullable()();
 

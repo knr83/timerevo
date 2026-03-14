@@ -10,7 +10,10 @@ import 'entities/schedule_entities.dart';
 /// - T after last interval's end → null (outside working day)
 ///
 /// [intervals] must be non-empty and ordered by startMin (ascending).
-ScheduleInterval? resolveIntervalForTime(int timeMin, List<ScheduleInterval> intervals) {
+ScheduleInterval? resolveIntervalForTime(
+  int timeMin,
+  List<ScheduleInterval> intervals,
+) {
   if (intervals.isEmpty) return null;
 
   for (var i = 0; i < intervals.length; i++) {

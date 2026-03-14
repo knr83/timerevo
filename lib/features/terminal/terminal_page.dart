@@ -1142,7 +1142,8 @@ Future<void> _handleClockIn(
     hypothesisId: 'H1',
   );
   // #endregion
-  final attendance = ref.read(attendanceSettingsProvider).value ??
+  final attendance =
+      ref.read(attendanceSettingsProvider).value ??
       (mode: AttendanceMode.flexible, toleranceMinutes: 10);
   final workingHours =
       ref.read(workingHoursSettingsProvider).value ??
@@ -1154,7 +1155,11 @@ Future<void> _handleClockIn(
   final nowMin = now.hour * 60 + now.minute;
   if (attendance.mode == AttendanceMode.flexible) {
     if (nowMin < workingHours.startMin) {
-      showAppSnack(context, l10n.terminalErrorClockInBeforeStart, isError: true);
+      showAppSnack(
+        context,
+        l10n.terminalErrorClockInBeforeStart,
+        isError: true,
+      );
       return;
     }
     if (nowMin > workingHours.endMin) {
@@ -1218,7 +1223,8 @@ Future<void> _handleClockOut(
     ),
   );
   // #region agent log
-  final attendanceOut = ref.read(attendanceSettingsProvider).value ??
+  final attendanceOut =
+      ref.read(attendanceSettingsProvider).value ??
       (mode: AttendanceMode.flexible, toleranceMinutes: 10);
   debugLog(
     location: '_handleClockOut:entry',
@@ -1227,7 +1233,8 @@ Future<void> _handleClockOut(
     hypothesisId: 'H1,H2',
   );
   // #endregion
-  final attendance = ref.read(attendanceSettingsProvider).value ??
+  final attendance =
+      ref.read(attendanceSettingsProvider).value ??
       (mode: AttendanceMode.flexible, toleranceMinutes: 10);
   final result = await ref.read(clockOutUseCaseProvider)(
     employeeId,

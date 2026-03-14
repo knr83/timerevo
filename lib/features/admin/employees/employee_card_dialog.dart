@@ -561,7 +561,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
             child: Text(l10n.commonCancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(ctx).pop(_EmployeeGuardAction.discard),
+            onPressed: () =>
+                Navigator.of(ctx).pop(_EmployeeGuardAction.discard),
             child: Text(l10n.employeeDiscardChanges),
           ),
           FilledButton(
@@ -626,7 +627,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     );
   }
 
-
   Widget _buildFormContent(AppLocalizations l10n) {
     return Column(
       mainAxisSize: widget.embedded ? MainAxisSize.max : MainAxisSize.min,
@@ -678,685 +678,660 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       mainAxisSize: MainAxisSize.min,
       children: [
         _SectionCard(
-                  title: l10n.employeeSectionBasicInfo,
-                  icon: Symbols.badge,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        l10n.commonRequiredFieldsLegend,
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
+          title: l10n.employeeSectionBasicInfo,
+          icon: Symbols.badge,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                l10n.commonRequiredFieldsLegend,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _firstNameCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeFieldLabelWithRequired(
+                          l10n.employeeFirstName,
                         ),
+                        errorText:
+                            _submitted && _firstNameCtrl.text.trim().isEmpty
+                            ? l10n.employeeFirstNameRequired
+                            : null,
+                        border: const OutlineInputBorder(),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _firstNameCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeFieldLabelWithRequired(
-                                  l10n.employeeFirstName,
-                                ),
-                                errorText:
-                                    _submitted &&
-                                        _firstNameCtrl.text.trim().isEmpty
-                                    ? l10n.employeeFirstNameRequired
-                                    : null,
-                                border: const OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 2,
-                            child: TextField(
-                              controller: _lastNameCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeFieldLabelWithRequired(
-                                  l10n.employeeLastName,
-                                ),
-                                errorText:
-                                    _submitted &&
-                                        _lastNameCtrl.text.trim().isEmpty
-                                    ? l10n.employeeLastNameRequired
-                                    : null,
-                                border: const OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                TextField(
-                                  controller: _codeCtrl,
-                                  readOnly: widget.existing != null,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.employeeCode,
-                                    hintText: l10n.employeeCodeHint,
-                                    errorText:
-                                        _codeError ??
-                                        (_submitted &&
-                                                widget.existing == null &&
-                                                _codeCtrl.text.trim().isEmpty
-                                            ? l10n.employeeCodeRequired
-                                            : null),
-                                    border: const OutlineInputBorder(),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                  textCapitalization:
-                                      TextCapitalization.characters,
-                                  onChanged: widget.existing == null
-                                      ? (_) => setState(() {
-                                            _codeError = null;
-                                          })
-                                      : null,
-                                  onEditingComplete: widget.existing == null
-                                      ? _checkCodeUnique
-                                      : null,
-                                  onTapOutside: widget.existing == null
-                                      ? (_) => _checkCodeUnique()
-                                      : null,
-                                ),
-                                const SizedBox(height: 8),
-                                DropdownButtonFormField<EmployeeStatus>(
-                                  key: ValueKey('status_$_statusDropdownKey'),
-                                  initialValue: _status,
-                                  decoration: InputDecoration(
-                                    labelText: l10n.employeeStatusLabel,
-                                    border: const OutlineInputBorder(),
-                                    contentPadding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 12,
-                                    ),
-                                  ),
-                                  items: [
-                                    DropdownMenuItem(
-                                      value: EmployeeStatus.active,
-                                      child: Text(l10n.employeeStatusActive),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: EmployeeStatus.inactive,
-                                      child: Text(l10n.employeeStatusInactive),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: EmployeeStatus.archived,
-                                      child: Text(l10n.employeeStatusArchived),
-                                    ),
-                                  ],
-                                  onChanged: (v) {
-                                    if (v != null) _onStatusChanged(v);
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _SectionCard(
-                  title: l10n.employeeSectionEmployment,
-                  icon: Symbols.work,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: DropdownButtonFormField<String>(
-                              initialValue: _employeeRole,
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeRole,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 12,
-                                ),
-                              ),
-                              items: _roles
-                                  .map(
-                                    (r) => DropdownMenuItem(
-                                      value: r,
-                                      child: Text(_roleLabel(r)),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (v) => setState(
-                                () => _employeeRole = v ?? 'employee',
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: DropdownButtonFormField<String?>(
-                              initialValue: _employmentType,
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeEmploymentType,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 12,
-                                ),
-                              ),
-                              items: [
-                                DropdownMenuItem<String?>(
-                                  value: null,
-                                  child: Text(l10n.commonNone),
-                                ),
-                                ..._employmentTypes.map(
-                                  (t) => DropdownMenuItem(
-                                    value: t,
-                                    child: Text(_employmentTypeLabel(t)),
-                                  ),
-                                ),
-                              ],
-                              onChanged: (v) =>
-                                  setState(() => _employmentType = v),
-                            ),
-                          ),
-                        ],
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: TextField(
+                      controller: _lastNameCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeFieldLabelWithRequired(
+                          l10n.employeeLastName,
+                        ),
+                        errorText:
+                            _submitted && _lastNameCtrl.text.trim().isEmpty
+                            ? l10n.employeeLastNameRequired
+                            : null,
+                        border: const OutlineInputBorder(),
                       ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeHireDate,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: InkWell(
-                                  onTap: _pickHireDate,
-                                  child: Padding(
-                                    padding: EdgeInsets.zero,
-                                    child: Text(
-                                      _hireDate != null
-                                          ? DateFormat.yMd().format(
-                                              DateTime.fromMillisecondsSinceEpoch(
-                                                _hireDate!,
-                                                isUtc: true,
-                                              ),
-                                            )
-                                          : l10n.commonNone,
-                                      style: TextStyle(
-                                        color: _hireDate != null
-                                            ? null
-                                            : Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeTerminationDateLabel,
-                                border: const OutlineInputBorder(),
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 12,
-                                ),
-                              ),
-                              child: MouseRegion(
-                                cursor: SystemMouseCursors.click,
-                                child: InkWell(
-                                  onTap: _pickTerminationDate,
-                                  child: Padding(
-                                    padding: EdgeInsets.zero,
-                                    child: Text(
-                                      _terminationDate != null
-                                          ? DateFormat.yMd().format(
-                                              DateTime.fromMillisecondsSinceEpoch(
-                                                _terminationDate!,
-                                                isUtc: true,
-                                              ),
-                                            )
-                                          : l10n.commonNone,
-                                      style: TextStyle(
-                                        color: _terminationDate != null
-                                            ? null
-                                            : Theme.of(
-                                                context,
-                                              ).colorScheme.onSurfaceVariant,
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _weeklyHoursCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeWeeklyHours,
-                                border: const OutlineInputBorder(),
-                                hintText: l10n.employeeWeeklyHoursHint,
-                              ),
-                              keyboardType:
-                                  const TextInputType.numberWithOptions(
-                                    decimal: true,
-                                  ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _vacationDaysPerYearCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText:
-                                    l10n.employeeVacationDaysPerYearLabel,
-                                border: const OutlineInputBorder(),
-                                hintText: l10n.commonNone,
-                                errorText:
-                                    _submitted &&
-                                            _vacationDaysPerYearCtrl
-                                                .text
-                                                .trim()
-                                                .isNotEmpty &&
-                                            (int.tryParse(
-                                                        _vacationDaysPerYearCtrl
-                                                            .text
-                                                            .trim()) ==
-                                                    null ||
-                                                int.parse(
-                                                        _vacationDaysPerYearCtrl
-                                                            .text
-                                                            .trim()) <
-                                                    0)
-                                    ? l10n.employeeVacationDaysPerYearInvalid
-                                    : null,
-                              ),
-                              keyboardType: TextInputType.number,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TextField(
-                              controller: _departmentCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeDepartment,
-                                border: const OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _jobTitleCtrl,
-                              onChanged: (_) => setState(() {}),
-                              decoration: InputDecoration(
-                                labelText: l10n.employeeJobTitle,
-                                border: const OutlineInputBorder(),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-                const SizedBox(height: 12),
-                _SectionCard(
-                  title: l10n.employeeSectionSchedule,
-                  icon: Symbols.schedule,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      DropdownButtonFormField<int?>(
-                        initialValue: _templateId,
-                        decoration: InputDecoration(
-                          labelText: l10n.employeeFieldLabelWithRequired(
-                            l10n.employeeSectionSchedule,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 1,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        TextField(
+                          controller: _codeCtrl,
+                          readOnly: widget.existing != null,
+                          decoration: InputDecoration(
+                            labelText: l10n.employeeCode,
+                            hintText: l10n.employeeCodeHint,
+                            errorText:
+                                _codeError ??
+                                (_submitted &&
+                                        widget.existing == null &&
+                                        _codeCtrl.text.trim().isEmpty
+                                    ? l10n.employeeCodeRequired
+                                    : null),
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                           ),
-                          border: const OutlineInputBorder(),
-                          errorText: _submitted && _templateId == null
-                              ? l10n.employeeScheduleRequired
+                          textCapitalization: TextCapitalization.characters,
+                          onChanged: widget.existing == null
+                              ? (_) => setState(() {
+                                  _codeError = null;
+                                })
                               : null,
-                          contentPadding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 12,
-                          ),
+                          onEditingComplete: widget.existing == null
+                              ? _checkCodeUnique
+                              : null,
+                          onTapOutside: widget.existing == null
+                              ? (_) => _checkCodeUnique()
+                              : null,
                         ),
-                        items: [
-                          DropdownMenuItem(
-                            value: null,
-                            child: Text(l10n.commonNone),
-                          ),
-                          ...widget.templates.map(
-                            (t) => DropdownMenuItem<int>(
-                              value: t.id,
-                              child: Text(t.name),
+                        const SizedBox(height: 8),
+                        DropdownButtonFormField<EmployeeStatus>(
+                          key: ValueKey('status_$_statusDropdownKey'),
+                          initialValue: _status,
+                          decoration: InputDecoration(
+                            labelText: l10n.employeeStatusLabel,
+                            border: const OutlineInputBorder(),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
                             ),
                           ),
-                        ],
-                        onChanged: (v) => setState(() => _templateId = v),
+                          items: [
+                            DropdownMenuItem(
+                              value: EmployeeStatus.active,
+                              child: Text(l10n.employeeStatusActive),
+                            ),
+                            DropdownMenuItem(
+                              value: EmployeeStatus.inactive,
+                              child: Text(l10n.employeeStatusInactive),
+                            ),
+                            DropdownMenuItem(
+                              value: EmployeeStatus.archived,
+                              child: Text(l10n.employeeStatusArchived),
+                            ),
+                          ],
+                          onChanged: (v) {
+                            if (v != null) _onStatusChanged(v);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
+          title: l10n.employeeSectionEmployment,
+          icon: Symbols.work,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      initialValue: _employeeRole,
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeRole,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
                       ),
-                    ],
+                      items: _roles
+                          .map(
+                            (r) => DropdownMenuItem(
+                              value: r,
+                              child: Text(_roleLabel(r)),
+                            ),
+                          )
+                          .toList(),
+                      onChanged: (v) =>
+                          setState(() => _employeeRole = v ?? 'employee'),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: DropdownButtonFormField<String?>(
+                      initialValue: _employmentType,
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeEmploymentType,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                      items: [
+                        DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text(l10n.commonNone),
+                        ),
+                        ..._employmentTypes.map(
+                          (t) => DropdownMenuItem(
+                            value: t,
+                            child: Text(_employmentTypeLabel(t)),
+                          ),
+                        ),
+                      ],
+                      onChanged: (v) => setState(() => _employmentType = v),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeHireDate,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: InkWell(
+                          onTap: _pickHireDate,
+                          child: Padding(
+                            padding: EdgeInsets.zero,
+                            child: Text(
+                              _hireDate != null
+                                  ? DateFormat.yMd().format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        _hireDate!,
+                                        isUtc: true,
+                                      ),
+                                    )
+                                  : l10n.commonNone,
+                              style: TextStyle(
+                                color: _hireDate != null
+                                    ? null
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: InputDecorator(
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeTerminationDateLabel,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.click,
+                        child: InkWell(
+                          onTap: _pickTerminationDate,
+                          child: Padding(
+                            padding: EdgeInsets.zero,
+                            child: Text(
+                              _terminationDate != null
+                                  ? DateFormat.yMd().format(
+                                      DateTime.fromMillisecondsSinceEpoch(
+                                        _terminationDate!,
+                                        isUtc: true,
+                                      ),
+                                    )
+                                  : l10n.commonNone,
+                              style: TextStyle(
+                                color: _terminationDate != null
+                                    ? null
+                                    : Theme.of(
+                                        context,
+                                      ).colorScheme.onSurfaceVariant,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _weeklyHoursCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeWeeklyHours,
+                        border: const OutlineInputBorder(),
+                        hintText: l10n.employeeWeeklyHoursHint,
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _vacationDaysPerYearCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeVacationDaysPerYearLabel,
+                        border: const OutlineInputBorder(),
+                        hintText: l10n.commonNone,
+                        errorText:
+                            _submitted &&
+                                _vacationDaysPerYearCtrl.text
+                                    .trim()
+                                    .isNotEmpty &&
+                                (int.tryParse(
+                                          _vacationDaysPerYearCtrl.text.trim(),
+                                        ) ==
+                                        null ||
+                                    int.parse(
+                                          _vacationDaysPerYearCtrl.text.trim(),
+                                        ) <
+                                        0)
+                            ? l10n.employeeVacationDaysPerYearInvalid
+                            : null,
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _departmentCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeDepartment,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _jobTitleCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeJobTitle,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        _SectionCard(
+          title: l10n.employeeSectionSchedule,
+          icon: Symbols.schedule,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              DropdownButtonFormField<int?>(
+                initialValue: _templateId,
+                decoration: InputDecoration(
+                  labelText: l10n.employeeFieldLabelWithRequired(
+                    l10n.employeeSectionSchedule,
+                  ),
+                  border: const OutlineInputBorder(),
+                  errorText: _submitted && _templateId == null
+                      ? l10n.employeeScheduleRequired
+                      : null,
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 12,
                   ),
                 ),
-              ],
+                items: [
+                  DropdownMenuItem(value: null, child: Text(l10n.commonNone)),
+                  ...widget.templates.map(
+                    (t) =>
+                        DropdownMenuItem<int>(value: t.id, child: Text(t.name)),
+                  ),
+                ],
+                onChanged: (v) => setState(() => _templateId = v),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildContactTabContent(AppLocalizations l10n) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SectionCard(
-            title: l10n.employeeSectionContact,
-            icon: Symbols.contact_phone,
-            child: Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          controller: _emailCtrl,
-                          onChanged: (_) => setState(() {}),
-                          decoration: InputDecoration(
-                            labelText: l10n.employeeEmail,
-                            border: const OutlineInputBorder(),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _phoneCtrl,
-                          onChanged: (_) => setState(() {}),
-                          decoration: InputDecoration(
-                            labelText: l10n.employeePhone,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: TextField(
-                          controller: _secondaryPhoneCtrl,
-                          onChanged: (_) => setState(() {}),
-                          decoration: InputDecoration(
-                            labelText: l10n.employeeSecondaryPhoneLabel,
-                            border: const OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                    ],
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SectionCard(
+          title: l10n.employeeSectionContact,
+          icon: Symbols.contact_phone,
+          child: Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _emailCtrl,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.employeeEmail,
+                    border: const OutlineInputBorder(),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _phoneCtrl,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.employeePhone,
+                    border: const OutlineInputBorder(),
                   ),
                 ),
-              ],
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: TextField(
+                  controller: _secondaryPhoneCtrl,
+                  onChanged: (_) => setState(() {}),
+                  decoration: InputDecoration(
+                    labelText: l10n.employeeSecondaryPhoneLabel,
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildTerminalAccessTabContent(AppLocalizations l10n) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SectionCard(
-            title: l10n.employeeSectionAccess,
-            icon: Symbols.key,
-            child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          _CompactSwitch(
-                            value: _usePin,
-                            onChanged: (v) => setState(() => _usePin = v),
-                            label: l10n.employeeUsePin,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SectionCard(
+          title: l10n.employeeSectionAccess,
+          icon: Symbols.key,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                children: [
+                  _CompactSwitch(
+                    value: _usePin,
+                    onChanged: (v) => setState(() => _usePin = v),
+                    label: l10n.employeeUsePin,
+                  ),
+                  const Spacer(),
+                  if (_usePin)
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          l10n.employeePinStatusWithValue(
+                            _pinStatus == EmployeePinStatus.set
+                                ? l10n.employeePinStatusSet
+                                : l10n.employeePinStatusNotSet,
                           ),
-                          const Spacer(),
-                          if (_usePin)
-                            Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  l10n.employeePinStatusWithValue(
-                                    _pinStatus == EmployeePinStatus.set
-                                        ? l10n.employeePinStatusSet
-                                        : l10n.employeePinStatusNotSet,
-                                  ),
-                                  style: TextStyle(
-                                    fontSize: 13,
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                                if (widget.existing != null) ...[
-                                  const SizedBox(width: 8),
-                                  TextButton(
-                                    onPressed: _showSetPinDialog,
-                                    child: Text(l10n.employeeSetPin),
-                                  ),
-                                  TextButton(
-                                    onPressed: _resettingPin ? null : _resetPin,
-                                    child: _resettingPin
-                                        ? const SizedBox(
-                                            width: 16,
-                                            height: 16,
-                                            child: CircularProgressIndicator(
-                                              strokeWidth: 2,
-                                            ),
-                                          )
-                                        : Text(l10n.employeeResetPin),
-                                  ),
-                                ],
-                              ],
-                            ),
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurfaceVariant,
+                          ),
+                        ),
+                        if (widget.existing != null) ...[
+                          const SizedBox(width: 8),
+                          TextButton(
+                            onPressed: _showSetPinDialog,
+                            child: Text(l10n.employeeSetPin),
+                          ),
+                          TextButton(
+                            onPressed: _resettingPin ? null : _resetPin,
+                            child: _resettingPin
+                                ? const SizedBox(
+                                    width: 16,
+                                    height: 16,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : Text(l10n.employeeResetPin),
+                          ),
                         ],
-                      ),
-                      _CompactSwitch(
-                        value: _useNfc,
-                        onChanged: (v) => setState(() => _useNfc = v),
-                        label: l10n.employeeUseNfc,
-                      ),
-                      if (!_usePin && !_useNfc)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 8, bottom: 12),
-                          child: Text(
-                            l10n.employeeTerminalAccessDisabled,
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _accessTokenCtrl,
-                        onChanged: (_) => setState(() {}),
-                        decoration: InputDecoration(
-                          labelText: _useNfc
-                              ? l10n.employeeFieldLabelWithRequired(
-                                  l10n.employeeAccessToken,
-                                )
-                              : l10n.employeeAccessToken,
-                          border: const OutlineInputBorder(),
-                          errorText:
-                              _submitted &&
-                                  _useNfc &&
-                                  _accessTokenCtrl.text.trim().isEmpty
-                              ? l10n.employeeAccessTokenRequiredWhenNfc
-                              : null,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _accessNoteCtrl,
-                        onChanged: (_) => setState(() {}),
-                        decoration: InputDecoration(
-                          labelText: l10n.employeeAccessNote,
-                          border: const OutlineInputBorder(),
-                        ),
-                        maxLines: 2,
-                      ),
-                    ],
+                      ],
+                    ),
+                ],
+              ),
+              _CompactSwitch(
+                value: _useNfc,
+                onChanged: (v) => setState(() => _useNfc = v),
+                label: l10n.employeeUseNfc,
+              ),
+              if (!_usePin && !_useNfc)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 12),
+                  child: Text(
+                    l10n.employeeTerminalAccessDisabled,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 13,
+                    ),
                   ),
                 ),
-              ],
+              const SizedBox(height: 8),
+              TextField(
+                controller: _accessTokenCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: _useNfc
+                      ? l10n.employeeFieldLabelWithRequired(
+                          l10n.employeeAccessToken,
+                        )
+                      : l10n.employeeAccessToken,
+                  border: const OutlineInputBorder(),
+                  errorText:
+                      _submitted &&
+                          _useNfc &&
+                          _accessTokenCtrl.text.trim().isEmpty
+                      ? l10n.employeeAccessTokenRequiredWhenNfc
+                      : null,
+                ),
+              ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: _accessNoteCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.employeeAccessNote,
+                  border: const OutlineInputBorder(),
+                ),
+                maxLines: 2,
+              ),
+            ],
+          ),
+        ),
+      ],
     );
   }
 
   Widget _buildAdditionalTabContent(AppLocalizations l10n) {
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _SectionCard(
-            title: l10n.employeeSectionPolicy,
-            icon: Symbols.policy,
-            child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      TextField(
-                        controller: _internalCommentCtrl,
-                        onChanged: (_) => setState(() {}),
-                        decoration: InputDecoration(
-                          labelText: l10n.employeeInternalComment,
-                          border: const OutlineInputBorder(),
-                          alignLabelWithHint: true,
-                        ),
-                        maxLines: 3,
-                      ),
-                      const SizedBox(height: 8),
-                      CheckboxListTile(
-                        value: _policyAcknowledged,
-                        onChanged: null,
-                        title: _PolicyLinksText(
-                          l10n: l10n,
-                          baseStyle:
-                              Theme.of(context).textTheme.bodyMedium ??
-                              const TextStyle(),
-                          linkStyle:
-                              (Theme.of(context).textTheme.bodyMedium ??
-                                      const TextStyle())
-                                  .copyWith(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.primary,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                        ),
-                        contentPadding: EdgeInsets.zero,
-                      ),
-                      if (_policyAcknowledgedAt != null)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 8),
-                          child: Text(
-                            l10n.employeePolicyAcknowledgedAtWithValue(
-                              DateFormat.yMd().add_Hm().format(
-                                DateTime.fromMillisecondsSinceEpoch(
-                                  _policyAcknowledgedAt!,
-                                ),
-                              ),
-                            ),
-                            style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onSurfaceVariant,
-                              fontSize: 12,
-                            ),
-                          ),
-                        ),
-                      Text(
-                        dataRetentionPolicyText,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onSurfaceVariant,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _SectionCard(
+          title: l10n.employeeSectionPolicy,
+          icon: Symbols.policy,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              TextField(
+                controller: _internalCommentCtrl,
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.employeeInternalComment,
+                  border: const OutlineInputBorder(),
+                  alignLabelWithHint: true,
                 ),
-          if (widget.existing != null) ...[
-            const SizedBox(height: 12),
-            _SectionCard(
-              title: l10n.employeeSectionAudit,
-              icon: Symbols.history,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Text(
-                    l10n.employeeCreatedAtWithValue(
+                maxLines: 3,
+              ),
+              const SizedBox(height: 8),
+              CheckboxListTile(
+                value: _policyAcknowledged,
+                onChanged: null,
+                title: _PolicyLinksText(
+                  l10n: l10n,
+                  baseStyle:
+                      Theme.of(context).textTheme.bodyMedium ??
+                      const TextStyle(),
+                  linkStyle:
+                      (Theme.of(context).textTheme.bodyMedium ??
+                              const TextStyle())
+                          .copyWith(
+                            color: Theme.of(context).colorScheme.primary,
+                            decoration: TextDecoration.underline,
+                          ),
+                ),
+                contentPadding: EdgeInsets.zero,
+              ),
+              if (_policyAcknowledgedAt != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    l10n.employeePolicyAcknowledgedAtWithValue(
                       DateFormat.yMd().add_Hm().format(
                         DateTime.fromMillisecondsSinceEpoch(
-                          widget.existing!.createdAt,
+                          _policyAcknowledgedAt!,
                         ),
                       ),
                     ),
                     style: TextStyle(
-                      color: Theme.of(
-                        context,
-                      ).colorScheme.onSurfaceVariant,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              Text(
+                dataRetentionPolicyText,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  fontSize: 12,
+                ),
+              ),
+            ],
+          ),
+        ),
+        if (widget.existing != null) ...[
+          const SizedBox(height: 12),
+          _SectionCard(
+            title: l10n.employeeSectionAudit,
+            icon: Symbols.history,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Text(
+                  l10n.employeeCreatedAtWithValue(
+                    DateFormat.yMd().add_Hm().format(
+                      DateTime.fromMillisecondsSinceEpoch(
+                        widget.existing!.createdAt,
+                      ),
+                    ),
+                  ),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                  ),
+                ),
+                if (widget.existing!.updatedAt != null) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    l10n.employeeUpdatedAtWithValue(
+                      DateFormat.yMd().add_Hm().format(
+                        DateTime.fromMillisecondsSinceEpoch(
+                          widget.existing!.updatedAt!,
+                        ),
+                      ),
+                    ),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 13,
                     ),
                   ),
-                  if (widget.existing!.updatedAt != null) ...[
-                    const SizedBox(height: 4),
-                    Text(
-                      l10n.employeeUpdatedAtWithValue(
-                        DateFormat.yMd().add_Hm().format(
-                          DateTime.fromMillisecondsSinceEpoch(
-                            widget.existing!.updatedAt!,
-                          ),
-                        ),
-                      ),
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurfaceVariant,
-                        fontSize: 13,
-                      ),
-                    ),
-                  ],
                 ],
-              ),
+              ],
             ),
-          ],
+          ),
         ],
+      ],
     );
   }
 

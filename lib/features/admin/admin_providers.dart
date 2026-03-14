@@ -9,10 +9,7 @@ final isAddingNewProvider = StateProvider<bool>((ref) => false);
 /// Guard state for unsaved changes in the embedded Employee Card form.
 /// The form registers itself here; the list checks before switching selection.
 class EmployeeCardGuardState {
-  const EmployeeCardGuardState({
-    required this.isDirty,
-    this.performSave,
-  });
+  const EmployeeCardGuardState({required this.isDirty, this.performSave});
 
   final bool isDirty;
   final Future<bool> Function()? performSave;
@@ -20,7 +17,7 @@ class EmployeeCardGuardState {
 
 class EmployeeCardGuardNotifier extends StateNotifier<EmployeeCardGuardState> {
   EmployeeCardGuardNotifier()
-      : super(const EmployeeCardGuardState(isDirty: false, performSave: null));
+    : super(const EmployeeCardGuardState(isDirty: false, performSave: null));
 
   void setFormState(bool isDirty, Future<bool> Function()? performSave) {
     state = EmployeeCardGuardState(isDirty: isDirty, performSave: performSave);
@@ -33,5 +30,5 @@ class EmployeeCardGuardNotifier extends StateNotifier<EmployeeCardGuardState> {
 
 final employeeCardGuardProvider =
     StateNotifierProvider<EmployeeCardGuardNotifier, EmployeeCardGuardState>(
-  (ref) => EmployeeCardGuardNotifier(),
-);
+      (ref) => EmployeeCardGuardNotifier(),
+    );

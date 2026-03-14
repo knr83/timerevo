@@ -46,7 +46,10 @@ class AttendanceSettingsRepo {
     await _appSettings.set(_toleranceKey, minutes.toString());
   }
 
-  Future<void> write({required AttendanceMode mode, required int toleranceMinutes}) async {
+  Future<void> write({
+    required AttendanceMode mode,
+    required int toleranceMinutes,
+  }) async {
     await _appSettings.set(
       _modeKey,
       mode == AttendanceMode.fixed ? 'fixed' : 'flexible',

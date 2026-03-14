@@ -6,10 +6,10 @@ import '../../core/attendance_mode.dart';
 import '../../data/repositories/repo_providers.dart';
 
 final attendanceSettingsProvider =
-    AsyncNotifierProvider<AttendanceSettingsController,
-        ({AttendanceMode mode, int toleranceMinutes})>(
-  AttendanceSettingsController.new,
-);
+    AsyncNotifierProvider<
+      AttendanceSettingsController,
+      ({AttendanceMode mode, int toleranceMinutes})
+    >(AttendanceSettingsController.new);
 
 class AttendanceSettingsController
     extends AsyncNotifier<({AttendanceMode mode, int toleranceMinutes})> {

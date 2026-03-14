@@ -42,11 +42,7 @@ enum ClockErrorKind {
   noScheduleForDay,
 }
 
-enum ClockNeedsNoteKind {
-  lateCheckIn,
-  earlyCheckOut,
-  lateCheckOut,
-}
+enum ClockNeedsNoteKind { lateCheckIn, earlyCheckOut, lateCheckOut }
 
 class ClockNeedsNote extends ClockActionResult {
   const ClockNeedsNote(this.kind);
@@ -107,8 +103,7 @@ class ClockInUseCase {
         return const ClockError(ClockErrorKind.noScheduleForDay);
       }
       final nowMin = now.hour * 60 + now.minute;
-      final interval =
-          resolveIntervalForTime(nowMin, schedule.intervals);
+      final interval = resolveIntervalForTime(nowMin, schedule.intervals);
       if (interval == null) {
         return const ClockError(ClockErrorKind.noScheduleForDay);
       }
@@ -184,8 +179,7 @@ class ClockOutUseCase {
         // #endregion
         return const ClockError(ClockErrorKind.noOpenSession);
       }
-      final startMin =
-          sessionStartLocal.hour * 60 + sessionStartLocal.minute;
+      final startMin = sessionStartLocal.hour * 60 + sessionStartLocal.minute;
       final interval = resolveIntervalForTime(startMin, schedule.intervals);
       if (interval == null) {
         // Session started outside schedule intervals (e.g. in Flexible mode).
@@ -193,7 +187,8 @@ class ClockOutUseCase {
         // #region agent log
         debugLog(
           location: 'ClockOutUseCase:intervalNullAllowed',
-          message: 'Session start outside intervals - allowing clock-out without tolerance',
+          message:
+              'Session start outside intervals - allowing clock-out without tolerance',
           data: {'employeeId': employeeId, 'startMin': startMin},
           hypothesisId: 'H1',
         );
