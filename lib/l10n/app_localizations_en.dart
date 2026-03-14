@@ -1109,6 +1109,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalFilterSearch => 'Search';
 
   @override
+  String get journalFilterEmployee => 'Employee';
+
+  @override
+  String get journalScopeDay => 'Day';
+
+  @override
+  String get journalScopeWeek => 'Week';
+
+  @override
+  String get journalScopeMonth => 'Month';
+
+  @override
+  String get journalScopeInterval => 'Custom';
+
+  @override
   String get journalPresetToday => 'Today';
 
   @override
@@ -1141,6 +1156,57 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journalSaved => 'Saved.';
+
+  @override
+  String get journalViewTable => 'Table';
+
+  @override
+  String get journalViewTimeline => 'Timeline';
+
+  @override
+  String get journalViewDetailed => 'Detailed';
+
+  @override
+  String get journalIntervalLegendWork => 'Work';
+
+  @override
+  String get journalIntervalLegendApprovedAbsence => 'Approved absence';
+
+  @override
+  String get journalIntervalLegendOngoing => 'Ongoing';
+
+  @override
+  String get journalTimelineStateOngoing => 'Ongoing work';
+
+  @override
+  String get journalTimelineStatePresent => 'Present';
+
+  @override
+  String get journalTimelineStateApprovedAbsence => 'Approved absence';
+
+  @override
+  String get journalTimelineStateExpectedNoShow => 'Expected but no attendance';
+
+  @override
+  String get journalTimelineStateNoData => 'No data';
+
+  @override
+  String get journalTimelinePickRangeHint =>
+      'Pick a date range for timeline view.';
+
+  @override
+  String get journalNavPrev => 'Previous';
+
+  @override
+  String get journalNavNext => 'Next';
+
+  @override
+  String get journalIntervalNow => 'now';
+
+  @override
+  String journalIntervalDurationMinutes(int minutes) {
+    return '$minutes min';
+  }
 
   @override
   String durationHm(int hours, int minutes) {

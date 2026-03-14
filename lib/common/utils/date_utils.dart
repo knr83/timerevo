@@ -52,6 +52,32 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
   return localDayRangeUtcMs(now);
 }
 
+/// Single day range for [date] (local calendar day).
+({int fromUtcMs, int toUtcMs}) reportPeriodDay(DateTime date) {
+  final normalized = DateTime(date.year, date.month, date.day);
+  return localDayRangeUtcMs(normalized);
+}
+
+/// Week (Monday..Sunday) containing [date].
+({int fromUtcMs, int toUtcMs}) reportPeriodWeekContaining(DateTime date) {
+  final normalized = DateTime(date.year, date.month, date.day);
+  final weekday = normalized.weekday;
+  final startOfWeek = normalized.subtract(Duration(days: weekday - 1));
+  final endOfWeek = startOfWeek.add(const Duration(days: 6));
+  return (
+    fromUtcMs: startOfWeek.toUtc().millisecondsSinceEpoch,
+    toUtcMs: DateTime(
+      endOfWeek.year,
+      endOfWeek.month,
+      endOfWeek.day,
+      23,
+      59,
+      59,
+      999,
+    ).toUtc().millisecondsSinceEpoch,
+  );
+}
+
 /// Report period preset: current week (Monday..Sunday).
 ({int fromUtcMs, int toUtcMs}) reportPeriodWeek() {
   final now = DateTime.now();
@@ -68,6 +94,29 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
       endOfWeek.year,
       endOfWeek.month,
       endOfWeek.day,
+      23,
+      59,
+      59,
+      999,
+    ).toUtc().millisecondsSinceEpoch,
+  );
+}
+
+/// Month containing [date] as UTC milliseconds (day 1 through last day).
+({int fromUtcMs, int toUtcMs}) reportPeriodMonthContaining(DateTime date) {
+  final normalized = DateTime(date.year, date.month, date.day);
+  final start = DateTime(normalized.year, normalized.month, 1);
+  final end = DateTime(
+    normalized.year,
+    normalized.month + 1,
+    1,
+  ).subtract(const Duration(days: 1));
+  return (
+    fromUtcMs: start.toUtc().millisecondsSinceEpoch,
+    toUtcMs: DateTime(
+      end.year,
+      end.month,
+      end.day,
       23,
       59,
       59,

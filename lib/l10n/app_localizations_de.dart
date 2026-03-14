@@ -1117,6 +1117,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalFilterSearch => 'Suchen';
 
   @override
+  String get journalFilterEmployee => 'Mitarbeiter';
+
+  @override
+  String get journalScopeDay => 'Tag';
+
+  @override
+  String get journalScopeWeek => 'Woche';
+
+  @override
+  String get journalScopeMonth => 'Monat';
+
+  @override
+  String get journalScopeInterval => 'Benutzerdefiniert';
+
+  @override
   String get journalPresetToday => 'Heute';
 
   @override
@@ -1151,6 +1166,58 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get journalSaved => 'Gespeichert.';
+
+  @override
+  String get journalViewTable => 'Tabelle';
+
+  @override
+  String get journalViewTimeline => 'Zeitleiste';
+
+  @override
+  String get journalViewDetailed => 'Detailliert';
+
+  @override
+  String get journalIntervalLegendWork => 'Arbeit';
+
+  @override
+  String get journalIntervalLegendApprovedAbsence => 'Genehmigte Abwesenheit';
+
+  @override
+  String get journalIntervalLegendOngoing => 'Läuft';
+
+  @override
+  String get journalTimelineStateOngoing => 'Arbeit läuft';
+
+  @override
+  String get journalTimelineStatePresent => 'Anwesend';
+
+  @override
+  String get journalTimelineStateApprovedAbsence => 'Genehmigte Abwesenheit';
+
+  @override
+  String get journalTimelineStateExpectedNoShow =>
+      'Erwartet, keine Anwesenheit';
+
+  @override
+  String get journalTimelineStateNoData => 'Keine Daten';
+
+  @override
+  String get journalTimelinePickRangeHint =>
+      'Wählen Sie einen Datumsbereich für die Zeitleistenansicht.';
+
+  @override
+  String get journalNavPrev => 'Zurück';
+
+  @override
+  String get journalNavNext => 'Weiter';
+
+  @override
+  String get journalIntervalNow => 'jetzt';
+
+  @override
+  String journalIntervalDurationMinutes(int minutes) {
+    return '$minutes Min.';
+  }
 
   @override
   String durationHm(int hours, int minutes) {

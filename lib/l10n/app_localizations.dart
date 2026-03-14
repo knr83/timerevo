@@ -2080,6 +2080,36 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get journalFilterSearch;
 
+  /// No description provided for @journalFilterEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get journalFilterEmployee;
+
+  /// No description provided for @journalScopeDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Day'**
+  String get journalScopeDay;
+
+  /// No description provided for @journalScopeWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get journalScopeWeek;
+
+  /// No description provided for @journalScopeMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get journalScopeMonth;
+
+  /// No description provided for @journalScopeInterval.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get journalScopeInterval;
+
   /// No description provided for @journalPresetToday.
   ///
   /// In en, this message translates to:
@@ -2145,6 +2175,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved.'**
   String get journalSaved;
+
+  /// No description provided for @journalViewTable.
+  ///
+  /// In en, this message translates to:
+  /// **'Table'**
+  String get journalViewTable;
+
+  /// No description provided for @journalViewTimeline.
+  ///
+  /// In en, this message translates to:
+  /// **'Timeline'**
+  String get journalViewTimeline;
+
+  /// No description provided for @journalViewDetailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Detailed'**
+  String get journalViewDetailed;
+
+  /// No description provided for @journalIntervalLegendWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Work'**
+  String get journalIntervalLegendWork;
+
+  /// No description provided for @journalIntervalLegendApprovedAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved absence'**
+  String get journalIntervalLegendApprovedAbsence;
+
+  /// No description provided for @journalIntervalLegendOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing'**
+  String get journalIntervalLegendOngoing;
+
+  /// No description provided for @journalTimelineStateOngoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Ongoing work'**
+  String get journalTimelineStateOngoing;
+
+  /// No description provided for @journalTimelineStatePresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Present'**
+  String get journalTimelineStatePresent;
+
+  /// No description provided for @journalTimelineStateApprovedAbsence.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved absence'**
+  String get journalTimelineStateApprovedAbsence;
+
+  /// No description provided for @journalTimelineStateExpectedNoShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Expected but no attendance'**
+  String get journalTimelineStateExpectedNoShow;
+
+  /// No description provided for @journalTimelineStateNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No data'**
+  String get journalTimelineStateNoData;
+
+  /// No description provided for @journalTimelinePickRangeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a date range for timeline view.'**
+  String get journalTimelinePickRangeHint;
+
+  /// No description provided for @journalNavPrev.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get journalNavPrev;
+
+  /// No description provided for @journalNavNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get journalNavNext;
+
+  /// No description provided for @journalIntervalNow.
+  ///
+  /// In en, this message translates to:
+  /// **'now'**
+  String get journalIntervalNow;
+
+  /// No description provided for @journalIntervalDurationMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes} min'**
+  String journalIntervalDurationMinutes(int minutes);
 
   /// No description provided for @durationHm.
   ///

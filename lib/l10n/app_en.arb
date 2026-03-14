@@ -542,6 +542,11 @@
   "journalFilterStatusOpen": "Open",
   "journalFilterStatusClosed": "Closed",
   "journalFilterSearch": "Search",
+  "journalFilterEmployee": "Employee",
+  "journalScopeDay": "Day",
+  "journalScopeWeek": "Week",
+  "journalScopeMonth": "Month",
+  "journalScopeInterval": "Custom",
   "journalPresetToday": "Today",
   "journalPresetWeek": "Week",
   "journalPresetMonth": "Month",
@@ -553,6 +558,27 @@
   "journalErrorCrossDay": "Start and end must be on the same day.",
   "journalUpdateReasonHint": "Required when changing start or end time",
   "journalSaved": "Saved.",
+  "journalViewTable": "Table",
+  "journalViewTimeline": "Timeline",
+  "journalViewDetailed": "Detailed",
+  "journalIntervalLegendWork": "Work",
+  "journalIntervalLegendApprovedAbsence": "Approved absence",
+  "journalIntervalLegendOngoing": "Ongoing",
+  "journalTimelineStateOngoing": "Ongoing work",
+  "journalTimelineStatePresent": "Present",
+  "journalTimelineStateApprovedAbsence": "Approved absence",
+  "journalTimelineStateExpectedNoShow": "Expected but no attendance",
+  "journalTimelineStateNoData": "No data",
+  "journalTimelinePickRangeHint": "Pick a date range for timeline view.",
+  "journalNavPrev": "Previous",
+  "journalNavNext": "Next",
+  "journalIntervalNow": "now",
+  "journalIntervalDurationMinutes": "{minutes} min",
+  "@journalIntervalDurationMinutes": {
+    "placeholders": {
+      "minutes": { "type": "int" }
+    }
+  },
   "durationHm": "{hours}h {minutes}m",
   "@durationHm": {
     "placeholders": {

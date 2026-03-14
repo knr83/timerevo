@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import '../core/domain_errors.dart';
+import '../core/journal_interval_projection.dart';
 import '../core/employee_pin_status.dart';
 import '../core/pin_validation.dart';
 import '../common/utils/date_utils.dart';
@@ -7,6 +10,8 @@ import 'entities/employee_day_report_row.dart';
 import 'entities/employee_details.dart';
 import 'entities/employee_info.dart';
 import 'entities/employee_report_row_info.dart';
+import 'entities/journal_day_overview_row.dart';
+import 'entities/journal_day_state.dart';
 import 'entities/schedule_entities.dart';
 import 'entities/session_info.dart';
 import 'entities/session_with_employee_info.dart';
@@ -397,6 +402,431 @@ class EmployeeDayReportUseCase {
     fromUtcMs: fromUtcMs,
     toUtcMs: toUtcMs,
   ).first;
+}
+
+/// Use case for Journal timeline overview: per-day, per-employee states.
+/// Batch-oriented: fetches sessions and employees via streams, then aggregates in memory.
+class JournalDayOverviewUseCase {
+  JournalDayOverviewUseCase(
+    this._sessionsRepo,
+    this._absencesRepo,
+    this._schedulesRepo,
+    this._employeesRepo,
+  );
+  final ISessionsRepo _sessionsRepo;
+  final IAbsencesRepo _absencesRepo;
+  final ISchedulesRepo _schedulesRepo;
+  final IEmployeesRepo _employeesRepo;
+
+  Stream<List<JournalDayOverviewRow>> streamDayOverview({
+    int? employeeId,
+    required int fromUtcMs,
+    required int toUtcMs,
+  }) {
+    final controller =
+        StreamController<List<JournalDayOverviewRow>>.broadcast();
+    List<EmployeeInfo>? latestEmployees;
+    List<SessionWithEmployeeInfo>? latestSessions;
+
+    late StreamSubscription<void> subEmp;
+    late StreamSubscription<void> subSess;
+
+    void maybeEmit() async {
+      if (latestEmployees == null || latestSessions == null) return;
+      final rows = await _computeRows(
+        employees: latestEmployees!,
+        sessions: latestSessions!,
+        fromUtcMs: fromUtcMs,
+        toUtcMs: toUtcMs,
+        employeeIdFilter: employeeId,
+      );
+      if (!controller.isClosed) controller.add(rows);
+    }
+
+    subEmp = _employeesRepo.streamActiveEmployees().listen((e) {
+      latestEmployees = employeeId != null
+          ? e.where((x) => x.id == employeeId).toList()
+          : List<EmployeeInfo>.from(e);
+      maybeEmit();
+    });
+
+    subSess = _sessionsRepo
+        .streamSessionsWithEmployee(
+          employeeId: employeeId,
+          fromUtcMs: fromUtcMs,
+          toUtcMs: toUtcMs,
+        )
+        .listen((s) {
+          latestSessions = s;
+          maybeEmit();
+        });
+
+    controller.onCancel = () {
+      subEmp.cancel();
+      subSess.cancel();
+    };
+
+    return controller.stream;
+  }
+
+  Future<List<JournalDayOverviewRow>> _computeRows({
+    required List<EmployeeInfo> employees,
+    required List<SessionWithEmployeeInfo> sessions,
+    required int fromUtcMs,
+    required int toUtcMs,
+    int? employeeIdFilter,
+  }) async {
+    final fromLocal = DateTime.fromMillisecondsSinceEpoch(
+      fromUtcMs,
+      isUtc: true,
+    ).toLocal();
+    final toLocal = DateTime.fromMillisecondsSinceEpoch(
+      toUtcMs,
+      isUtc: true,
+    ).toLocal();
+    final fromDate = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
+    final toDate = DateTime(toLocal.year, toLocal.month, toLocal.day);
+    final fromYmd = dateToYmd(fromDate);
+    final toYmd = dateToYmd(toDate);
+
+    final employeeIds = employees.map((e) => e.id).toSet();
+    if (employeeIdFilter != null && !employeeIds.contains(employeeIdFilter)) {
+      return [];
+    }
+
+    final workedByEmpYmd = <int, Map<String, int>>{};
+    final ongoingByEmpYmd = <int, Set<String>>{};
+    for (final empId in employeeIds) {
+      workedByEmpYmd[empId] = <String, int>{};
+      ongoingByEmpYmd[empId] = <String>{};
+    }
+
+    for (
+      var d = fromDate;
+      !d.isAfter(toDate);
+      d = d.add(const Duration(days: 1))
+    ) {
+      final ymd = dateToYmd(d);
+      for (final empId in employeeIds) {
+        workedByEmpYmd[empId]![ymd] = 0;
+      }
+    }
+
+    for (final sw in sessions) {
+      final empId = sw.employee.id;
+      if (!employeeIds.contains(empId)) continue;
+      final s = sw.session;
+      final startLocal = DateTime.fromMillisecondsSinceEpoch(
+        s.startTs,
+        isUtc: true,
+      ).toLocal();
+      final ymd = dateToYmd(startLocal);
+      if (!workedByEmpYmd[empId]!.containsKey(ymd)) continue;
+      if (s.endTs == null) {
+        ongoingByEmpYmd[empId]!.add(ymd);
+      } else {
+        workedByEmpYmd[empId]![ymd] =
+            workedByEmpYmd[empId]![ymd]! + (s.endTs! - s.startTs);
+      }
+    }
+
+    final absenceByEmpYmd = <int, Set<String>>{};
+    final absenceFutures = employees.map(
+      (e) => _absencesRepo.getApprovedAbsenceRangesForEmployeeInPeriod(
+        e.id,
+        fromYmd,
+        toYmd,
+      ),
+    );
+    final absenceRangesList = await Future.wait(absenceFutures);
+    for (var i = 0; i < employees.length; i++) {
+      final empId = employees[i].id;
+      final set = <String>{};
+      for (final range in absenceRangesList[i]) {
+        var d = DateTime(
+          range.dateFrom.year,
+          range.dateFrom.month,
+          range.dateFrom.day,
+        );
+        final end = DateTime(
+          range.dateTo.year,
+          range.dateTo.month,
+          range.dateTo.day,
+        );
+        while (!d.isAfter(end)) {
+          set.add(dateToYmd(d));
+          d = d.add(const Duration(days: 1));
+        }
+      }
+      absenceByEmpYmd[empId] = set;
+    }
+
+    final scheduleCache = <String, ResolvedSchedule>{};
+
+    Future<ResolvedSchedule> getSchedule(int empId, DateTime date) async {
+      final ymd = dateToYmd(date);
+      final key = '$empId:$ymd';
+      final cached = scheduleCache[key];
+      if (cached != null) return cached;
+      final s = await _schedulesRepo.resolveSchedule(
+        employeeId: empId,
+        dateLocal: date,
+      );
+      scheduleCache[key] = s;
+      return s;
+    }
+
+    final result = <JournalDayOverviewRow>[];
+    for (final emp in employees) {
+      final cells = <JournalDayState>[];
+      var d = fromDate;
+      while (!d.isAfter(toDate)) {
+        final ymd = dateToYmd(d);
+        final hasOngoing = ongoingByEmpYmd[emp.id]?.contains(ymd) ?? false;
+        final workedMs = workedByEmpYmd[emp.id]?[ymd] ?? 0;
+        final hasWorked = workedMs > 0;
+        final hasAbsence = absenceByEmpYmd[emp.id]?.contains(ymd) ?? false;
+        final schedule = await getSchedule(emp.id, d);
+        final hasSchedule = schedule.source != 'none';
+
+        final state = _resolveState(
+          hasOngoing: hasOngoing,
+          hasWorked: hasWorked,
+          hasAbsence: hasAbsence,
+          hasSchedule: hasSchedule,
+        );
+        cells.add(state);
+        d = d.add(const Duration(days: 1));
+      }
+      result.add(
+        JournalDayOverviewRow(
+          employeeId: emp.id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          cells: cells,
+        ),
+      );
+    }
+    return result;
+  }
+
+  JournalDayState _resolveState({
+    required bool hasOngoing,
+    required bool hasWorked,
+    required bool hasAbsence,
+    required bool hasSchedule,
+  }) {
+    if (hasOngoing) return JournalDayState.ongoing;
+    if (hasWorked) return JournalDayState.present;
+    if (hasAbsence) return JournalDayState.approvedAbsence;
+    if (hasSchedule) return JournalDayState.expectedNoShow;
+    return JournalDayState.noData;
+  }
+}
+
+/// Use case for Journal detailed timeline: interval-level data per day per employee.
+/// Clips intervals to the allowed working window. Returns display-oriented projections.
+class JournalIntervalOverviewUseCase {
+  JournalIntervalOverviewUseCase(
+    this._sessionsRepo,
+    this._absencesRepo,
+    this._employeesRepo,
+  );
+  final ISessionsRepo _sessionsRepo;
+  final IAbsencesRepo _absencesRepo;
+  final IEmployeesRepo _employeesRepo;
+
+  Stream<List<JournalIntervalRow>> streamIntervalOverview({
+    int? employeeId,
+    required int fromUtcMs,
+    required int toUtcMs,
+    required int startMin,
+    required int endMin,
+  }) {
+    final controller = StreamController<List<JournalIntervalRow>>.broadcast();
+    List<EmployeeInfo>? latestEmployees;
+    List<SessionWithEmployeeInfo>? latestSessions;
+
+    late StreamSubscription<void> subEmp;
+    late StreamSubscription<void> subSess;
+
+    void maybeEmit() async {
+      if (latestEmployees == null || latestSessions == null) return;
+      final rows = await _computeRows(
+        employees: latestEmployees!,
+        sessions: latestSessions!,
+        fromUtcMs: fromUtcMs,
+        toUtcMs: toUtcMs,
+        startMin: startMin,
+        endMin: endMin,
+        employeeIdFilter: employeeId,
+      );
+      if (!controller.isClosed) controller.add(rows);
+    }
+
+    subEmp = _employeesRepo.streamActiveEmployees().listen((e) {
+      latestEmployees = employeeId != null
+          ? e.where((x) => x.id == employeeId).toList()
+          : List<EmployeeInfo>.from(e);
+      maybeEmit();
+    });
+
+    subSess = _sessionsRepo
+        .streamSessionsWithEmployee(
+          employeeId: employeeId,
+          fromUtcMs: fromUtcMs,
+          toUtcMs: toUtcMs,
+        )
+        .listen((s) {
+          latestSessions = s;
+          maybeEmit();
+        });
+
+    controller.onCancel = () {
+      subEmp.cancel();
+      subSess.cancel();
+    };
+
+    return controller.stream;
+  }
+
+  Future<List<JournalIntervalRow>> _computeRows({
+    required List<EmployeeInfo> employees,
+    required List<SessionWithEmployeeInfo> sessions,
+    required int fromUtcMs,
+    required int toUtcMs,
+    required int startMin,
+    required int endMin,
+    int? employeeIdFilter,
+  }) async {
+    final fromLocal = DateTime.fromMillisecondsSinceEpoch(
+      fromUtcMs,
+      isUtc: true,
+    ).toLocal();
+    final toLocal = DateTime.fromMillisecondsSinceEpoch(
+      toUtcMs,
+      isUtc: true,
+    ).toLocal();
+    final fromDate = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
+    final toDate = DateTime(toLocal.year, toLocal.month, toLocal.day);
+    final fromYmd = dateToYmd(fromDate);
+    final toYmd = dateToYmd(toDate);
+    final nowUtcMs = DateTime.now().toUtc().millisecondsSinceEpoch;
+
+    final employeeIds = employees.map((e) => e.id).toSet();
+    if (employeeIdFilter != null && !employeeIds.contains(employeeIdFilter)) {
+      return [];
+    }
+
+    final absenceByEmpYmd = <int, Set<String>>{};
+    final absenceFutures = employees.map(
+      (e) => _absencesRepo.getApprovedAbsenceRangesForEmployeeInPeriod(
+        e.id,
+        fromYmd,
+        toYmd,
+      ),
+    );
+    final absenceRangesList = await Future.wait(absenceFutures);
+    for (var i = 0; i < employees.length; i++) {
+      final empId = employees[i].id;
+      final set = <String>{};
+      for (final range in absenceRangesList[i]) {
+        var d = DateTime(
+          range.dateFrom.year,
+          range.dateFrom.month,
+          range.dateFrom.day,
+        );
+        final end = DateTime(
+          range.dateTo.year,
+          range.dateTo.month,
+          range.dateTo.day,
+        );
+        while (!d.isAfter(end)) {
+          set.add(dateToYmd(d));
+          d = d.add(const Duration(days: 1));
+        }
+      }
+      absenceByEmpYmd[empId] = set;
+    }
+
+    final result = <JournalIntervalRow>[];
+    for (final emp in employees) {
+      final cells = <List<JournalIntervalItem>>[];
+      var d = fromDate;
+      while (!d.isAfter(toDate)) {
+        final ymd = dateToYmd(d);
+        final dayStart = DateTime(d.year, d.month, d.day);
+        final windowStart = dayStart
+            .add(Duration(minutes: startMin))
+            .toUtc()
+            .millisecondsSinceEpoch;
+        final windowEnd = dayStart
+            .add(Duration(minutes: endMin))
+            .toUtc()
+            .millisecondsSinceEpoch;
+
+        final intervals = <JournalIntervalItem>[];
+
+        for (final sw in sessions) {
+          if (sw.employee.id != emp.id) continue;
+          final s = sw.session;
+          final startLocal = DateTime.fromMillisecondsSinceEpoch(
+            s.startTs,
+            isUtc: true,
+          ).toLocal();
+          if (dateToYmd(startLocal) != ymd) continue;
+
+          final effectiveEnd = s.endTs ?? nowUtcMs;
+          if (!isSameLocalCalendarDay(s.startTs, effectiveEnd)) continue;
+
+          var clipStart = s.startTs;
+          var clipEnd = effectiveEnd;
+          if (s.endTs == null) {
+            clipEnd = effectiveEnd < windowEnd ? effectiveEnd : windowEnd;
+          }
+          if (clipStart < windowStart) clipStart = windowStart;
+          if (clipEnd > windowEnd) clipEnd = windowEnd;
+          if (clipStart >= clipEnd) continue;
+
+          final kind = s.endTs == null
+              ? JournalIntervalKind.ongoing
+              : JournalIntervalKind.work;
+          intervals.add(
+            JournalIntervalItem(
+              kind: kind,
+              startUtcMs: clipStart,
+              endUtcMs: clipEnd,
+            ),
+          );
+        }
+
+        final hasAbsence = absenceByEmpYmd[emp.id]?.contains(ymd) ?? false;
+        if (hasAbsence) {
+          intervals.add(
+            JournalIntervalItem(
+              kind: JournalIntervalKind.absence,
+              startUtcMs: windowStart,
+              endUtcMs: windowEnd,
+            ),
+          );
+        }
+
+        intervals.sort((a, b) => a.startUtcMs.compareTo(b.startUtcMs));
+        cells.add(intervals);
+        d = d.add(const Duration(days: 1));
+      }
+
+      result.add(
+        JournalIntervalRow(
+          employeeId: emp.id,
+          firstName: emp.firstName,
+          lastName: emp.lastName,
+          cells: cells,
+        ),
+      );
+    }
+    return result;
+  }
 }
 
 /// Terminal use case for employee PIN verification and policy acknowledgment.

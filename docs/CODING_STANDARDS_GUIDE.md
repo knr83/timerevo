@@ -146,6 +146,13 @@ Business logic belongs in use cases, controllers, or repositories—not in widge
 
 ## H. PR Checklist
 
+Before commit, run the same checks as the CI pipeline:
+
+- [ ] `dart format --output=none --set-exit-if-changed .` passes (fix with `dart format .` if needed)
+- [ ] `flutter analyze` passes
+
+Other checks:
+
 - [ ] No new imports from `lib/data/` in `lib/features/` or `lib/common/` (use use cases/controllers instead)
 - [ ] No Drift entities in UI — use domain types where available
 - [ ] No `DataException` in UI catch blocks — catch `DomainException` only
@@ -157,7 +164,6 @@ Business logic belongs in use cases, controllers, or repositories—not in widge
 - [ ] No empty catch blocks (or documented if intentional)
 - [ ] No sensitive data in logs
 - [ ] New repos implement domain ports; providers return interface type
-- [ ] `flutter analyze` passes
 - [ ] `flutter analyze` returns **No issues found** (do not introduce new infos/warnings/errors)
 
 ---

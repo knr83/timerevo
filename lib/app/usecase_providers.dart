@@ -61,6 +61,26 @@ final employeeDayReportUseCaseProvider = Provider<EmployeeDayReportUseCase>((
   );
 });
 
+final journalDayOverviewUseCaseProvider = Provider<JournalDayOverviewUseCase>((
+  ref,
+) {
+  return JournalDayOverviewUseCase(
+    ref.watch(sessionsRepoProvider),
+    ref.watch(absencesRepoProvider),
+    ref.watch(schedulesRepoProvider),
+    ref.watch(employeesRepoProvider),
+  );
+});
+
+final journalIntervalOverviewUseCaseProvider =
+    Provider<JournalIntervalOverviewUseCase>((ref) {
+      return JournalIntervalOverviewUseCase(
+        ref.watch(sessionsRepoProvider),
+        ref.watch(absencesRepoProvider),
+        ref.watch(employeesRepoProvider),
+      );
+    });
+
 /// Report filters (From/To date range, employee filter). Used by Reports page and watchReportWithNormProvider.
 /// Default period: current month.
 final reportFiltersProvider =

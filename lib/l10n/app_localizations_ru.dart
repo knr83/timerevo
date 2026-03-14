@@ -1113,6 +1113,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journalFilterSearch => 'Поиск';
 
   @override
+  String get journalFilterEmployee => 'Сотрудник';
+
+  @override
+  String get journalScopeDay => 'День';
+
+  @override
+  String get journalScopeWeek => 'Неделя';
+
+  @override
+  String get journalScopeMonth => 'Месяц';
+
+  @override
+  String get journalScopeInterval => 'Интервал';
+
+  @override
   String get journalPresetToday => 'Сегодня';
 
   @override
@@ -1146,6 +1161,57 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journalSaved => 'Сохранено.';
+
+  @override
+  String get journalViewTable => 'Таблица';
+
+  @override
+  String get journalViewTimeline => 'Временная шкала';
+
+  @override
+  String get journalViewDetailed => 'По интервалам';
+
+  @override
+  String get journalIntervalLegendWork => 'Работа';
+
+  @override
+  String get journalIntervalLegendApprovedAbsence => 'Утверждённое отсутствие';
+
+  @override
+  String get journalIntervalLegendOngoing => 'Идёт';
+
+  @override
+  String get journalTimelineStateOngoing => 'Работа идёт';
+
+  @override
+  String get journalTimelineStatePresent => 'Присутствует';
+
+  @override
+  String get journalTimelineStateApprovedAbsence => 'Утверждённое отсутствие';
+
+  @override
+  String get journalTimelineStateExpectedNoShow => 'Ожидался, не отметился';
+
+  @override
+  String get journalTimelineStateNoData => 'Нет данных';
+
+  @override
+  String get journalTimelinePickRangeHint =>
+      'Выберите диапазон дат для вида по дням.';
+
+  @override
+  String get journalNavPrev => 'Назад';
+
+  @override
+  String get journalNavNext => 'Вперёд';
+
+  @override
+  String get journalIntervalNow => 'сейчас';
+
+  @override
+  String journalIntervalDurationMinutes(int minutes) {
+    return '$minutes мин';
+  }
 
   @override
   String durationHm(int hours, int minutes) {
