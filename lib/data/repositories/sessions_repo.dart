@@ -1,7 +1,9 @@
 import 'package:drift/drift.dart';
 
 import '../../domain/entities/employee_info.dart';
+import '../../domain/entities/employee_status.dart';
 import '../../domain/entities/employee_report_row_info.dart';
+import '../../core/debug_session_log.dart';
 import '../../domain/entities/session_info.dart';
 import '../../domain/entities/session_ref.dart';
 import '../../domain/entities/session_with_employee_info.dart';
@@ -63,6 +65,24 @@ class SessionsRepo implements ISessionsRepo {
     return row != null ? SessionRef(id: row.id) : null;
   }
 
+  @override
+  Future<SessionInfo?> getOpenSessionInfoForEmployee(int employeeId) async {
+    final row = await _openSessionQuery(employeeId).getSingleOrNull();
+    // #region agent log
+    debugLog(
+      location: 'SessionsRepo:getOpenSessionInfoForEmployee',
+      message: 'Query result',
+      data: {
+        'employeeId': employeeId,
+        'found': row != null,
+        if (row != null) 'startTs': row.startTs,
+      },
+      hypothesisId: 'H2',
+    );
+    // #endregion
+    return row != null ? _toSessionInfo(row) : null;
+  }
+
   Future<WorkSession?> getOpenSessionForEmployeeRaw(int employeeId) {
     return _openSessionQuery(employeeId).getSingleOrNull();
   }
@@ -79,7 +99,7 @@ class SessionsRepo implements ISessionsRepo {
     id: e.id,
     firstName: e.firstName,
     lastName: e.lastName,
-    isActive: e.isActive == 1,
+    status: employeeStatusFromString(e.status),
     usePin: e.usePin == 1,
     policyAcknowledged: e.policyAcknowledged == 1,
   );
@@ -203,6 +223,7 @@ class SessionsRepo implements ISessionsRepo {
   @override
   Future<bool> closeOpenSession({
     required int employeeId,
+    String? note,
     String source = WorkSessionSourceDb.terminal,
     String? updatedBy,
   }) async {
@@ -219,6 +240,7 @@ class SessionsRepo implements ISessionsRepo {
               WorkSessionsCompanion(
                 endTs: Value(now),
                 status: const Value(WorkSessionStatusDb.closed),
+                note: Value(note),
                 source: Value(source),
                 updatedAt: Value(now),
                 updatedBy: Value(updatedBy),

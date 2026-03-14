@@ -1,14 +1,18 @@
 import 'dart:async';
 
+import '../core/attendance_mode.dart';
+import '../core/debug_session_log.dart';
 import '../core/domain_errors.dart';
 import '../core/journal_interval_projection.dart';
 import '../core/employee_pin_status.dart';
 import '../core/pin_validation.dart';
 import '../common/utils/date_utils.dart';
+import 'attendance_interval_resolver.dart';
 import 'entities/absence_with_employee_info.dart';
 import 'entities/employee_day_report_row.dart';
 import 'entities/employee_details.dart';
 import 'entities/employee_info.dart';
+import 'entities/employee_status.dart';
 import 'entities/employee_report_row_info.dart';
 import 'entities/journal_day_overview_row.dart';
 import 'entities/journal_day_state.dart';
@@ -35,6 +39,18 @@ enum ClockErrorKind {
   noOpenSession,
   employeeInactive,
   hasApprovedAbsence,
+  noScheduleForDay,
+}
+
+enum ClockNeedsNoteKind {
+  lateCheckIn,
+  earlyCheckOut,
+  lateCheckOut,
+}
+
+class ClockNeedsNote extends ClockActionResult {
+  const ClockNeedsNote(this.kind);
+  final ClockNeedsNoteKind kind;
 }
 
 class ClockError extends ClockActionResult {
@@ -43,17 +59,28 @@ class ClockError extends ClockActionResult {
 }
 
 class ClockInUseCase {
-  ClockInUseCase(this._sessionsRepo, this._employeesRepo, this._absencesRepo);
+  ClockInUseCase(
+    this._sessionsRepo,
+    this._employeesRepo,
+    this._absencesRepo,
+    this._schedulesRepo,
+  );
   final ISessionsRepo _sessionsRepo;
   final IEmployeesRepo _employeesRepo;
   final IAbsencesRepo _absencesRepo;
+  final ISchedulesRepo _schedulesRepo;
 
-  Future<ClockActionResult> call(int employeeId) async {
+  Future<ClockActionResult> call(
+    int employeeId, {
+    String? note,
+    required AttendanceMode attendanceMode,
+    required int toleranceMinutes,
+  }) async {
     final employee = await _employeesRepo.getEmployee(employeeId);
     if (employee == null) {
       return const ClockError(ClockErrorKind.employeeInactive);
     }
-    if (!employee.isActive) {
+    if (employee.status != EmployeeStatus.active) {
       return const ClockError(ClockErrorKind.employeeInactive);
     }
     final open = await _sessionsRepo.getOpenSessionForEmployee(employeeId);
@@ -68,17 +95,127 @@ class ClockInUseCase {
     if (hasAbsence) {
       return const ClockError(ClockErrorKind.hasApprovedAbsence);
     }
-    await _sessionsRepo.createOpenSession(employeeId: employeeId);
+
+    if (attendanceMode == AttendanceMode.fixed) {
+      final now = DateTime.now();
+      final todayLocal = DateTime(now.year, now.month, now.day);
+      final schedule = await _schedulesRepo.resolveSchedule(
+        employeeId: employeeId,
+        dateLocal: todayLocal,
+      );
+      if (schedule.isDayOff || schedule.intervals.isEmpty) {
+        return const ClockError(ClockErrorKind.noScheduleForDay);
+      }
+      final nowMin = now.hour * 60 + now.minute;
+      final interval =
+          resolveIntervalForTime(nowMin, schedule.intervals);
+      if (interval == null) {
+        return const ClockError(ClockErrorKind.noScheduleForDay);
+      }
+      if (nowMin > interval.startMin + toleranceMinutes) {
+        if (note == null || note.trim().isEmpty) {
+          return const ClockNeedsNote(ClockNeedsNoteKind.lateCheckIn);
+        }
+      }
+    }
+
+    await _sessionsRepo.createOpenSession(
+      employeeId: employeeId,
+      note: note?.trim().isNotEmpty == true ? note!.trim() : null,
+    );
     return const ClockSaved();
   }
 }
 
 class ClockOutUseCase {
-  ClockOutUseCase(this._sessionsRepo);
+  ClockOutUseCase(this._sessionsRepo, this._schedulesRepo);
   final ISessionsRepo _sessionsRepo;
+  final ISchedulesRepo _schedulesRepo;
 
-  Future<ClockActionResult> call(int employeeId) async {
-    final ok = await _sessionsRepo.closeOpenSession(employeeId: employeeId);
+  Future<ClockActionResult> call(
+    int employeeId, {
+    String? note,
+    required AttendanceMode attendanceMode,
+    required int toleranceMinutes,
+  }) async {
+    // #region agent log
+    debugLog(
+      location: 'ClockOutUseCase:entry',
+      message: 'ClockOut call',
+      data: {'employeeId': employeeId, 'attendanceMode': attendanceMode.name},
+      hypothesisId: 'H2',
+    );
+    // #endregion
+    final open = await _sessionsRepo.getOpenSessionInfoForEmployee(employeeId);
+    if (open == null) {
+      // #region agent log
+      debugLog(
+        location: 'ClockOutUseCase:openNull',
+        message: 'getOpenSessionInfoForEmployee returned null',
+        data: {'employeeId': employeeId},
+        hypothesisId: 'H2',
+      );
+      // #endregion
+      return const ClockError(ClockErrorKind.noOpenSession);
+    }
+
+    if (attendanceMode == AttendanceMode.fixed) {
+      final sessionStartLocal = DateTime.fromMillisecondsSinceEpoch(
+        open.startTs,
+        isUtc: true,
+      ).toLocal();
+      final sessionDate = DateTime(
+        sessionStartLocal.year,
+        sessionStartLocal.month,
+        sessionStartLocal.day,
+      );
+      final schedule = await _schedulesRepo.resolveSchedule(
+        employeeId: employeeId,
+        dateLocal: sessionDate,
+      );
+      if (schedule.isDayOff || schedule.intervals.isEmpty) {
+        // #region agent log
+        debugLog(
+          location: 'ClockOutUseCase:scheduleEmpty',
+          message: 'Schedule empty or day off',
+          data: {'employeeId': employeeId, 'sessionStartTs': open.startTs},
+          hypothesisId: 'H1',
+        );
+        // #endregion
+        return const ClockError(ClockErrorKind.noOpenSession);
+      }
+      final startMin =
+          sessionStartLocal.hour * 60 + sessionStartLocal.minute;
+      final interval = resolveIntervalForTime(startMin, schedule.intervals);
+      if (interval == null) {
+        // Session started outside schedule intervals (e.g. in Flexible mode).
+        // Allow clock-out without tolerance check; cannot enforce schedule rules.
+        // #region agent log
+        debugLog(
+          location: 'ClockOutUseCase:intervalNullAllowed',
+          message: 'Session start outside intervals - allowing clock-out without tolerance',
+          data: {'employeeId': employeeId, 'startMin': startMin},
+          hypothesisId: 'H1',
+        );
+        // #endregion
+      } else {
+        final now = DateTime.now();
+        final nowMin = now.hour * 60 + now.minute;
+        if (nowMin < interval.endMin - toleranceMinutes ||
+            nowMin > interval.endMin + toleranceMinutes) {
+          if (note == null || note.trim().isEmpty) {
+            return nowMin < interval.endMin - toleranceMinutes
+                ? const ClockNeedsNote(ClockNeedsNoteKind.earlyCheckOut)
+                : const ClockNeedsNote(ClockNeedsNoteKind.lateCheckOut);
+          }
+        }
+      }
+    }
+
+    final ok = await _sessionsRepo.closeOpenSession(
+      employeeId: employeeId,
+      note: note?.trim().isNotEmpty == true ? note!.trim() : null,
+    );
     if (!ok) return const ClockError(ClockErrorKind.noOpenSession);
     return const ClockSaved();
   }
@@ -989,8 +1126,10 @@ class EmployeesAdminUseCase {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -1000,6 +1139,7 @@ class EmployeesAdminUseCase {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,
@@ -1011,8 +1151,10 @@ class EmployeesAdminUseCase {
     code: code,
     firstName: firstName,
     lastName: lastName,
-    isActive: isActive,
+    status: status,
     hireDate: hireDate,
+    terminationDate: terminationDate,
+    vacationDaysPerYear: vacationDaysPerYear,
     employeeRole: employeeRole,
     usePin: usePin,
     useNfc: useNfc,
@@ -1022,6 +1164,7 @@ class EmployeesAdminUseCase {
     weeklyHours: weeklyHours,
     email: email,
     phone: phone,
+    secondaryPhone: secondaryPhone,
     department: department,
     jobTitle: jobTitle,
     internalComment: internalComment,
@@ -1036,8 +1179,10 @@ class EmployeesAdminUseCase {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -1047,6 +1192,7 @@ class EmployeesAdminUseCase {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,
@@ -1059,8 +1205,10 @@ class EmployeesAdminUseCase {
     code: code,
     firstName: firstName,
     lastName: lastName,
-    isActive: isActive,
+    status: status,
     hireDate: hireDate,
+    terminationDate: terminationDate,
+    vacationDaysPerYear: vacationDaysPerYear,
     employeeRole: employeeRole,
     usePin: usePin,
     useNfc: useNfc,
@@ -1070,6 +1218,7 @@ class EmployeesAdminUseCase {
     weeklyHours: weeklyHours,
     email: email,
     phone: phone,
+    secondaryPhone: secondaryPhone,
     department: department,
     jobTitle: jobTitle,
     internalComment: internalComment,

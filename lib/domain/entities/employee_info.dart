@@ -1,10 +1,12 @@
+import 'employee_status.dart';
+
 /// Minimal employee info for domain use cases. Data layer maps from Drift Employee.
 class EmployeeInfo {
   const EmployeeInfo({
     required this.id,
     required this.firstName,
     required this.lastName,
-    required this.isActive,
+    required this.status,
     this.usePin = false,
     this.policyAcknowledged = false,
   });
@@ -12,7 +14,7 @@ class EmployeeInfo {
   final int id;
   final String firstName;
   final String lastName;
-  final bool isActive;
+  final EmployeeStatus status;
   final bool usePin;
   final bool policyAcknowledged;
 }

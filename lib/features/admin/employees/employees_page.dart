@@ -9,9 +9,117 @@ import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_details.dart';
 import '../../../domain/entities/employee_info.dart';
+import '../../../domain/entities/employee_status.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../admin_providers.dart';
 import 'employee_card_dialog.dart';
+
+Future<void> _handleSelectEmployee(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+  int employeeId,
+) async {
+  final guard = ref.read(employeeCardGuardProvider);
+  if (!guard.isDirty) {
+    ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
+    ref.read(isAddingNewProvider.notifier).state = false;
+    return;
+  }
+  final action = await showDialog<_EmployeeListGuardAction>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.employeeUnsavedChangesTitle),
+      content: Text(l10n.employeeUnsavedChangesMessage),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
+          child: Text(l10n.commonCancel),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.discard),
+          child: Text(l10n.employeeDiscardChanges),
+        ),
+        FilledButton(
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
+          child: Text(l10n.commonSave),
+        ),
+      ],
+    ),
+  );
+  if (!context.mounted) return;
+  switch (action) {
+    case _EmployeeListGuardAction.save:
+      final ok = await guard.performSave?.call() ?? false;
+      if (context.mounted && ok) {
+        ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
+        ref.read(isAddingNewProvider.notifier).state = false;
+      }
+      break;
+    case _EmployeeListGuardAction.discard:
+      ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
+      ref.read(isAddingNewProvider.notifier).state = false;
+      break;
+    case _EmployeeListGuardAction.cancel:
+    case null:
+      break;
+  }
+}
+
+Future<void> _handleSelectNewEmployee(
+  BuildContext context,
+  WidgetRef ref,
+  AppLocalizations l10n,
+) async {
+  final guard = ref.read(employeeCardGuardProvider);
+  if (!guard.isDirty) {
+    ref.read(selectedEmployeeIdProvider.notifier).state = null;
+    ref.read(isAddingNewProvider.notifier).state = true;
+    return;
+  }
+  final action = await showDialog<_EmployeeListGuardAction>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.employeeUnsavedChangesTitle),
+      content: Text(l10n.employeeUnsavedChangesMessage),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
+          child: Text(l10n.commonCancel),
+        ),
+        TextButton(
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.discard),
+          child: Text(l10n.employeeDiscardChanges),
+        ),
+        FilledButton(
+          onPressed: () =>
+              Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
+          child: Text(l10n.commonSave),
+        ),
+      ],
+    ),
+  );
+  if (!context.mounted) return;
+  switch (action) {
+    case _EmployeeListGuardAction.save:
+      final ok = await guard.performSave?.call() ?? false;
+      if (context.mounted && ok) {
+        ref.read(selectedEmployeeIdProvider.notifier).state = null;
+        ref.read(isAddingNewProvider.notifier).state = true;
+      }
+      break;
+    case _EmployeeListGuardAction.discard:
+      ref.read(selectedEmployeeIdProvider.notifier).state = null;
+      ref.read(isAddingNewProvider.notifier).state = true;
+      break;
+    case _EmployeeListGuardAction.cancel:
+    case null:
+      break;
+  }
+}
 
 class EmployeesPage extends ConsumerWidget {
   const EmployeesPage({super.key});
@@ -28,15 +136,7 @@ class EmployeesPage extends ConsumerWidget {
       data: (employees) {
         final templates =
             templatesAsync.value ?? const <ScheduleTemplateInfo>[];
-        final effectiveSelectedId =
-            selectedId ??
-            (isAddingNew || employees.isEmpty ? null : employees.first.id);
-        if (effectiveSelectedId != selectedId && !isAddingNew) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            ref.read(selectedEmployeeIdProvider.notifier).state =
-                effectiveSelectedId;
-          });
-        }
+        final effectiveSelectedId = selectedId;
         EmployeeInfo? effectiveSelectedEmployee;
         if (effectiveSelectedId != null) {
           try {
@@ -68,7 +168,13 @@ class EmployeesPage extends ConsumerWidget {
                       isAddingNew: isAddingNew,
                       templates: templates,
                     )
-                  : Center(child: Text(l10n.employeesNoEmployeesYet)),
+                  : Center(
+                      child: Text(
+                        employees.isEmpty
+                            ? l10n.employeesNoEmployeesYet
+                            : l10n.employeesSelectFromList,
+                      ),
+                    ),
             ),
           ],
         );
@@ -84,6 +190,8 @@ class EmployeesPage extends ConsumerWidget {
     );
   }
 }
+
+enum _EmployeeListGuardAction { cancel, discard, save }
 
 class _EmployeesList extends ConsumerWidget {
   const _EmployeesList({
@@ -112,10 +220,7 @@ class _EmployeesList extends ConsumerWidget {
               ),
               const Spacer(),
               IconButton(
-                onPressed: () {
-                  ref.read(selectedEmployeeIdProvider.notifier).state = null;
-                  ref.read(isAddingNewProvider.notifier).state = true;
-                },
+                onPressed: () => _handleSelectNewEmployee(context, ref, l10n),
                 icon: const Icon(Symbols.add),
                 tooltip: l10n.commonAdd,
               ),
@@ -130,7 +235,7 @@ class _EmployeesList extends ConsumerWidget {
                     itemBuilder: (context, index) {
                       final e = employees[index];
                       final isSelected = e.id == selectedId && !isAddingNew;
-                      final isInactive = !e.isActive;
+                      final isInactive = e.status != EmployeeStatus.active;
                       return Opacity(
                         opacity: isInactive ? 0.6 : 1,
                         child: Card(
@@ -165,14 +270,12 @@ class _EmployeesList extends ConsumerWidget {
                               trailing: isSelected
                                   ? const Icon(Symbols.chevron_right)
                                   : null,
-                              onTap: () {
-                                ref
-                                    .read(selectedEmployeeIdProvider.notifier)
-                                    .state = e
-                                    .id;
-                                ref.read(isAddingNewProvider.notifier).state =
-                                    false;
-                              },
+                              onTap: () => _handleSelectEmployee(
+                                  context,
+                                  ref,
+                                  l10n,
+                                  e.id,
+                                ),
                             ),
                           ),
                         ),
@@ -261,19 +364,20 @@ class _EmployeeCardPanelState extends ConsumerState<_EmployeeCardPanel> {
     if (!_loaded || _suggestedCode == null) {
       return const Center(child: CircularProgressIndicator());
     }
-
-    return EmployeeCardDialog(
-      key: ValueKey(widget.employee?.id ?? 'new'),
-      existing: _loadedDetails,
-      templates: widget.templates,
-      initialTemplateId: _initialTemplateId,
-      suggestedCode: _suggestedCode!,
-      embedded: true,
-      onSaved: (newEmployeeId) {
-        ref.read(isAddingNewProvider.notifier).state = false;
-        ref.read(selectedEmployeeIdProvider.notifier).state =
-            newEmployeeId ?? widget.employee?.id;
-      },
+    return SizedBox.expand(
+      child: EmployeeCardDialog(
+        key: ValueKey(widget.employee?.id ?? 'new'),
+        existing: _loadedDetails,
+        templates: widget.templates,
+        initialTemplateId: _initialTemplateId,
+        suggestedCode: _suggestedCode!,
+        embedded: true,
+        onSaved: (newEmployeeId) {
+          ref.read(isAddingNewProvider.notifier).state = false;
+          ref.read(selectedEmployeeIdProvider.notifier).state =
+              newEmployeeId ?? widget.employee?.id;
+        },
+      ),
     );
   }
 }

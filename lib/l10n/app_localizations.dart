@@ -418,6 +418,42 @@ abstract class AppLocalizations {
   /// **'You have an approved absence today. Clock-in is not available.'**
   String get terminalErrorHasApprovedAbsence;
 
+  /// No description provided for @terminalErrorNoScheduleForDay.
+  ///
+  /// In en, this message translates to:
+  /// **'No scheduled work today.'**
+  String get terminalErrorNoScheduleForDay;
+
+  /// No description provided for @terminalNoteRequiredTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Note required'**
+  String get terminalNoteRequiredTitle;
+
+  /// No description provided for @terminalNoteRequiredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'A note is required for this attendance deviation.'**
+  String get terminalNoteRequiredMessage;
+
+  /// No description provided for @terminalNoteLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Note'**
+  String get terminalNoteLabel;
+
+  /// No description provided for @terminalNoteConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get terminalNoteConfirm;
+
+  /// No description provided for @terminalNoteCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get terminalNoteCancel;
+
   /// No description provided for @terminalOpenSince.
   ///
   /// In en, this message translates to:
@@ -748,6 +784,12 @@ abstract class AppLocalizations {
   /// **'No employees yet.'**
   String get employeesNoEmployeesYet;
 
+  /// No description provided for @employeesSelectFromList.
+  ///
+  /// In en, this message translates to:
+  /// **'Select an employee from the list.'**
+  String get employeesSelectFromList;
+
   /// No description provided for @employeesAddEmployee.
   ///
   /// In en, this message translates to:
@@ -771,6 +813,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Edit employee'**
   String get employeeDialogEditTitle;
+
+  /// No description provided for @employeeDialogNewTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New employee'**
+  String get employeeDialogNewTitle;
 
   /// No description provided for @employeeFirstName.
   ///
@@ -796,6 +844,72 @@ abstract class AppLocalizations {
   /// **'Active'**
   String get employeeActiveLabel;
 
+  /// No description provided for @employeeStatusLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get employeeStatusLabel;
+
+  /// No description provided for @employeeStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get employeeStatusActive;
+
+  /// No description provided for @employeeStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get employeeStatusInactive;
+
+  /// No description provided for @employeeStatusArchived.
+  ///
+  /// In en, this message translates to:
+  /// **'Archived'**
+  String get employeeStatusArchived;
+
+  /// No description provided for @employeeTerminationDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Termination date'**
+  String get employeeTerminationDateLabel;
+
+  /// No description provided for @employeeVacationDaysPerYearLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Vacation days per year'**
+  String get employeeVacationDaysPerYearLabel;
+
+  /// No description provided for @employeeSecondaryPhoneLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Secondary phone'**
+  String get employeeSecondaryPhoneLabel;
+
+  /// No description provided for @employeeStatusChangeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change status?'**
+  String get employeeStatusChangeConfirmTitle;
+
+  /// No description provided for @employeeStatusChangeConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Active employees are shown in the Terminal. Inactive and archived employees are not shown.'**
+  String get employeeStatusChangeConfirmMessage;
+
+  /// No description provided for @employeeStatusChangeConfirmConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get employeeStatusChangeConfirmConfirm;
+
+  /// No description provided for @employeeVacationDaysPerYearInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Must be 0 or more'**
+  String get employeeVacationDaysPerYearInvalid;
+
   /// No description provided for @employeeFirstLastRequired.
   ///
   /// In en, this message translates to:
@@ -819,6 +933,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Saved.'**
   String get employeeSaved;
+
+  /// No description provided for @employeeUnsavedChangesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsaved changes'**
+  String get employeeUnsavedChangesTitle;
+
+  /// No description provided for @employeeUnsavedChangesMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have unsaved changes. Save, discard, or cancel?'**
+  String get employeeUnsavedChangesMessage;
+
+  /// No description provided for @employeeDiscardChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Discard'**
+  String get employeeDiscardChanges;
 
   /// No description provided for @employeeDefaultScheduleSubtitle.
   ///
@@ -1198,6 +1330,12 @@ abstract class AppLocalizations {
   /// **'Schedule'**
   String get employeeSectionSchedule;
 
+  /// No description provided for @employeeScheduleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Schedule is required.'**
+  String get employeeScheduleRequired;
+
   /// No description provided for @employeeSectionPolicy.
   ///
   /// In en, this message translates to:
@@ -1209,6 +1347,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Record'**
   String get employeeSectionAudit;
+
+  /// No description provided for @employeeTabGeneral.
+  ///
+  /// In en, this message translates to:
+  /// **'General'**
+  String get employeeTabGeneral;
+
+  /// No description provided for @employeeTabContact.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact'**
+  String get employeeTabContact;
+
+  /// No description provided for @employeeTabTerminalAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Terminal Access'**
+  String get employeeTabTerminalAccess;
+
+  /// No description provided for @employeeTabAdditional.
+  ///
+  /// In en, this message translates to:
+  /// **'Additional'**
+  String get employeeTabAdditional;
 
   /// No description provided for @schedulesEmptyHint.
   ///
@@ -1587,6 +1749,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'High contrast (dark)'**
   String get settingsThemeHighContrastDark;
+
+  /// No description provided for @settingsAttendanceModeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance mode'**
+  String get settingsAttendanceModeLabel;
+
+  /// No description provided for @settingsAttendanceModeFlexible.
+  ///
+  /// In en, this message translates to:
+  /// **'Flexible'**
+  String get settingsAttendanceModeFlexible;
+
+  /// No description provided for @settingsAttendanceModeFixed.
+  ///
+  /// In en, this message translates to:
+  /// **'Fixed'**
+  String get settingsAttendanceModeFixed;
+
+  /// No description provided for @settingsAttendanceToleranceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tolerance (minutes)'**
+  String get settingsAttendanceToleranceLabel;
+
+  /// No description provided for @settingsAttendanceModeChangeConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change attendance mode?'**
+  String get settingsAttendanceModeChangeConfirmTitle;
+
+  /// No description provided for @settingsAttendanceModeChangeConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This affects terminal check-in and check-out behavior for all employees.'**
+  String get settingsAttendanceModeChangeConfirmMessage;
 
   /// No description provided for @settingsWorkingHoursLabel.
   ///

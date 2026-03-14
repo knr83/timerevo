@@ -6,6 +6,7 @@ import '../../core/domain_errors.dart';
 import '../../domain/entities/absence_info.dart';
 import '../../domain/entities/absence_with_employee_info.dart';
 import '../../domain/entities/employee_info.dart';
+import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/absences_repo_port.dart';
 import '../db/app_db.dart';
 import 'repo_guard.dart';
@@ -54,7 +55,7 @@ class AbsencesRepo implements IAbsencesRepo {
     id: e.id,
     firstName: e.firstName,
     lastName: e.lastName,
-    isActive: e.isActive == 1,
+    status: employeeStatusFromString(e.status),
     usePin: e.usePin == 1,
     policyAcknowledged: e.policyAcknowledged == 1,
   );

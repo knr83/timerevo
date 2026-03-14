@@ -51,7 +51,7 @@ Future<void> createIndexesAndConstraints(AppDb db) async {
   );
 
   await db.customStatement(
-    'CREATE INDEX IF NOT EXISTS idx_employees_is_active ON employees(is_active);',
+    'CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);',
   );
 }
 
@@ -260,6 +260,106 @@ CREATE TABLE IF NOT EXISTS app_settings (
         await db.customStatement(
           'DROP TABLE IF EXISTS employee_schedule_overrides;',
         );
+      }
+
+      if (from < 10) {
+        // Replace is_active with status enum; add termination_date,
+        // vacation_days_per_year, secondary_phone.
+        await db.transaction(() async {
+          final cols = await db
+              .customSelect('PRAGMA table_info(employees);')
+              .get();
+          final names = cols.map((r) => r.read<String>('name')).toSet();
+
+          if (names.contains('status')) {
+            // Already migrated (e.g. fresh install with new schema).
+            return;
+          }
+
+          // Add new columns.
+          const alterStatements = [
+            "ALTER TABLE employees ADD COLUMN status TEXT NOT NULL DEFAULT 'active';",
+            'ALTER TABLE employees ADD COLUMN termination_date INTEGER;',
+            'ALTER TABLE employees ADD COLUMN vacation_days_per_year INTEGER;',
+            'ALTER TABLE employees ADD COLUMN secondary_phone TEXT;',
+          ];
+          for (final sql in alterStatements) {
+            try {
+              await db.customStatement(sql);
+            } catch (_) {
+              // Column may already exist.
+            }
+          }
+
+          // Migrate is_active -> status (only if is_active still exists).
+          if (names.contains('is_active')) {
+            await db.customStatement('''
+UPDATE employees
+SET status = CASE WHEN is_active = 1 THEN 'active' ELSE 'inactive' END;
+''');
+          }
+
+          // Rebuild table to drop is_active.
+          if (names.contains('is_active')) {
+            await db.customStatement('PRAGMA foreign_keys=OFF;');
+            await db.customStatement('''
+CREATE TABLE employees_new (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','archived')),
+  termination_date INTEGER,
+  vacation_days_per_year INTEGER,
+  secondary_phone TEXT,
+  hire_date INTEGER,
+  employee_role TEXT NOT NULL DEFAULT 'employee',
+  use_pin INTEGER NOT NULL DEFAULT 0,
+  use_nfc INTEGER NOT NULL DEFAULT 0,
+  access_token TEXT,
+  access_note TEXT,
+  employment_type TEXT,
+  weekly_hours REAL,
+  email TEXT,
+  phone TEXT,
+  department TEXT,
+  job_title TEXT,
+  internal_comment TEXT,
+  policy_acknowledged INTEGER NOT NULL DEFAULT 0,
+  policy_acknowledged_at INTEGER,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER,
+  created_by TEXT,
+  updated_by TEXT
+);
+''');
+            await db.customStatement('''
+INSERT INTO employees_new (
+  id, code, first_name, last_name, status,
+  termination_date, vacation_days_per_year, secondary_phone,
+  hire_date, employee_role, use_pin, use_nfc,
+  access_token, access_note, employment_type, weekly_hours,
+  email, phone, department, job_title, internal_comment,
+  policy_acknowledged, policy_acknowledged_at,
+  created_at, updated_at, created_by, updated_by
+)
+SELECT
+  id, code, first_name, last_name, status,
+  termination_date, vacation_days_per_year, secondary_phone,
+  hire_date, employee_role, use_pin, use_nfc,
+  access_token, access_note, employment_type, weekly_hours,
+  email, phone, department, job_title, internal_comment,
+  policy_acknowledged, policy_acknowledged_at,
+  created_at, updated_at, created_by, updated_by
+FROM employees;
+''');
+            await db.customStatement('DROP TABLE employees;');
+            await db.customStatement(
+              'ALTER TABLE employees_new RENAME TO employees;',
+            );
+            await db.customStatement('PRAGMA foreign_keys=ON;');
+          }
+        });
       }
 
       await createIndexesAndConstraints(db);

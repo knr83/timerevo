@@ -193,6 +193,25 @@ class AppLocalizationsEn extends AppLocalizations {
       'You have an approved absence today. Clock-in is not available.';
 
   @override
+  String get terminalErrorNoScheduleForDay => 'No scheduled work today.';
+
+  @override
+  String get terminalNoteRequiredTitle => 'Note required';
+
+  @override
+  String get terminalNoteRequiredMessage =>
+      'A note is required for this attendance deviation.';
+
+  @override
+  String get terminalNoteLabel => 'Note';
+
+  @override
+  String get terminalNoteConfirm => 'Confirm';
+
+  @override
+  String get terminalNoteCancel => 'Cancel';
+
+  @override
   String terminalOpenSince(String time) {
     return 'OPEN session since $time';
   }
@@ -371,6 +390,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeesNoEmployeesYet => 'No employees yet.';
 
   @override
+  String get employeesSelectFromList => 'Select an employee from the list.';
+
+  @override
   String get employeesAddEmployee => 'Add';
 
   @override
@@ -384,6 +406,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeDialogEditTitle => 'Edit employee';
 
   @override
+  String get employeeDialogNewTitle => 'New employee';
+
+  @override
   String get employeeFirstName => 'First name';
 
   @override
@@ -394,6 +419,40 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeActiveLabel => 'Active';
+
+  @override
+  String get employeeStatusLabel => 'Status';
+
+  @override
+  String get employeeStatusActive => 'Active';
+
+  @override
+  String get employeeStatusInactive => 'Inactive';
+
+  @override
+  String get employeeStatusArchived => 'Archived';
+
+  @override
+  String get employeeTerminationDateLabel => 'Termination date';
+
+  @override
+  String get employeeVacationDaysPerYearLabel => 'Vacation days per year';
+
+  @override
+  String get employeeSecondaryPhoneLabel => 'Secondary phone';
+
+  @override
+  String get employeeStatusChangeConfirmTitle => 'Change status?';
+
+  @override
+  String get employeeStatusChangeConfirmMessage =>
+      'Active employees are shown in the Terminal. Inactive and archived employees are not shown.';
+
+  @override
+  String get employeeStatusChangeConfirmConfirm => 'Change';
+
+  @override
+  String get employeeVacationDaysPerYearInvalid => 'Must be 0 or more';
 
   @override
   String get employeeFirstLastRequired =>
@@ -411,6 +470,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeSaved => 'Saved.';
+
+  @override
+  String get employeeUnsavedChangesTitle => 'Unsaved changes';
+
+  @override
+  String get employeeUnsavedChangesMessage =>
+      'You have unsaved changes. Save, discard, or cancel?';
+
+  @override
+  String get employeeDiscardChanges => 'Discard';
 
   @override
   String employeeDefaultScheduleSubtitle(String name) {
@@ -617,10 +686,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeSectionSchedule => 'Schedule';
 
   @override
+  String get employeeScheduleRequired => 'Schedule is required.';
+
+  @override
   String get employeeSectionPolicy => 'Policy & Compliance';
 
   @override
   String get employeeSectionAudit => 'Record';
+
+  @override
+  String get employeeTabGeneral => 'General';
+
+  @override
+  String get employeeTabContact => 'Contact';
+
+  @override
+  String get employeeTabTerminalAccess => 'Terminal Access';
+
+  @override
+  String get employeeTabAdditional => 'Additional';
 
   @override
   String get schedulesEmptyHint => 'Create a schedule template.';
@@ -831,6 +915,26 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get settingsThemeHighContrastDark => 'High contrast (dark)';
+
+  @override
+  String get settingsAttendanceModeLabel => 'Attendance mode';
+
+  @override
+  String get settingsAttendanceModeFlexible => 'Flexible';
+
+  @override
+  String get settingsAttendanceModeFixed => 'Fixed';
+
+  @override
+  String get settingsAttendanceToleranceLabel => 'Tolerance (minutes)';
+
+  @override
+  String get settingsAttendanceModeChangeConfirmTitle =>
+      'Change attendance mode?';
+
+  @override
+  String get settingsAttendanceModeChangeConfirmMessage =>
+      'This affects terminal check-in and check-out behavior for all employees.';
 
   @override
   String get settingsWorkingHoursLabel => 'Allowed working time';

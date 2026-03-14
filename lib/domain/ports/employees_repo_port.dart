@@ -1,13 +1,14 @@
 import '../../core/employee_pin_status.dart';
 import '../entities/employee_details.dart';
 import '../entities/employee_info.dart';
+import '../entities/employee_status.dart';
 
 /// Port for employee data access. Use cases depend on this; data layer implements.
 abstract interface class IEmployeesRepo {
   Future<EmployeeInfo?> getEmployee(int id);
   Future<EmployeeDetails?> getEmployeeDetails(int id);
 
-  /// Stream of active employees (isActive=true), sorted by lastName, firstName.
+  /// Stream of active employees (status == active), sorted by lastName, firstName.
   Stream<List<EmployeeInfo>> streamActiveEmployees();
 
   /// Stream of all employees, sorted by lastName, firstName.
@@ -31,8 +32,10 @@ abstract interface class IEmployeesRepo {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -42,6 +45,7 @@ abstract interface class IEmployeesRepo {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,
@@ -56,8 +60,10 @@ abstract interface class IEmployeesRepo {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -67,6 +73,7 @@ abstract interface class IEmployeesRepo {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,

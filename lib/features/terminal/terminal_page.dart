@@ -9,7 +9,9 @@ import '../../app/auth/admin_auth_controller.dart';
 import '../../app/router.dart';
 import '../../app/terminal_providers.dart';
 import '../../app/usecase_providers.dart';
+import '../../app/attendance/attendance_settings_controller.dart';
 import '../../app/working_hours/working_hours_settings_controller.dart';
+import '../../core/attendance_mode.dart';
 import '../../common/pdf/employee_daily_pdf_export.dart';
 import '../../common/utils/date_time_picker.dart';
 import '../../common/utils/date_utils.dart';
@@ -17,6 +19,7 @@ import '../../common/utils/employee_display_name.dart';
 import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
 import '../../common/widgets/app_snack.dart';
+import '../../core/debug_session_log.dart';
 import '../../core/domain_errors.dart';
 import '../../core/diagnostic_log.dart';
 import '../../core/employee_pin_status.dart';
@@ -1114,8 +1117,9 @@ Future<void> _handleMyPdf(
 Future<void> _handleClockIn(
   BuildContext context,
   WidgetRef ref,
-  int employeeId,
-) async {
+  int employeeId, {
+  String? note,
+}) async {
   unawaited(
     DiagnosticLog.append(
       DiagnosticLogEntry(
@@ -1125,6 +1129,21 @@ Future<void> _handleClockIn(
     ),
   );
   final l10n = AppLocalizations.of(context);
+  // #region agent log
+  final attendanceAsync = ref.read(attendanceSettingsProvider);
+  debugLog(
+    location: '_handleClockIn:entry',
+    message: 'Clock-in attempt',
+    data: {
+      'employeeId': employeeId,
+      'attendanceLoading': attendanceAsync.isLoading,
+      'attendanceValue': attendanceAsync.value != null,
+    },
+    hypothesisId: 'H1',
+  );
+  // #endregion
+  final attendance = ref.read(attendanceSettingsProvider).value ??
+      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
   final workingHours =
       ref.read(workingHoursSettingsProvider).value ??
       (
@@ -1133,16 +1152,30 @@ Future<void> _handleClockIn(
       );
   final now = DateTime.now();
   final nowMin = now.hour * 60 + now.minute;
-  if (nowMin < workingHours.startMin) {
-    showAppSnack(context, l10n.terminalErrorClockInBeforeStart, isError: true);
-    return;
+  if (attendance.mode == AttendanceMode.flexible) {
+    if (nowMin < workingHours.startMin) {
+      showAppSnack(context, l10n.terminalErrorClockInBeforeStart, isError: true);
+      return;
+    }
+    if (nowMin > workingHours.endMin) {
+      showAppSnack(context, l10n.terminalErrorClockInAfterEnd, isError: true);
+      return;
+    }
   }
-  if (nowMin > workingHours.endMin) {
-    showAppSnack(context, l10n.terminalErrorClockInAfterEnd, isError: true);
-    return;
-  }
-  final result = await ref.read(clockInUseCaseProvider)(employeeId);
+  final result = await ref.read(clockInUseCaseProvider)(
+    employeeId,
+    note: note,
+    attendanceMode: attendance.mode,
+    toleranceMinutes: attendance.toleranceMinutes,
+  );
   if (!context.mounted) return;
+  if (result is ClockNeedsNote) {
+    final submittedNote = await _showMandatoryNoteDialog(context, l10n);
+    if (submittedNote != null && context.mounted) {
+      await _handleClockIn(context, ref, employeeId, note: submittedNote);
+    }
+    return;
+  }
   if (result is ClockSaved) {
     unawaited(
       DiagnosticLog.append(
@@ -1173,8 +1206,9 @@ Future<void> _handleClockIn(
 Future<void> _handleClockOut(
   BuildContext context,
   WidgetRef ref,
-  int employeeId,
-) async {
+  int employeeId, {
+  String? note,
+}) async {
   unawaited(
     DiagnosticLog.append(
       DiagnosticLogEntry(
@@ -1183,8 +1217,46 @@ Future<void> _handleClockOut(
       ),
     ),
   );
-  final result = await ref.read(clockOutUseCaseProvider)(employeeId);
+  // #region agent log
+  final attendanceOut = ref.read(attendanceSettingsProvider).value ??
+      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
+  debugLog(
+    location: '_handleClockOut:entry',
+    message: 'Clock-out attempt',
+    data: {'employeeId': employeeId, 'attendanceMode': attendanceOut.mode.name},
+    hypothesisId: 'H1,H2',
+  );
+  // #endregion
+  final attendance = ref.read(attendanceSettingsProvider).value ??
+      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
+  final result = await ref.read(clockOutUseCaseProvider)(
+    employeeId,
+    note: note,
+    attendanceMode: attendance.mode,
+    toleranceMinutes: attendance.toleranceMinutes,
+  );
   if (!context.mounted) return;
+  // #region agent log
+  debugLog(
+    location: '_handleClockOut:result',
+    message: 'Clock-out result',
+    data: {
+      'resultType': result.runtimeType.toString(),
+      'isClockSaved': result is ClockSaved,
+      'isClockError': result is ClockError,
+      if (result is ClockError) 'errorKind': result.kind.name,
+    },
+    hypothesisId: 'H1,H2,H3',
+  );
+  // #endregion
+  if (result is ClockNeedsNote) {
+    final l10n = AppLocalizations.of(context);
+    final submittedNote = await _showMandatoryNoteDialog(context, l10n);
+    if (submittedNote != null && context.mounted) {
+      await _handleClockOut(context, ref, employeeId, note: submittedNote);
+    }
+    return;
+  }
   if (result is ClockSaved) {
     unawaited(
       DiagnosticLog.append(
@@ -1244,14 +1316,99 @@ void _showClockResult(
   final l10n = AppLocalizations.of(context);
   final text = switch (result) {
     ClockSaved() => l10n.terminalSaved,
+    ClockNeedsNote() => l10n.terminalNoteRequiredMessage,
     ClockError(:final kind) => switch (kind) {
       ClockErrorKind.sessionAlreadyOpen => l10n.terminalErrorSessionAlreadyOpen,
       ClockErrorKind.noOpenSession => l10n.terminalErrorNoOpenSession,
       ClockErrorKind.employeeInactive => l10n.employeeInactive,
       ClockErrorKind.hasApprovedAbsence => l10n.terminalErrorHasApprovedAbsence,
+      ClockErrorKind.noScheduleForDay => l10n.terminalErrorNoScheduleForDay,
     },
   };
   showAppSnack(context, text, isError: result is ClockError);
+}
+
+Future<String?> _showMandatoryNoteDialog(
+  BuildContext context,
+  AppLocalizations l10n,
+) async {
+  return showDialog<String?>(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) => _MandatoryNoteDialog(
+      title: l10n.terminalNoteRequiredTitle,
+      message: l10n.terminalNoteRequiredMessage,
+      noteLabel: l10n.terminalNoteLabel,
+      confirmLabel: l10n.terminalNoteConfirm,
+      cancelLabel: l10n.terminalNoteCancel,
+    ),
+  );
+}
+
+class _MandatoryNoteDialog extends StatefulWidget {
+  const _MandatoryNoteDialog({
+    required this.title,
+    required this.message,
+    required this.noteLabel,
+    required this.confirmLabel,
+    required this.cancelLabel,
+  });
+
+  final String title;
+  final String message;
+  final String noteLabel;
+  final String confirmLabel;
+  final String cancelLabel;
+
+  @override
+  State<_MandatoryNoteDialog> createState() => _MandatoryNoteDialogState();
+}
+
+class _MandatoryNoteDialogState extends State<_MandatoryNoteDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      title: Text(widget.title),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(widget.message),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _controller,
+            decoration: InputDecoration(
+              labelText: widget.noteLabel,
+              border: const OutlineInputBorder(),
+            ),
+            maxLines: 3,
+            autofocus: true,
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(null),
+          child: Text(widget.cancelLabel),
+        ),
+        FilledButton(
+          onPressed: _controller.text.trim().isEmpty
+              ? null
+              : () => Navigator.of(context).pop(_controller.text.trim()),
+          child: Text(widget.confirmLabel),
+        ),
+      ],
+    );
+  }
 }
 
 /// Reusable animated checkmark with optional message. Runs scale + fade on mount.

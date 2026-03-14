@@ -5,9 +5,11 @@ import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../app/attendance/attendance_settings_controller.dart';
 import '../../../app/locale/locale_settings_controller.dart';
 import '../../../app/theme/theme_settings_controller.dart';
 import '../../../app/working_hours/working_hours_settings_controller.dart';
+import '../../../core/attendance_mode.dart';
 import '../../../common/utils/backup_error_messages.dart';
 import '../../../common/utils/time_format.dart';
 import '../../../common/widgets/app_snack.dart';
@@ -16,6 +18,144 @@ import '../../../app/backup_providers.dart';
 import '../../../app/diagnostic_export_providers.dart';
 import '../../../core/diagnostic_log.dart';
 import '../auth/change_pin_dialog.dart';
+
+class _ToleranceField extends StatefulWidget {
+  const _ToleranceField({
+    required this.initialValue,
+    required this.label,
+    required this.onSave,
+  });
+
+  final int initialValue;
+  final String label;
+  final void Function(int) onSave;
+
+  @override
+  State<_ToleranceField> createState() => _ToleranceFieldState();
+}
+
+class _ToleranceFieldState extends State<_ToleranceField> {
+  late TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(
+      text: widget.initialValue.toString(),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant _ToleranceField oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.initialValue != widget.initialValue) {
+      _controller.text = widget.initialValue.toString();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: 120,
+      child: TextField(
+        controller: _controller,
+        keyboardType: TextInputType.number,
+        decoration: InputDecoration(
+          labelText: widget.label,
+          border: const OutlineInputBorder(),
+        ),
+        onSubmitted: (v) {
+          final n = int.tryParse(v);
+          if (n != null && n >= 0) {
+            widget.onSave(n);
+          }
+        },
+      ),
+    );
+  }
+}
+
+class _AttendanceModeSection extends ConsumerWidget {
+  const _AttendanceModeSection({required this.l10n});
+
+  final AppLocalizations l10n;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final attendanceAsync = ref.watch(attendanceSettingsProvider);
+    final attendance = attendanceAsync.value;
+
+    if (attendance == null) {
+      return const SizedBox(
+        height: 48,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SegmentedButton<AttendanceMode>(
+          segments: [
+            ButtonSegment(
+              value: AttendanceMode.flexible,
+              label: Text(l10n.settingsAttendanceModeFlexible),
+            ),
+            ButtonSegment(
+              value: AttendanceMode.fixed,
+              label: Text(l10n.settingsAttendanceModeFixed),
+            ),
+          ],
+          selected: {attendance.mode},
+          onSelectionChanged: (selected) async {
+            final newMode = selected.first;
+            if (newMode == attendance.mode) return;
+            final confirmed = await showDialog<bool>(
+              context: context,
+              builder: (ctx) => AlertDialog(
+                title: Text(l10n.settingsAttendanceModeChangeConfirmTitle),
+                content: Text(
+                  l10n.settingsAttendanceModeChangeConfirmMessage,
+                ),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(ctx).pop(false),
+                    child: Text(l10n.commonCancel),
+                  ),
+                  FilledButton(
+                    onPressed: () => Navigator.of(ctx).pop(true),
+                    child: Text(l10n.commonOk),
+                  ),
+                ],
+              ),
+            );
+            if (confirmed == true && context.mounted) {
+              await ref
+                  .read(attendanceSettingsProvider.notifier)
+                  .setMode(newMode);
+            }
+          },
+        ),
+        if (attendance.mode == AttendanceMode.fixed) ...[
+          const SizedBox(height: 12),
+          _ToleranceField(
+            initialValue: attendance.toleranceMinutes,
+            label: l10n.settingsAttendanceToleranceLabel,
+            onSave: (n) => ref
+                .read(attendanceSettingsProvider.notifier)
+                .setTolerance(n),
+          ),
+        ],
+      ],
+    );
+  }
+}
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -167,6 +307,13 @@ class SettingsPage extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(height: 8),
+                  Text(
+                    l10n.settingsAttendanceModeLabel,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  _AttendanceModeSection(l10n: l10n),
+                  const SizedBox(height: 16),
                   Text(
                     l10n.settingsWorkingHoursLabel,
                     style: Theme.of(context).textTheme.titleSmall,

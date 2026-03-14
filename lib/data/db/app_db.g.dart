@@ -54,17 +54,49 @@ class $EmployeesTable extends Employees
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _isActiveMeta = const VerificationMeta(
-    'isActive',
-  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
-  late final GeneratedColumn<int> isActive = GeneratedColumn<int>(
-    'is_active',
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
     aliasedName,
     false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    $customConstraints:
+        'NOT NULL CHECK (status IN (\'active\',\'inactive\',\'archived\'))',
+    defaultValue: const Constant('active'),
+  );
+  static const VerificationMeta _terminationDateMeta = const VerificationMeta(
+    'terminationDate',
+  );
+  @override
+  late final GeneratedColumn<int> terminationDate = GeneratedColumn<int>(
+    'termination_date',
+    aliasedName,
+    true,
     type: DriftSqlType.int,
     requiredDuringInsert: false,
-    defaultValue: const Constant(1),
+  );
+  static const VerificationMeta _vacationDaysPerYearMeta =
+      const VerificationMeta('vacationDaysPerYear');
+  @override
+  late final GeneratedColumn<int> vacationDaysPerYear = GeneratedColumn<int>(
+    'vacation_days_per_year',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _secondaryPhoneMeta = const VerificationMeta(
+    'secondaryPhone',
+  );
+  @override
+  late final GeneratedColumn<String> secondaryPhone = GeneratedColumn<String>(
+    'secondary_phone',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _hireDateMeta = const VerificationMeta(
     'hireDate',
@@ -275,7 +307,10 @@ class $EmployeesTable extends Employees
     code,
     firstName,
     lastName,
-    isActive,
+    status,
+    terminationDate,
+    vacationDaysPerYear,
+    secondaryPhone,
     hireDate,
     employeeRole,
     usePin,
@@ -335,10 +370,37 @@ class $EmployeesTable extends Employees
     } else if (isInserting) {
       context.missing(_lastNameMeta);
     }
-    if (data.containsKey('is_active')) {
+    if (data.containsKey('status')) {
       context.handle(
-        _isActiveMeta,
-        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('termination_date')) {
+      context.handle(
+        _terminationDateMeta,
+        terminationDate.isAcceptableOrUnknown(
+          data['termination_date']!,
+          _terminationDateMeta,
+        ),
+      );
+    }
+    if (data.containsKey('vacation_days_per_year')) {
+      context.handle(
+        _vacationDaysPerYearMeta,
+        vacationDaysPerYear.isAcceptableOrUnknown(
+          data['vacation_days_per_year']!,
+          _vacationDaysPerYearMeta,
+        ),
+      );
+    }
+    if (data.containsKey('secondary_phone')) {
+      context.handle(
+        _secondaryPhoneMeta,
+        secondaryPhone.isAcceptableOrUnknown(
+          data['secondary_phone']!,
+          _secondaryPhoneMeta,
+        ),
       );
     }
     if (data.containsKey('hire_date')) {
@@ -503,10 +565,22 @@ class $EmployeesTable extends Employees
         DriftSqlType.string,
         data['${effectivePrefix}last_name'],
       )!,
-      isActive: attachedDatabase.typeMapping.read(
-        DriftSqlType.int,
-        data['${effectivePrefix}is_active'],
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
       )!,
+      terminationDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}termination_date'],
+      ),
+      vacationDaysPerYear: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}vacation_days_per_year'],
+      ),
+      secondaryPhone: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}secondary_phone'],
+      ),
       hireDate: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}hire_date'],
@@ -597,7 +671,10 @@ class Employee extends DataClass implements Insertable<Employee> {
   final String code;
   final String firstName;
   final String lastName;
-  final int isActive;
+  final String status;
+  final int? terminationDate;
+  final int? vacationDaysPerYear;
+  final String? secondaryPhone;
   final int? hireDate;
   final String employeeRole;
   final int usePin;
@@ -622,7 +699,10 @@ class Employee extends DataClass implements Insertable<Employee> {
     required this.code,
     required this.firstName,
     required this.lastName,
-    required this.isActive,
+    required this.status,
+    this.terminationDate,
+    this.vacationDaysPerYear,
+    this.secondaryPhone,
     this.hireDate,
     required this.employeeRole,
     required this.usePin,
@@ -650,7 +730,16 @@ class Employee extends DataClass implements Insertable<Employee> {
     map['code'] = Variable<String>(code);
     map['first_name'] = Variable<String>(firstName);
     map['last_name'] = Variable<String>(lastName);
-    map['is_active'] = Variable<int>(isActive);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || terminationDate != null) {
+      map['termination_date'] = Variable<int>(terminationDate);
+    }
+    if (!nullToAbsent || vacationDaysPerYear != null) {
+      map['vacation_days_per_year'] = Variable<int>(vacationDaysPerYear);
+    }
+    if (!nullToAbsent || secondaryPhone != null) {
+      map['secondary_phone'] = Variable<String>(secondaryPhone);
+    }
     if (!nullToAbsent || hireDate != null) {
       map['hire_date'] = Variable<int>(hireDate);
     }
@@ -707,7 +796,16 @@ class Employee extends DataClass implements Insertable<Employee> {
       code: Value(code),
       firstName: Value(firstName),
       lastName: Value(lastName),
-      isActive: Value(isActive),
+      status: Value(status),
+      terminationDate: terminationDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(terminationDate),
+      vacationDaysPerYear: vacationDaysPerYear == null && nullToAbsent
+          ? const Value.absent()
+          : Value(vacationDaysPerYear),
+      secondaryPhone: secondaryPhone == null && nullToAbsent
+          ? const Value.absent()
+          : Value(secondaryPhone),
       hireDate: hireDate == null && nullToAbsent
           ? const Value.absent()
           : Value(hireDate),
@@ -768,7 +866,12 @@ class Employee extends DataClass implements Insertable<Employee> {
       code: serializer.fromJson<String>(json['code']),
       firstName: serializer.fromJson<String>(json['firstName']),
       lastName: serializer.fromJson<String>(json['lastName']),
-      isActive: serializer.fromJson<int>(json['isActive']),
+      status: serializer.fromJson<String>(json['status']),
+      terminationDate: serializer.fromJson<int?>(json['terminationDate']),
+      vacationDaysPerYear: serializer.fromJson<int?>(
+        json['vacationDaysPerYear'],
+      ),
+      secondaryPhone: serializer.fromJson<String?>(json['secondaryPhone']),
       hireDate: serializer.fromJson<int?>(json['hireDate']),
       employeeRole: serializer.fromJson<String>(json['employeeRole']),
       usePin: serializer.fromJson<int>(json['usePin']),
@@ -800,7 +903,10 @@ class Employee extends DataClass implements Insertable<Employee> {
       'code': serializer.toJson<String>(code),
       'firstName': serializer.toJson<String>(firstName),
       'lastName': serializer.toJson<String>(lastName),
-      'isActive': serializer.toJson<int>(isActive),
+      'status': serializer.toJson<String>(status),
+      'terminationDate': serializer.toJson<int?>(terminationDate),
+      'vacationDaysPerYear': serializer.toJson<int?>(vacationDaysPerYear),
+      'secondaryPhone': serializer.toJson<String?>(secondaryPhone),
       'hireDate': serializer.toJson<int?>(hireDate),
       'employeeRole': serializer.toJson<String>(employeeRole),
       'usePin': serializer.toJson<int>(usePin),
@@ -828,7 +934,10 @@ class Employee extends DataClass implements Insertable<Employee> {
     String? code,
     String? firstName,
     String? lastName,
-    int? isActive,
+    String? status,
+    Value<int?> terminationDate = const Value.absent(),
+    Value<int?> vacationDaysPerYear = const Value.absent(),
+    Value<String?> secondaryPhone = const Value.absent(),
     Value<int?> hireDate = const Value.absent(),
     String? employeeRole,
     int? usePin,
@@ -853,7 +962,16 @@ class Employee extends DataClass implements Insertable<Employee> {
     code: code ?? this.code,
     firstName: firstName ?? this.firstName,
     lastName: lastName ?? this.lastName,
-    isActive: isActive ?? this.isActive,
+    status: status ?? this.status,
+    terminationDate: terminationDate.present
+        ? terminationDate.value
+        : this.terminationDate,
+    vacationDaysPerYear: vacationDaysPerYear.present
+        ? vacationDaysPerYear.value
+        : this.vacationDaysPerYear,
+    secondaryPhone: secondaryPhone.present
+        ? secondaryPhone.value
+        : this.secondaryPhone,
     hireDate: hireDate.present ? hireDate.value : this.hireDate,
     employeeRole: employeeRole ?? this.employeeRole,
     usePin: usePin ?? this.usePin,
@@ -886,7 +1004,16 @@ class Employee extends DataClass implements Insertable<Employee> {
       code: data.code.present ? data.code.value : this.code,
       firstName: data.firstName.present ? data.firstName.value : this.firstName,
       lastName: data.lastName.present ? data.lastName.value : this.lastName,
-      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      status: data.status.present ? data.status.value : this.status,
+      terminationDate: data.terminationDate.present
+          ? data.terminationDate.value
+          : this.terminationDate,
+      vacationDaysPerYear: data.vacationDaysPerYear.present
+          ? data.vacationDaysPerYear.value
+          : this.vacationDaysPerYear,
+      secondaryPhone: data.secondaryPhone.present
+          ? data.secondaryPhone.value
+          : this.secondaryPhone,
       hireDate: data.hireDate.present ? data.hireDate.value : this.hireDate,
       employeeRole: data.employeeRole.present
           ? data.employeeRole.value
@@ -934,7 +1061,10 @@ class Employee extends DataClass implements Insertable<Employee> {
           ..write('code: $code, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
-          ..write('isActive: $isActive, ')
+          ..write('status: $status, ')
+          ..write('terminationDate: $terminationDate, ')
+          ..write('vacationDaysPerYear: $vacationDaysPerYear, ')
+          ..write('secondaryPhone: $secondaryPhone, ')
           ..write('hireDate: $hireDate, ')
           ..write('employeeRole: $employeeRole, ')
           ..write('usePin: $usePin, ')
@@ -964,7 +1094,10 @@ class Employee extends DataClass implements Insertable<Employee> {
     code,
     firstName,
     lastName,
-    isActive,
+    status,
+    terminationDate,
+    vacationDaysPerYear,
+    secondaryPhone,
     hireDate,
     employeeRole,
     usePin,
@@ -993,7 +1126,10 @@ class Employee extends DataClass implements Insertable<Employee> {
           other.code == this.code &&
           other.firstName == this.firstName &&
           other.lastName == this.lastName &&
-          other.isActive == this.isActive &&
+          other.status == this.status &&
+          other.terminationDate == this.terminationDate &&
+          other.vacationDaysPerYear == this.vacationDaysPerYear &&
+          other.secondaryPhone == this.secondaryPhone &&
           other.hireDate == this.hireDate &&
           other.employeeRole == this.employeeRole &&
           other.usePin == this.usePin &&
@@ -1020,7 +1156,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
   final Value<String> code;
   final Value<String> firstName;
   final Value<String> lastName;
-  final Value<int> isActive;
+  final Value<String> status;
+  final Value<int?> terminationDate;
+  final Value<int?> vacationDaysPerYear;
+  final Value<String?> secondaryPhone;
   final Value<int?> hireDate;
   final Value<String> employeeRole;
   final Value<int> usePin;
@@ -1045,7 +1184,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.code = const Value.absent(),
     this.firstName = const Value.absent(),
     this.lastName = const Value.absent(),
-    this.isActive = const Value.absent(),
+    this.status = const Value.absent(),
+    this.terminationDate = const Value.absent(),
+    this.vacationDaysPerYear = const Value.absent(),
+    this.secondaryPhone = const Value.absent(),
     this.hireDate = const Value.absent(),
     this.employeeRole = const Value.absent(),
     this.usePin = const Value.absent(),
@@ -1071,7 +1213,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     required String code,
     required String firstName,
     required String lastName,
-    this.isActive = const Value.absent(),
+    this.status = const Value.absent(),
+    this.terminationDate = const Value.absent(),
+    this.vacationDaysPerYear = const Value.absent(),
+    this.secondaryPhone = const Value.absent(),
     this.hireDate = const Value.absent(),
     this.employeeRole = const Value.absent(),
     this.usePin = const Value.absent(),
@@ -1100,7 +1245,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Expression<String>? code,
     Expression<String>? firstName,
     Expression<String>? lastName,
-    Expression<int>? isActive,
+    Expression<String>? status,
+    Expression<int>? terminationDate,
+    Expression<int>? vacationDaysPerYear,
+    Expression<String>? secondaryPhone,
     Expression<int>? hireDate,
     Expression<String>? employeeRole,
     Expression<int>? usePin,
@@ -1126,7 +1274,11 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       if (code != null) 'code': code,
       if (firstName != null) 'first_name': firstName,
       if (lastName != null) 'last_name': lastName,
-      if (isActive != null) 'is_active': isActive,
+      if (status != null) 'status': status,
+      if (terminationDate != null) 'termination_date': terminationDate,
+      if (vacationDaysPerYear != null)
+        'vacation_days_per_year': vacationDaysPerYear,
+      if (secondaryPhone != null) 'secondary_phone': secondaryPhone,
       if (hireDate != null) 'hire_date': hireDate,
       if (employeeRole != null) 'employee_role': employeeRole,
       if (usePin != null) 'use_pin': usePin,
@@ -1155,7 +1307,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Value<String>? code,
     Value<String>? firstName,
     Value<String>? lastName,
-    Value<int>? isActive,
+    Value<String>? status,
+    Value<int?>? terminationDate,
+    Value<int?>? vacationDaysPerYear,
+    Value<String?>? secondaryPhone,
     Value<int?>? hireDate,
     Value<String>? employeeRole,
     Value<int>? usePin,
@@ -1181,7 +1336,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       code: code ?? this.code,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
-      isActive: isActive ?? this.isActive,
+      status: status ?? this.status,
+      terminationDate: terminationDate ?? this.terminationDate,
+      vacationDaysPerYear: vacationDaysPerYear ?? this.vacationDaysPerYear,
+      secondaryPhone: secondaryPhone ?? this.secondaryPhone,
       hireDate: hireDate ?? this.hireDate,
       employeeRole: employeeRole ?? this.employeeRole,
       usePin: usePin ?? this.usePin,
@@ -1219,8 +1377,17 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     if (lastName.present) {
       map['last_name'] = Variable<String>(lastName.value);
     }
-    if (isActive.present) {
-      map['is_active'] = Variable<int>(isActive.value);
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (terminationDate.present) {
+      map['termination_date'] = Variable<int>(terminationDate.value);
+    }
+    if (vacationDaysPerYear.present) {
+      map['vacation_days_per_year'] = Variable<int>(vacationDaysPerYear.value);
+    }
+    if (secondaryPhone.present) {
+      map['secondary_phone'] = Variable<String>(secondaryPhone.value);
     }
     if (hireDate.present) {
       map['hire_date'] = Variable<int>(hireDate.value);
@@ -1289,7 +1456,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
           ..write('code: $code, ')
           ..write('firstName: $firstName, ')
           ..write('lastName: $lastName, ')
-          ..write('isActive: $isActive, ')
+          ..write('status: $status, ')
+          ..write('terminationDate: $terminationDate, ')
+          ..write('vacationDaysPerYear: $vacationDaysPerYear, ')
+          ..write('secondaryPhone: $secondaryPhone, ')
           ..write('hireDate: $hireDate, ')
           ..write('employeeRole: $employeeRole, ')
           ..write('usePin: $usePin, ')
@@ -5372,7 +5542,10 @@ typedef $$EmployeesTableCreateCompanionBuilder =
       required String code,
       required String firstName,
       required String lastName,
-      Value<int> isActive,
+      Value<String> status,
+      Value<int?> terminationDate,
+      Value<int?> vacationDaysPerYear,
+      Value<String?> secondaryPhone,
       Value<int?> hireDate,
       Value<String> employeeRole,
       Value<int> usePin,
@@ -5399,7 +5572,10 @@ typedef $$EmployeesTableUpdateCompanionBuilder =
       Value<String> code,
       Value<String> firstName,
       Value<String> lastName,
-      Value<int> isActive,
+      Value<String> status,
+      Value<int?> terminationDate,
+      Value<int?> vacationDaysPerYear,
+      Value<String?> secondaryPhone,
       Value<int?> hireDate,
       Value<String> employeeRole,
       Value<int> usePin,
@@ -5525,8 +5701,23 @@ class $$EmployeesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<int> get isActive => $composableBuilder(
-    column: $table.isActive,
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get terminationDate => $composableBuilder(
+    column: $table.terminationDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get vacationDaysPerYear => $composableBuilder(
+    column: $table.vacationDaysPerYear,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get secondaryPhone => $composableBuilder(
+    column: $table.secondaryPhone,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5734,8 +5925,23 @@ class $$EmployeesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<int> get isActive => $composableBuilder(
-    column: $table.isActive,
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get terminationDate => $composableBuilder(
+    column: $table.terminationDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get vacationDaysPerYear => $composableBuilder(
+    column: $table.vacationDaysPerYear,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get secondaryPhone => $composableBuilder(
+    column: $table.secondaryPhone,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -5856,8 +6062,23 @@ class $$EmployeesTableAnnotationComposer
   GeneratedColumn<String> get lastName =>
       $composableBuilder(column: $table.lastName, builder: (column) => column);
 
-  GeneratedColumn<int> get isActive =>
-      $composableBuilder(column: $table.isActive, builder: (column) => column);
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get terminationDate => $composableBuilder(
+    column: $table.terminationDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get vacationDaysPerYear => $composableBuilder(
+    column: $table.vacationDaysPerYear,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get secondaryPhone => $composableBuilder(
+    column: $table.secondaryPhone,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<int> get hireDate =>
       $composableBuilder(column: $table.hireDate, builder: (column) => column);
@@ -6050,7 +6271,10 @@ class $$EmployeesTableTableManager
                 Value<String> code = const Value.absent(),
                 Value<String> firstName = const Value.absent(),
                 Value<String> lastName = const Value.absent(),
-                Value<int> isActive = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int?> terminationDate = const Value.absent(),
+                Value<int?> vacationDaysPerYear = const Value.absent(),
+                Value<String?> secondaryPhone = const Value.absent(),
                 Value<int?> hireDate = const Value.absent(),
                 Value<String> employeeRole = const Value.absent(),
                 Value<int> usePin = const Value.absent(),
@@ -6075,7 +6299,10 @@ class $$EmployeesTableTableManager
                 code: code,
                 firstName: firstName,
                 lastName: lastName,
-                isActive: isActive,
+                status: status,
+                terminationDate: terminationDate,
+                vacationDaysPerYear: vacationDaysPerYear,
+                secondaryPhone: secondaryPhone,
                 hireDate: hireDate,
                 employeeRole: employeeRole,
                 usePin: usePin,
@@ -6102,7 +6329,10 @@ class $$EmployeesTableTableManager
                 required String code,
                 required String firstName,
                 required String lastName,
-                Value<int> isActive = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int?> terminationDate = const Value.absent(),
+                Value<int?> vacationDaysPerYear = const Value.absent(),
+                Value<String?> secondaryPhone = const Value.absent(),
                 Value<int?> hireDate = const Value.absent(),
                 Value<String> employeeRole = const Value.absent(),
                 Value<int> usePin = const Value.absent(),
@@ -6127,7 +6357,10 @@ class $$EmployeesTableTableManager
                 code: code,
                 firstName: firstName,
                 lastName: lastName,
-                isActive: isActive,
+                status: status,
+                terminationDate: terminationDate,
+                vacationDaysPerYear: vacationDaysPerYear,
+                secondaryPhone: secondaryPhone,
                 hireDate: hireDate,
                 employeeRole: employeeRole,
                 usePin: usePin,

@@ -38,7 +38,7 @@ BackupErrorCode _mapFileSystemException(FileSystemException e) {
   return BackupErrorCode.ioFailure;
 }
 
-const _schemaVersion = 8;
+const _schemaVersion = 10;
 
 /// Shared with app_init for pending restore.
 const restorePendingKey = 'restore_pending';

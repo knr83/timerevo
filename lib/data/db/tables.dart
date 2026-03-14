@@ -8,8 +8,21 @@ class Employees extends Table {
   TextColumn get firstName => text().named('first_name')();
   TextColumn get lastName => text().named('last_name')();
 
-  IntColumn get isActive =>
-      integer().named('is_active').withDefault(const Constant(1))();
+  TextColumn get status => text()
+      .named('status')
+      .withDefault(const Constant('active'))
+      .customConstraint(
+        "NOT NULL CHECK (status IN ('active','inactive','archived'))",
+      )();
+
+  IntColumn get terminationDate =>
+      integer().named('termination_date').nullable()();
+
+  IntColumn get vacationDaysPerYear =>
+      integer().named('vacation_days_per_year').nullable()();
+
+  TextColumn get secondaryPhone =>
+      text().named('secondary_phone').nullable()();
 
   IntColumn get hireDate => integer().named('hire_date').nullable()();
 

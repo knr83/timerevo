@@ -14,11 +14,15 @@ final clockInUseCaseProvider = Provider<ClockInUseCase>((ref) {
     ref.watch(sessionsRepoProvider),
     ref.watch(employeesRepoProvider),
     ref.watch(absencesRepoProvider),
+    ref.watch(schedulesRepoProvider),
   );
 });
 
 final clockOutUseCaseProvider = Provider<ClockOutUseCase>((ref) {
-  return ClockOutUseCase(ref.watch(sessionsRepoProvider));
+  return ClockOutUseCase(
+    ref.watch(sessionsRepoProvider),
+    ref.watch(schedulesRepoProvider),
+  );
 });
 
 final watchEmployeesUseCaseProvider = Provider<WatchEmployeesUseCase>((ref) {

@@ -3,11 +3,19 @@ import 'package:drift/drift.dart';
 import '../../core/employee_pin_status.dart';
 import '../../domain/entities/employee_details.dart';
 import '../../domain/entities/employee_info.dart';
+import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/employees_repo_port.dart';
 import '../db/app_db.dart';
 import '../../common/utils/pin_hash.dart';
 import '../../common/utils/utc_clock.dart';
 import 'repo_guard.dart';
+
+String _statusToString(EmployeeStatus s) =>
+    switch (s) {
+      EmployeeStatus.active => 'active',
+      EmployeeStatus.inactive => 'inactive',
+      EmployeeStatus.archived => 'archived',
+    };
 
 class EmployeesRepo implements IEmployeesRepo {
   EmployeesRepo(this._db);
@@ -63,7 +71,7 @@ class EmployeesRepo implements IEmployeesRepo {
 
   Stream<List<Employee>> watchActiveEmployees() {
     return (_db.select(_db.employees)
-          ..where((e) => e.isActive.equals(1))
+          ..where((e) => e.status.equals('active'))
           ..orderBy([
             (e) => OrderingTerm.asc(e.lastName),
             (e) => OrderingTerm.asc(e.firstName),
@@ -88,7 +96,7 @@ class EmployeesRepo implements IEmployeesRepo {
               id: e.id,
               firstName: e.firstName,
               lastName: e.lastName,
-              isActive: e.isActive == 1,
+              status: employeeStatusFromString(e.status),
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
             ),
@@ -106,7 +114,7 @@ class EmployeesRepo implements IEmployeesRepo {
               id: e.id,
               firstName: e.firstName,
               lastName: e.lastName,
-              isActive: e.isActive == 1,
+              status: employeeStatusFromString(e.status),
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
             ),
@@ -179,7 +187,7 @@ class EmployeesRepo implements IEmployeesRepo {
     required int id,
     required String firstName,
     required String lastName,
-    required bool isActive,
+    required EmployeeStatus status,
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
@@ -187,7 +195,7 @@ class EmployeesRepo implements IEmployeesRepo {
         EmployeesCompanion(
           firstName: Value(firstName.trim()),
           lastName: Value(lastName.trim()),
-          isActive: Value(isActive ? 1 : 0),
+          status: Value(_statusToString(status)),
           updatedAt: Value(now),
         ),
       );
@@ -198,7 +206,7 @@ class EmployeesRepo implements IEmployeesRepo {
     required int id,
     required String firstName,
     required String lastName,
-    required bool isActive,
+    required EmployeeStatus status,
     required int? templateId,
   }) async {
     return guardRepoCall(() async {
@@ -208,7 +216,7 @@ class EmployeesRepo implements IEmployeesRepo {
           EmployeesCompanion(
             firstName: Value(firstName.trim()),
             lastName: Value(lastName.trim()),
-            isActive: Value(isActive ? 1 : 0),
+            status: Value(_statusToString(status)),
             updatedAt: Value(now),
           ),
         );
@@ -240,9 +248,11 @@ class EmployeesRepo implements IEmployeesRepo {
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
+      final status =
+          isActive ? EmployeeStatus.active : EmployeeStatus.inactive;
       await (_db.update(_db.employees)..where((e) => e.id.equals(id))).write(
         EmployeesCompanion(
-          isActive: Value(isActive ? 1 : 0),
+          status: Value(_statusToString(status)),
           updatedAt: Value(now),
         ),
       );
@@ -303,7 +313,7 @@ class EmployeesRepo implements IEmployeesRepo {
       id: row.id,
       firstName: row.firstName,
       lastName: row.lastName,
-      isActive: row.isActive == 1,
+      status: employeeStatusFromString(row.status),
     );
   }
 
@@ -323,7 +333,7 @@ class EmployeesRepo implements IEmployeesRepo {
       code: row.code,
       firstName: row.firstName,
       lastName: row.lastName,
-      isActive: row.isActive == 1,
+      status: employeeStatusFromString(row.status),
       usePin: row.usePin == 1,
       useNfc: row.useNfc == 1,
       accessToken: row.accessToken,
@@ -332,12 +342,15 @@ class EmployeesRepo implements IEmployeesRepo {
       weeklyHours: row.weeklyHours,
       email: row.email,
       phone: row.phone,
+      secondaryPhone: row.secondaryPhone,
       department: row.department,
       jobTitle: row.jobTitle,
       internalComment: row.internalComment,
       policyAcknowledged: row.policyAcknowledged == 1,
       policyAcknowledgedAt: row.policyAcknowledgedAt,
       hireDate: row.hireDate,
+      terminationDate: row.terminationDate,
+      vacationDaysPerYear: row.vacationDaysPerYear,
       employeeRole: row.employeeRole,
       templateId: assignment?.templateId,
       createdAt: row.createdAt,
@@ -356,8 +369,10 @@ class EmployeesRepo implements IEmployeesRepo {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -367,6 +382,7 @@ class EmployeesRepo implements IEmployeesRepo {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,
@@ -385,8 +401,10 @@ class EmployeesRepo implements IEmployeesRepo {
                 code: code.trim().toUpperCase(),
                 firstName: firstName.trim(),
                 lastName: lastName.trim(),
-                isActive: Value(isActive ? 1 : 0),
+                status: Value(_statusToString(status)),
                 hireDate: Value(hireDate),
+                terminationDate: Value(terminationDate),
+                vacationDaysPerYear: Value(vacationDaysPerYear),
                 employeeRole: Value(employeeRole),
                 usePin: Value(usePin ? 1 : 0),
                 useNfc: Value(useNfc ? 1 : 0),
@@ -396,6 +414,7 @@ class EmployeesRepo implements IEmployeesRepo {
                 weeklyHours: Value(weeklyHours),
                 email: Value(email?.trim()),
                 phone: Value(phone?.trim()),
+                secondaryPhone: Value(secondaryPhone?.trim()),
                 department: Value(department?.trim()),
                 jobTitle: Value(jobTitle?.trim()),
                 internalComment: Value(internalComment?.trim()),
@@ -430,8 +449,10 @@ class EmployeesRepo implements IEmployeesRepo {
     required String code,
     required String firstName,
     required String lastName,
-    bool isActive = true,
+    EmployeeStatus status = EmployeeStatus.active,
     int? hireDate,
+    int? terminationDate,
+    int? vacationDaysPerYear,
     String employeeRole = 'employee',
     bool usePin = false,
     bool useNfc = false,
@@ -441,6 +462,7 @@ class EmployeesRepo implements IEmployeesRepo {
     double? weeklyHours,
     String? email,
     String? phone,
+    String? secondaryPhone,
     String? department,
     String? jobTitle,
     String? internalComment,
@@ -457,8 +479,10 @@ class EmployeesRepo implements IEmployeesRepo {
             code: Value(code.trim().toUpperCase()),
             firstName: Value(firstName.trim()),
             lastName: Value(lastName.trim()),
-            isActive: Value(isActive ? 1 : 0),
+            status: Value(_statusToString(status)),
             hireDate: Value(hireDate),
+            terminationDate: Value(terminationDate),
+            vacationDaysPerYear: Value(vacationDaysPerYear),
             employeeRole: Value(employeeRole),
             usePin: Value(usePin ? 1 : 0),
             useNfc: Value(useNfc ? 1 : 0),
@@ -468,6 +492,7 @@ class EmployeesRepo implements IEmployeesRepo {
             weeklyHours: Value(weeklyHours),
             email: Value(email?.trim()),
             phone: Value(phone?.trim()),
+            secondaryPhone: Value(secondaryPhone?.trim()),
             department: Value(department?.trim()),
             jobTitle: Value(jobTitle?.trim()),
             internalComment: Value(internalComment?.trim()),

@@ -9,7 +9,12 @@ import 'locale_settings_repo.dart';
 import 'schedules_repo.dart';
 import 'sessions_repo.dart';
 import 'theme_settings_repo.dart';
+import 'attendance_settings_repo.dart';
 import 'working_hours_settings_repo.dart';
+
+final attendanceSettingsRepoProvider = Provider<AttendanceSettingsRepo>((ref) {
+  return AttendanceSettingsRepo(ref.watch(appSettingsRepoProvider));
+});
 
 final authRepoProvider = Provider<AuthRepo>((ref) {
   final db = ref.watch(appDbProvider);

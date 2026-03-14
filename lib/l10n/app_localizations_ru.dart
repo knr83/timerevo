@@ -194,6 +194,26 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сегодня у вас одобренное отсутствие. Отметка прихода недоступна.';
 
   @override
+  String get terminalErrorNoScheduleForDay =>
+      'Сегодня нет запланированной работы.';
+
+  @override
+  String get terminalNoteRequiredTitle => 'Требуется заметка';
+
+  @override
+  String get terminalNoteRequiredMessage =>
+      'Для этого отклонения требуется заметка.';
+
+  @override
+  String get terminalNoteLabel => 'Заметка';
+
+  @override
+  String get terminalNoteConfirm => 'Подтвердить';
+
+  @override
+  String get terminalNoteCancel => 'Отмена';
+
+  @override
   String terminalOpenSince(String time) {
     return 'Открытая смена с $time';
   }
@@ -371,6 +391,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeesNoEmployeesYet => 'Пока нет сотрудников.';
 
   @override
+  String get employeesSelectFromList => 'Выберите сотрудника из списка.';
+
+  @override
   String get employeesAddEmployee => 'Добавить';
 
   @override
@@ -384,6 +407,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeDialogEditTitle => 'Редактировать сотрудника';
 
   @override
+  String get employeeDialogNewTitle => 'Новый сотрудник';
+
+  @override
   String get employeeFirstName => 'Имя';
 
   @override
@@ -394,6 +420,40 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get employeeActiveLabel => 'Активен';
+
+  @override
+  String get employeeStatusLabel => 'Статус';
+
+  @override
+  String get employeeStatusActive => 'Активный';
+
+  @override
+  String get employeeStatusInactive => 'Неактивный';
+
+  @override
+  String get employeeStatusArchived => 'Архивный';
+
+  @override
+  String get employeeTerminationDateLabel => 'Дата увольнения';
+
+  @override
+  String get employeeVacationDaysPerYearLabel => 'Дней отпуска в год';
+
+  @override
+  String get employeeSecondaryPhoneLabel => 'Дополнительный телефон';
+
+  @override
+  String get employeeStatusChangeConfirmTitle => 'Изменить статус?';
+
+  @override
+  String get employeeStatusChangeConfirmMessage =>
+      'Активные сотрудники отображаются в терминале. Неактивные и архивные — не отображаются.';
+
+  @override
+  String get employeeStatusChangeConfirmConfirm => 'Изменить';
+
+  @override
+  String get employeeVacationDaysPerYearInvalid => 'Должно быть 0 или больше';
 
   @override
   String get employeeFirstLastRequired => 'Имя и фамилия обязательны.';
@@ -410,6 +470,16 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get employeeSaved => 'Сохранено.';
+
+  @override
+  String get employeeUnsavedChangesTitle => 'Несохранённые изменения';
+
+  @override
+  String get employeeUnsavedChangesMessage =>
+      'У вас есть несохранённые изменения. Сохранить, отменить или остаться?';
+
+  @override
+  String get employeeDiscardChanges => 'Отменить';
 
   @override
   String employeeDefaultScheduleSubtitle(String name) {
@@ -617,10 +687,25 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeSectionSchedule => 'Расписание';
 
   @override
+  String get employeeScheduleRequired => 'Укажите расписание.';
+
+  @override
   String get employeeSectionPolicy => 'Политика и соответствие';
 
   @override
   String get employeeSectionAudit => 'Запись';
+
+  @override
+  String get employeeTabGeneral => 'Общие';
+
+  @override
+  String get employeeTabContact => 'Контакт';
+
+  @override
+  String get employeeTabTerminalAccess => 'Доступ к терминалу';
+
+  @override
+  String get employeeTabAdditional => 'Дополнительно';
 
   @override
   String get schedulesEmptyHint => 'Создайте шаблон расписания.';
@@ -832,6 +917,26 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get settingsThemeHighContrastDark => 'Контрастная (тёмная)';
+
+  @override
+  String get settingsAttendanceModeLabel => 'Режим учёта';
+
+  @override
+  String get settingsAttendanceModeFlexible => 'Гибкий';
+
+  @override
+  String get settingsAttendanceModeFixed => 'Фиксированный';
+
+  @override
+  String get settingsAttendanceToleranceLabel => 'Допуск (минуты)';
+
+  @override
+  String get settingsAttendanceModeChangeConfirmTitle =>
+      'Изменить режим учёта?';
+
+  @override
+  String get settingsAttendanceModeChangeConfirmMessage =>
+      'Это повлияет на отметки прихода и ухода в терминале для всех сотрудников.';
 
   @override
   String get settingsWorkingHoursLabel => 'Рабочее время';
