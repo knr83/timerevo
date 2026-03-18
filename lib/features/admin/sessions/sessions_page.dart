@@ -244,7 +244,9 @@ class SessionsPage extends ConsumerWidget {
               children: [
                 if (viewMode == JournalViewMode.timelineDetailed)
                   DateRangeFilterBar(
-                    scope: _detailedScopeToDateRangeScope(filters.detailedScope),
+                    scope: _detailedScopeToDateRangeScope(
+                      filters.detailedScope,
+                    ),
                     fromUtcMs: _detailedEffectiveRange(filters).$1,
                     toUtcMs: _detailedEffectiveRange(filters).$2,
                     availableScopes: const [
@@ -252,8 +254,9 @@ class SessionsPage extends ConsumerWidget {
                       DateRangeScope.week,
                     ],
                     onChanged: (scope, from, to) =>
-                        ref.read(_journalFiltersProvider.notifier).state =
-                            filters.copyWith(
+                        ref
+                            .read(_journalFiltersProvider.notifier)
+                            .state = filters.copyWith(
                           detailedScope: _dateRangeScopeToDetailedScope(scope),
                           fromUtcMs: from,
                           toUtcMs: to,
@@ -271,8 +274,9 @@ class SessionsPage extends ConsumerWidget {
                       DateRangeScope.interval,
                     ],
                     onChanged: (scope, from, to) =>
-                        ref.read(_journalFiltersProvider.notifier).state =
-                            filters.copyWith(
+                        ref
+                            .read(_journalFiltersProvider.notifier)
+                            .state = filters.copyWith(
                           tableScope: _dateRangeScopeToTableScope(scope),
                           fromUtcMs: from,
                           toUtcMs: to,
@@ -280,7 +284,9 @@ class SessionsPage extends ConsumerWidget {
                   )
                 else
                   DateRangeFilterBar(
-                    scope: _timelineScopeToDateRangeScope(filters.timelineScope),
+                    scope: _timelineScopeToDateRangeScope(
+                      filters.timelineScope,
+                    ),
                     fromUtcMs: _timelineEffectiveRange(filters).$1,
                     toUtcMs: _timelineEffectiveRange(filters).$2,
                     availableScopes: const [
@@ -289,8 +295,9 @@ class SessionsPage extends ConsumerWidget {
                       DateRangeScope.interval,
                     ],
                     onChanged: (scope, from, to) =>
-                        ref.read(_journalFiltersProvider.notifier).state =
-                            filters.copyWith(
+                        ref
+                            .read(_journalFiltersProvider.notifier)
+                            .state = filters.copyWith(
                           timelineScope: _dateRangeScopeToTimelineScope(scope),
                           fromUtcMs: from,
                           toUtcMs: to,
@@ -855,10 +862,9 @@ class _JournalTable extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .errorContainer
-                              .withValues(alpha: 0.5),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.errorContainer.withValues(alpha: 0.5),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -873,7 +879,9 @@ class _JournalTable extends ConsumerWidget {
                               child: Text(
                                 validationError!,
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onErrorContainer,
                                   fontSize: 13,
                                 ),
                               ),
@@ -997,97 +1005,114 @@ class _JournalTable extends ConsumerWidget {
                   child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
-                  onPressed: (reasonRequired && reasonEmpty) ? null : () async {
-                    validationError = null;
-                    setState(() {});
+                  onPressed: (reasonRequired && reasonEmpty)
+                      ? null
+                      : () async {
+                          validationError = null;
+                          setState(() {});
 
-                    if (reasonRequired && reasonCtrl.text.trim().isEmpty) {
-                      validationError = l10n.sessionsUpdateReasonRequired;
-                      setState(() {});
-                      return;
-                    }
-                    if (endUtcMs != null) {
-                      if (endUtcMs! <= startUtcMs) {
-                        validationError = l10n.journalErrorEndBeforeStart;
-                        setState(() {});
-                        return;
-                      }
-                      if (!isSameLocalCalendarDay(startUtcMs, endUtcMs!)) {
-                        validationError = l10n.journalErrorCrossDay;
-                        setState(() {});
-                        return;
-                      }
-                    }
-                    final emp = row.employee;
-                    final startLocal = DateTime.fromMillisecondsSinceEpoch(
-                      startUtcMs,
-                      isUtc: true,
-                    ).toLocal();
-                    final startYmd = dateToYmd(
-                      DateTime(startLocal.year, startLocal.month, startLocal.day),
-                    );
-                    if (!isDateWithinEmployment(
-                      emp.hireDate,
-                      emp.terminationDate,
-                      startYmd,
-                    )) {
-                      validationError = l10n.journalErrorOutsideEmployment;
-                      setState(() {});
-                      return;
-                    }
-                    if (endUtcMs != null) {
-                      final endLocal = DateTime.fromMillisecondsSinceEpoch(
-                        endUtcMs!,
-                        isUtc: true,
-                      ).toLocal();
-                      final endYmd = dateToYmd(
-                        DateTime(
-                          endLocal.year,
-                          endLocal.month,
-                          endLocal.day,
-                        ),
-                      );
-                      if (!isDateWithinEmployment(
-                        emp.hireDate,
-                        emp.terminationDate,
-                        endYmd,
-                      )) {
-                        validationError = l10n.journalErrorOutsideEmployment;
-                        setState(() {});
-                        return;
-                      }
-                    }
-                    try {
-                      final useCase = ref.read(
-                        updateSessionAsAdminUseCaseProvider,
-                      );
-                      await useCase(
-                        sessionId: s.id,
-                        startUtcMs: startUtcMs,
-                        endUtcMs: endUtcMs,
-                        note: noteCtrl.text.trim().isEmpty
-                            ? null
-                            : noteCtrl.text.trim(),
-                        updateReason: startOrEndChanged
-                            ? reasonCtrl.text.trim()
-                            : '',
-                        updatedBy: 'admin',
-                      );
-                      if (context.mounted) {
-                        Navigator.of(context).pop(true);
-                      }
-                    } on DomainValidationException catch (e) {
-                      if (!context.mounted) return;
-                      validationError = switch (e.message) {
-                        'sessionsErrorSameDayRequired' =>
-                          l10n.journalErrorCrossDay,
-                        'journalErrorOutsideEmployment' =>
-                          l10n.journalErrorOutsideEmployment,
-                        _ => errorMessageForUser(e, l10n.commonErrorOccurred),
-                      };
-                      setState(() {});
-                    }
-                  },
+                          if (reasonRequired &&
+                              reasonCtrl.text.trim().isEmpty) {
+                            validationError = l10n.sessionsUpdateReasonRequired;
+                            setState(() {});
+                            return;
+                          }
+                          if (endUtcMs != null) {
+                            if (endUtcMs! <= startUtcMs) {
+                              validationError = l10n.journalErrorEndBeforeStart;
+                              setState(() {});
+                              return;
+                            }
+                            if (!isSameLocalCalendarDay(
+                              startUtcMs,
+                              endUtcMs!,
+                            )) {
+                              validationError = l10n.journalErrorCrossDay;
+                              setState(() {});
+                              return;
+                            }
+                          }
+                          final emp = row.employee;
+                          final startLocal =
+                              DateTime.fromMillisecondsSinceEpoch(
+                                startUtcMs,
+                                isUtc: true,
+                              ).toLocal();
+                          final startYmd = dateToYmd(
+                            DateTime(
+                              startLocal.year,
+                              startLocal.month,
+                              startLocal.day,
+                            ),
+                          );
+                          if (!isDateWithinEmployment(
+                            emp.hireDate,
+                            emp.terminationDate,
+                            startYmd,
+                          )) {
+                            validationError =
+                                l10n.journalErrorOutsideEmployment;
+                            setState(() {});
+                            return;
+                          }
+                          if (endUtcMs != null) {
+                            final endLocal =
+                                DateTime.fromMillisecondsSinceEpoch(
+                                  endUtcMs!,
+                                  isUtc: true,
+                                ).toLocal();
+                            final endYmd = dateToYmd(
+                              DateTime(
+                                endLocal.year,
+                                endLocal.month,
+                                endLocal.day,
+                              ),
+                            );
+                            if (!isDateWithinEmployment(
+                              emp.hireDate,
+                              emp.terminationDate,
+                              endYmd,
+                            )) {
+                              validationError =
+                                  l10n.journalErrorOutsideEmployment;
+                              setState(() {});
+                              return;
+                            }
+                          }
+                          try {
+                            final useCase = ref.read(
+                              updateSessionAsAdminUseCaseProvider,
+                            );
+                            await useCase(
+                              sessionId: s.id,
+                              startUtcMs: startUtcMs,
+                              endUtcMs: endUtcMs,
+                              note: noteCtrl.text.trim().isEmpty
+                                  ? null
+                                  : noteCtrl.text.trim(),
+                              updateReason: startOrEndChanged
+                                  ? reasonCtrl.text.trim()
+                                  : '',
+                              updatedBy: 'admin',
+                            );
+                            if (context.mounted) {
+                              Navigator.of(context).pop(true);
+                            }
+                          } on DomainValidationException catch (e) {
+                            if (!context.mounted) return;
+                            validationError = switch (e.message) {
+                              'sessionsErrorSameDayRequired' =>
+                                l10n.journalErrorCrossDay,
+                              'journalErrorOutsideEmployment' =>
+                                l10n.journalErrorOutsideEmployment,
+                              _ => errorMessageForUser(
+                                e,
+                                l10n.commonErrorOccurred,
+                              ),
+                            };
+                            setState(() {});
+                          }
+                        },
                   child: Text(l10n.commonSave),
                 ),
               ],

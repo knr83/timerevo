@@ -206,7 +206,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 class _EmployeeFilterDropdown extends ConsumerWidget {
   const _EmployeeFilterDropdown({required this.filters});
 
-  final ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId}) filters;
+  final ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId})
+  filters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

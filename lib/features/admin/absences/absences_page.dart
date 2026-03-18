@@ -228,7 +228,7 @@ class AbsencesPage extends ConsumerWidget {
                   onPressed: employeesAsync.value?.isEmpty == true
                       ? null
                       : () =>
-                          _openAddDialog(context, ref, l10n, employeesAsync),
+                            _openAddDialog(context, ref, l10n, employeesAsync),
                   icon: const Icon(Symbols.add),
                   label: Text(l10n.absencesAdd),
                 ),
@@ -240,10 +240,9 @@ class AbsencesPage extends ConsumerWidget {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .errorContainer
-                      .withValues(alpha: 0.5),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.errorContainer.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Row(
@@ -284,8 +283,9 @@ class AbsencesPage extends ConsumerWidget {
                     DateRangeScope.interval,
                   ],
                   onChanged: (scope, from, to) =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(
+                      ref
+                          .read(_absencesFiltersProvider.notifier)
+                          .state = filters.copyWith(
                         scope: scope,
                         fromUtcMs: from,
                         toUtcMs: to,

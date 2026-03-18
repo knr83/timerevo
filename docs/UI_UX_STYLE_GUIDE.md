@@ -160,7 +160,7 @@ Asset conventions:
 - Validate on:
   - submit, and
   - on field blur (optional) for obvious constraints
-- Show errors **next to the field** (not only as snackbars).
+- **Always prefer** showing errors next to the field (inline, near the relevant input). Use snackbars only when this is not feasible (e.g., no clear field to attach to, or post-action feedback).
 - Keep messages short and actionable:
   - Bad: “Invalid.”
   - Good: “End time must be after start time.”

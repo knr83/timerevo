@@ -89,7 +89,9 @@ final journalIntervalOverviewUseCaseProvider =
 /// Report filters (scope, date range, employee). Used by Reports page and watchReportWithNormProvider.
 /// Default period: current month.
 final reportFiltersProvider =
-    StateProvider<({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId})>((ref) {
+    StateProvider<
+      ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId})
+    >((ref) {
       final month = reportPeriodMonth();
       return (
         scope: DateRangeScope.month,

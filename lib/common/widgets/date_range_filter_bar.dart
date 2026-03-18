@@ -26,7 +26,7 @@ class DateRangeFilterBar extends StatelessWidget {
   final int toUtcMs;
   final List<DateRangeScope> availableScopes;
   final void Function(DateRangeScope scope, int fromUtcMs, int toUtcMs)
-      onChanged;
+  onChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -106,9 +106,9 @@ class DateRangeFilterBar extends StatelessWidget {
         (_, DateRangeScope.week) => reportPeriodWeekContaining(baseDate),
         (_, DateRangeScope.month) => reportPeriodMonthContaining(baseDate),
         (_, DateRangeScope.interval) => (
-            fromUtcMs: fromUtcMs,
-            toUtcMs: toUtcMs,
-          ),
+          fromUtcMs: fromUtcMs,
+          toUtcMs: toUtcMs,
+        ),
       };
       onChanged(newScope, r.fromUtcMs, r.toUtcMs);
     }
@@ -122,11 +122,7 @@ class DateRangeFilterBar extends StatelessWidget {
         initialEndDate: to,
       );
       if (picked == null || !context.mounted) return;
-      onChanged(
-        DateRangeScope.interval,
-        picked.fromUtcMs,
-        picked.toUtcMs,
-      );
+      onChanged(DateRangeScope.interval, picked.fromUtcMs, picked.toUtcMs);
     }
 
     String scopeLabel(DateRangeScope s) {
@@ -150,12 +146,7 @@ class DateRangeFilterBar extends StatelessWidget {
             tapTargetSize: MaterialTapTargetSize.shrinkWrap,
           ),
           segments: availableScopes
-              .map(
-                (s) => ButtonSegment(
-                  value: s,
-                  label: Text(scopeLabel(s)),
-                ),
-              )
+              .map((s) => ButtonSegment(value: s, label: Text(scopeLabel(s))))
               .toList(),
           selected: {scope},
           onSelectionChanged: (s) {
