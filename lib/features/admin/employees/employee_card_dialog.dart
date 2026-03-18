@@ -231,7 +231,23 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     }
     final em = _emailCtrl.text.trim();
     if (em.isNotEmpty && !em.contains('@')) return false;
+    if (_hireDate != null &&
+        _terminationDate != null &&
+        _terminationDate! < _hireDate!) {
+      return false;
+    }
     return true;
+  }
+
+  String? get _terminationDateError {
+    if (_hireDate != null &&
+        _terminationDate != null &&
+        _terminationDate! < _hireDate!) {
+      return AppLocalizations.of(
+        context,
+      ).employeeTerminationDateBeforeHireError;
+    }
+    return null;
   }
 
   @override
@@ -912,6 +928,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                     child: InputDecorator(
                       decoration: InputDecoration(
                         labelText: l10n.employeeTerminationDateLabel,
+                        errorText: _terminationDateError,
                         border: const OutlineInputBorder(),
                         contentPadding: const EdgeInsets.symmetric(
                           horizontal: 12,

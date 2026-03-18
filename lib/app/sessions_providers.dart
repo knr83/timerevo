@@ -95,5 +95,8 @@ final watchSessionsForEmployeeOnDateProvider =
 /// App-layer use case for admin session updates. Use from UI instead of repo.
 final updateSessionAsAdminUseCaseProvider =
     Provider<UpdateSessionAsAdminUseCase>((ref) {
-      return UpdateSessionAsAdminUseCase(ref.watch(sessionsRepoProvider));
+      return UpdateSessionAsAdminUseCase(
+        ref.watch(sessionsRepoProvider),
+        ref.watch(employeesRepoProvider),
+      );
     });

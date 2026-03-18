@@ -96,10 +96,9 @@ class _AttendanceModeSection extends ConsumerWidget {
       );
     }
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SegmentedButton<AttendanceMode>(
+    final children = <Widget>[
+      Flexible(
+        child: SegmentedButton<AttendanceMode>(
           segments: [
             ButtonSegment(
               value: AttendanceMode.flexible,
@@ -138,16 +137,24 @@ class _AttendanceModeSection extends ConsumerWidget {
             }
           },
         ),
-        if (attendance.mode == AttendanceMode.fixed) ...[
-          const SizedBox(height: 12),
-          _ToleranceField(
+      ),
+      if (attendance.mode == AttendanceMode.fixed) ...[
+        const SizedBox(width: 12),
+        SizedBox(
+          width: 120,
+          child: _ToleranceField(
             initialValue: attendance.toleranceMinutes,
             label: l10n.settingsAttendanceToleranceLabel,
             onSave: (n) =>
                 ref.read(attendanceSettingsProvider.notifier).setTolerance(n),
           ),
-        ],
+        ),
       ],
+    ];
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: children,
     );
   }
 }

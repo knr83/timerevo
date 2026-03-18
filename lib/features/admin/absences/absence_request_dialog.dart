@@ -5,7 +5,6 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import '../../../app/absences_providers.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
-import '../../../common/widgets/app_snack.dart';
 import '../../../core/domain_errors.dart';
 import '../../../domain/entities/absence_info.dart';
 import '../../../domain/entities/employee_display.dart';
@@ -67,6 +66,8 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
   String _type = 'vacation';
   final _noteCtrl = TextEditingController();
   bool _isSaving = false;
+  String? _employeeError;
+  String? _dateRangeError;
 
   @override
   void initState() {
@@ -111,21 +112,34 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
     };
   }
 
+  void _clearEmployeeError() {
+    if (_employeeError != null) setState(() => _employeeError = null);
+  }
+
+  void _clearDateRangeError() {
+    if (_dateRangeError != null) setState(() => _dateRangeError = null);
+  }
+
   Future<void> _save() async {
     final l10n = AppLocalizations.of(context);
+    setState(() {
+      _employeeError = null;
+      _dateRangeError = null;
+    });
+
     final employeeId = _selectedEmployeeId;
     if (employeeId == null) {
-      showAppSnack(context, l10n.absenceErrorEmployeeRequired, isError: true);
+      setState(() => _employeeError = l10n.absenceErrorEmployeeRequired);
       return;
     }
     if (_dateFrom == null || _dateTo == null) {
-      showAppSnack(context, l10n.absenceErrorDateRequired, isError: true);
+      setState(() => _dateRangeError = l10n.absenceErrorDateRequired);
       return;
     }
     final dateFrom = dateToYmd(_dateFrom!);
     final dateTo = dateToYmd(_dateTo!);
     if (dateTo.compareTo(dateFrom) < 0) {
-      showAppSnack(context, l10n.absenceErrorDateOrder, isError: true);
+      setState(() => _dateRangeError = l10n.absenceErrorDateOrder);
       return;
     }
 
@@ -163,18 +177,21 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
       widget.onSaved?.call();
     } on DomainValidationException catch (e) {
       if (!mounted) return;
-      setState(() => _isSaving = false);
       final msg = switch (e.message) {
         'absenceErrorOverlap' => l10n.absenceErrorOverlap,
         'absenceErrorDateRestrictionVacation' =>
           l10n.absenceErrorDateRestrictionVacation,
         'absenceErrorDateRestrictionSickLeave' =>
           l10n.absenceErrorDateRestrictionSickLeave,
+        'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
         'absenceErrorEditPendingOnly' => l10n.absenceErrorEditPendingOnly,
         'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
         _ => l10n.commonErrorOccurred,
       };
-      showAppSnack(context, msg, isError: true);
+      setState(() {
+        _isSaving = false;
+        _dateRangeError = msg;
+      });
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -202,6 +219,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                       decoration: InputDecoration(
                         labelText: l10n.absencesEmployee,
                         border: const OutlineInputBorder(),
+                        errorText: _employeeError,
                       ),
                       items: [
                         for (final e in widget.employees)
@@ -217,7 +235,12 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                             ),
                           ),
                       ],
-                      onChanged: (v) => setState(() => _selectedEmployeeId = v),
+                      onChanged: (v) {
+                        setState(() {
+                          _selectedEmployeeId = v;
+                          _clearEmployeeError();
+                        });
+                      },
                     ),
                     const SizedBox(height: 12),
                   ],
@@ -255,7 +278,10 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                               initialDate: _dateFrom,
                             );
                             if (picked != null) {
-                              setState(() => _dateFrom = picked);
+                              setState(() {
+                                _dateFrom = picked;
+                                _clearDateRangeError();
+                              });
                             }
                           },
                           child: Text(
@@ -277,7 +303,10 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                                   _dateTo ?? _dateFrom ?? DateTime.now(),
                             );
                             if (picked != null) {
-                              setState(() => _dateTo = picked);
+                              setState(() {
+                                _dateTo = picked;
+                                _clearDateRangeError();
+                              });
                             }
                           },
                           child: Text(
@@ -289,6 +318,15 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                       ),
                     ],
                   ),
+                  if (_dateRangeError != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _dateRangeError!,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 12),
                   TextField(
                     controller: _noteCtrl,

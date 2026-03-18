@@ -9,6 +9,8 @@ class EmployeeInfo {
     required this.status,
     this.usePin = false,
     this.policyAcknowledged = false,
+    this.hireDate,
+    this.terminationDate,
   });
 
   final int id;
@@ -17,4 +19,10 @@ class EmployeeInfo {
   final EmployeeStatus status;
   final bool usePin;
   final bool policyAcknowledged;
+
+  /// UTC milliseconds; null = no lower employment boundary.
+  final int? hireDate;
+
+  /// UTC milliseconds; null = no upper employment boundary.
+  final int? terminationDate;
 }

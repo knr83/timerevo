@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -14,15 +13,17 @@ import '../../../common/utils/employee_display_name.dart';
 import '../../../common/utils/time_format.dart';
 import '../../../common/utils/utc_clock.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../core/domain_errors.dart';
 import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../core/journal_interval_projection.dart';
 import '../../../domain/entities/journal_day_overview_row.dart';
+import '../../../domain/entities/session_info.dart';
 import '../../../domain/entities/session_with_employee_info.dart';
 import 'journal_timeline_grid.dart';
 
-enum _JournalStatusFilter { all, open, closed }
+enum _JournalStatusFilter { all, open, notClosed, closed }
 
 enum _DetailedScope { day, week }
 
@@ -33,6 +34,73 @@ enum _TableScope { day, week, month, interval }
 enum _TimelineScope { week, month, interval }
 
 enum JournalViewMode { table, timeline, timelineDetailed }
+
+DateRangeScope _tableScopeToDateRangeScope(_TableScope s) {
+  return switch (s) {
+    _TableScope.day => DateRangeScope.day,
+    _TableScope.week => DateRangeScope.week,
+    _TableScope.month => DateRangeScope.month,
+    _TableScope.interval => DateRangeScope.interval,
+  };
+}
+
+_TableScope _dateRangeScopeToTableScope(DateRangeScope s) {
+  return switch (s) {
+    DateRangeScope.day => _TableScope.day,
+    DateRangeScope.week => _TableScope.week,
+    DateRangeScope.month => _TableScope.month,
+    DateRangeScope.interval => _TableScope.interval,
+  };
+}
+
+DateRangeScope _timelineScopeToDateRangeScope(_TimelineScope s) {
+  return switch (s) {
+    _TimelineScope.week => DateRangeScope.week,
+    _TimelineScope.month => DateRangeScope.month,
+    _TimelineScope.interval => DateRangeScope.interval,
+  };
+}
+
+_TimelineScope _dateRangeScopeToTimelineScope(DateRangeScope s) {
+  return switch (s) {
+    DateRangeScope.day => _TimelineScope.week,
+    DateRangeScope.week => _TimelineScope.week,
+    DateRangeScope.month => _TimelineScope.month,
+    DateRangeScope.interval => _TimelineScope.interval,
+  };
+}
+
+DateRangeScope _detailedScopeToDateRangeScope(_DetailedScope s) {
+  return switch (s) {
+    _DetailedScope.day => DateRangeScope.day,
+    _DetailedScope.week => DateRangeScope.week,
+  };
+}
+
+_DetailedScope _dateRangeScopeToDetailedScope(DateRangeScope s) {
+  return switch (s) {
+    DateRangeScope.day => _DetailedScope.day,
+    DateRangeScope.week => _DetailedScope.week,
+    DateRangeScope.month => _DetailedScope.week,
+    DateRangeScope.interval => _DetailedScope.week,
+  };
+}
+
+(int, int) _detailedEffectiveRange(_JournalFilters f) {
+  if (f.fromUtcMs != null && f.toUtcMs != null) {
+    return (f.fromUtcMs!, f.toUtcMs!);
+  }
+  return switch (f.detailedScope) {
+    _DetailedScope.day => (
+      reportPeriodToday().fromUtcMs,
+      reportPeriodToday().toUtcMs,
+    ),
+    _DetailedScope.week => (
+      reportPeriodWeek().fromUtcMs,
+      reportPeriodWeek().toUtcMs,
+    ),
+  };
+}
 
 (int, int) _tableEffectiveRange(_JournalFilters f) {
   if (f.fromUtcMs != null && f.toUtcMs != null) {
@@ -175,22 +243,58 @@ class SessionsPage extends ConsumerWidget {
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
                 if (viewMode == JournalViewMode.timelineDetailed)
-                  _DetailedRangeControls(
-                    filters: filters,
-                    onFiltersChanged: (f) =>
-                        ref.read(_journalFiltersProvider.notifier).state = f,
+                  DateRangeFilterBar(
+                    scope: _detailedScopeToDateRangeScope(filters.detailedScope),
+                    fromUtcMs: _detailedEffectiveRange(filters).$1,
+                    toUtcMs: _detailedEffectiveRange(filters).$2,
+                    availableScopes: const [
+                      DateRangeScope.day,
+                      DateRangeScope.week,
+                    ],
+                    onChanged: (scope, from, to) =>
+                        ref.read(_journalFiltersProvider.notifier).state =
+                            filters.copyWith(
+                          detailedScope: _dateRangeScopeToDetailedScope(scope),
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                        ),
                   )
                 else if (viewMode == JournalViewMode.table)
-                  _TableRangeControls(
-                    filters: filters,
-                    onFiltersChanged: (f) =>
-                        ref.read(_journalFiltersProvider.notifier).state = f,
+                  DateRangeFilterBar(
+                    scope: _tableScopeToDateRangeScope(filters.tableScope),
+                    fromUtcMs: _tableEffectiveRange(filters).$1,
+                    toUtcMs: _tableEffectiveRange(filters).$2,
+                    availableScopes: const [
+                      DateRangeScope.day,
+                      DateRangeScope.week,
+                      DateRangeScope.month,
+                      DateRangeScope.interval,
+                    ],
+                    onChanged: (scope, from, to) =>
+                        ref.read(_journalFiltersProvider.notifier).state =
+                            filters.copyWith(
+                          tableScope: _dateRangeScopeToTableScope(scope),
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                        ),
                   )
                 else
-                  _TimelineRangeControls(
-                    filters: filters,
-                    onFiltersChanged: (f) =>
-                        ref.read(_journalFiltersProvider.notifier).state = f,
+                  DateRangeFilterBar(
+                    scope: _timelineScopeToDateRangeScope(filters.timelineScope),
+                    fromUtcMs: _timelineEffectiveRange(filters).$1,
+                    toUtcMs: _timelineEffectiveRange(filters).$2,
+                    availableScopes: const [
+                      DateRangeScope.week,
+                      DateRangeScope.month,
+                      DateRangeScope.interval,
+                    ],
+                    onChanged: (scope, from, to) =>
+                        ref.read(_journalFiltersProvider.notifier).state =
+                            filters.copyWith(
+                          timelineScope: _dateRangeScopeToTimelineScope(scope),
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                        ),
                   ),
                 if (viewMode == JournalViewMode.table)
                   DropdownMenu<_JournalStatusFilter>(
@@ -204,6 +308,10 @@ class SessionsPage extends ConsumerWidget {
                       DropdownMenuEntry(
                         value: _JournalStatusFilter.open,
                         label: l10n.journalFilterStatusOpen,
+                      ),
+                      DropdownMenuEntry(
+                        value: _JournalStatusFilter.notClosed,
+                        label: l10n.journalFilterStatusNotClosed,
                       ),
                       DropdownMenuEntry(
                         value: _JournalStatusFilter.closed,
@@ -463,6 +571,18 @@ class _JournalSearchFieldState extends State<_JournalSearchField> {
   }
 }
 
+bool _isNotClosed(SessionInfo s) {
+  if (s.status != 'OPEN' || s.endTs != null) return false;
+  final startLocal = DateTime.fromMillisecondsSinceEpoch(
+    s.startTs,
+    isUtc: true,
+  ).toLocal();
+  final startYmd = dateToYmd(
+    DateTime(startLocal.year, startLocal.month, startLocal.day),
+  );
+  return startYmd.compareTo(todayYmd()) < 0;
+}
+
 List<SessionWithEmployeeInfo> _applyClientFilters(
   List<SessionWithEmployeeInfo> rows,
   _JournalFilters filters,
@@ -471,6 +591,8 @@ List<SessionWithEmployeeInfo> _applyClientFilters(
   final statusFilter = filters.statusFilter;
   if (statusFilter == _JournalStatusFilter.open) {
     result = result.where((r) => r.session.status == 'OPEN').toList();
+  } else if (statusFilter == _JournalStatusFilter.notClosed) {
+    result = result.where((r) => _isNotClosed(r.session)).toList();
   } else if (statusFilter == _JournalStatusFilter.closed) {
     result = result.where((r) => r.session.status == 'CLOSED').toList();
   }
@@ -489,620 +611,6 @@ List<SessionWithEmployeeInfo> _applyClientFilters(
     }).toList();
   }
   return result;
-}
-
-class _DetailedRangeControls extends StatelessWidget {
-  const _DetailedRangeControls({
-    required this.filters,
-    required this.onFiltersChanged,
-  });
-
-  final _JournalFilters filters;
-  final void Function(_JournalFilters) onFiltersChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final fromUtcMs = filters.fromUtcMs ?? reportPeriodToday().fromUtcMs;
-    final toUtcMs = filters.toUtcMs ?? reportPeriodToday().toUtcMs;
-    final scope = filters.detailedScope;
-
-    final fromLocal = DateTime.fromMillisecondsSinceEpoch(
-      fromUtcMs,
-      isUtc: true,
-    ).toLocal();
-    final baseDate = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
-
-    final dateFormat = DateFormat('MMM d', locale);
-    String rangeLabel;
-    if (scope == _DetailedScope.day) {
-      rangeLabel = dateFormat.format(baseDate);
-    } else {
-      final toLocalEnd = DateTime.fromMillisecondsSinceEpoch(
-        toUtcMs,
-        isUtc: true,
-      ).toLocal();
-      final endDate = DateTime(
-        toLocalEnd.year,
-        toLocalEnd.month,
-        toLocalEnd.day,
-      );
-      rangeLabel =
-          '${dateFormat.format(baseDate)} – ${dateFormat.format(endDate)}';
-    }
-
-    void onPrev() {
-      if (scope == _DetailedScope.day) {
-        final prevDate = baseDate.subtract(const Duration(days: 1));
-        final r = reportPeriodDay(prevDate);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      } else {
-        final prevMonday = baseDate.subtract(const Duration(days: 7));
-        final r = reportPeriodWeekContaining(prevMonday);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      }
-    }
-
-    void onNext() {
-      if (scope == _DetailedScope.day) {
-        final nextDate = baseDate.add(const Duration(days: 1));
-        final r = reportPeriodDay(nextDate);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      } else {
-        final nextMonday = baseDate.add(const Duration(days: 7));
-        final r = reportPeriodWeekContaining(nextMonday);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      }
-    }
-
-    void onScopeSwitch() {
-      if (scope == _DetailedScope.day) {
-        final r = reportPeriodWeekContaining(baseDate);
-        onFiltersChanged(
-          filters.copyWith(
-            fromUtcMs: r.fromUtcMs,
-            toUtcMs: r.toUtcMs,
-            detailedScope: _DetailedScope.week,
-          ),
-        );
-      } else {
-        final r = reportPeriodDay(baseDate);
-        onFiltersChanged(
-          filters.copyWith(
-            fromUtcMs: r.fromUtcMs,
-            toUtcMs: r.toUtcMs,
-            detailedScope: _DetailedScope.day,
-          ),
-        );
-      }
-    }
-
-    void onToday() {
-      final now = DateTime.now();
-      if (scope == _DetailedScope.day) {
-        final r = reportPeriodDay(now);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      } else {
-        final r = reportPeriodWeekContaining(now);
-        onFiltersChanged(
-          filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-        );
-      }
-    }
-
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        SegmentedButton<_DetailedScope>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          segments: [
-            ButtonSegment(
-              value: _DetailedScope.day,
-              label: Text(l10n.journalScopeDay),
-            ),
-            ButtonSegment(
-              value: _DetailedScope.week,
-              label: Text(l10n.journalScopeWeek),
-            ),
-          ],
-          selected: {scope},
-          onSelectionChanged: (s) {
-            if (!s.contains(scope)) onScopeSwitch();
-          },
-        ),
-        TextButton(onPressed: onToday, child: Text(l10n.journalPresetToday)),
-        Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              IconButton.filledTonal(
-                style: IconButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                icon: const Icon(Symbols.chevron_left),
-                onPressed: onPrev,
-                tooltip: l10n.journalNavPrev,
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: Text(rangeLabel, style: theme.textTheme.labelLarge),
-              ),
-              IconButton.filledTonal(
-                style: IconButton.styleFrom(
-                  visualDensity: VisualDensity.compact,
-                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                ),
-                icon: const Icon(Symbols.chevron_right),
-                onPressed: onNext,
-                tooltip: l10n.journalNavNext,
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TableRangeControls extends StatelessWidget {
-  const _TableRangeControls({
-    required this.filters,
-    required this.onFiltersChanged,
-  });
-
-  final _JournalFilters filters;
-  final void Function(_JournalFilters) onFiltersChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final scope = filters.tableScope;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final (fromUtcMs, toUtcMs) = _effectiveRange(scope, filters);
-    final fromLocal = DateTime.fromMillisecondsSinceEpoch(
-      fromUtcMs,
-      isUtc: true,
-    ).toLocal();
-    final toLocal = DateTime.fromMillisecondsSinceEpoch(
-      toUtcMs,
-      isUtc: true,
-    ).toLocal();
-    final baseDate = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
-
-    final dateFormat = DateFormat('MMM d', locale);
-    String rangeLabel;
-    if (scope == _TableScope.day) {
-      rangeLabel = dateFormat.format(baseDate);
-    } else if (scope == _TableScope.interval) {
-      final endDate = DateTime(toLocal.year, toLocal.month, toLocal.day);
-      rangeLabel =
-          '${dateFormat.format(baseDate)} – ${dateFormat.format(endDate)}';
-    } else {
-      final endDate = DateTime(toLocal.year, toLocal.month, toLocal.day);
-      rangeLabel =
-          '${dateFormat.format(baseDate)} – ${dateFormat.format(endDate)}';
-    }
-
-    void onToday() {
-      final r = switch (scope) {
-        _TableScope.day => reportPeriodToday(),
-        _TableScope.week => reportPeriodWeek(),
-        _TableScope.month => reportPeriodMonth(),
-        _TableScope.interval => reportPeriodMonth(),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onPrev() {
-      if (scope == _TableScope.interval) return;
-      final r = switch (scope) {
-        _TableScope.day => reportPeriodDay(
-          baseDate.subtract(const Duration(days: 1)),
-        ),
-        _TableScope.week => reportPeriodWeekContaining(
-          baseDate.subtract(const Duration(days: 7)),
-        ),
-        _TableScope.month => reportPeriodMonthContaining(
-          DateTime(baseDate.year, baseDate.month - 1, 1),
-        ),
-        _TableScope.interval => throw StateError('unreachable'),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onNext() {
-      if (scope == _TableScope.interval) return;
-      final r = switch (scope) {
-        _TableScope.day => reportPeriodDay(
-          baseDate.add(const Duration(days: 1)),
-        ),
-        _TableScope.week => reportPeriodWeekContaining(
-          baseDate.add(const Duration(days: 7)),
-        ),
-        _TableScope.month => reportPeriodMonthContaining(
-          DateTime(baseDate.year, baseDate.month + 1, 1),
-        ),
-        _TableScope.interval => throw StateError('unreachable'),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onScopeChanged(_TableScope newScope) {
-      if (newScope == scope) return;
-      final r = switch ((scope, newScope)) {
-        (_, _TableScope.day) => reportPeriodDay(baseDate),
-        (_, _TableScope.week) => reportPeriodWeekContaining(baseDate),
-        (_, _TableScope.month) => reportPeriodMonthContaining(baseDate),
-        (_, _TableScope.interval) => (fromUtcMs: fromUtcMs, toUtcMs: toUtcMs),
-      };
-      onFiltersChanged(
-        filters.copyWith(
-          tableScope: newScope,
-          fromUtcMs: r.fromUtcMs,
-          toUtcMs: r.toUtcMs,
-        ),
-      );
-    }
-
-    Future<void> onPickRange() async {
-      final from = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
-      final to = DateTime(toLocal.year, toLocal.month, toLocal.day);
-      final picked = await pickDateRange(
-        context,
-        initialStartDate: from,
-        initialEndDate: to,
-      );
-      if (picked == null || !context.mounted) return;
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: picked.fromUtcMs, toUtcMs: picked.toUtcMs),
-      );
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        SegmentedButton<_TableScope>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          segments: [
-            ButtonSegment(
-              value: _TableScope.day,
-              label: Text(l10n.journalScopeDay),
-            ),
-            ButtonSegment(
-              value: _TableScope.week,
-              label: Text(l10n.journalScopeWeek),
-            ),
-            ButtonSegment(
-              value: _TableScope.month,
-              label: Text(l10n.journalScopeMonth),
-            ),
-            ButtonSegment(
-              value: _TableScope.interval,
-              label: Text(l10n.journalScopeInterval),
-            ),
-          ],
-          selected: {scope},
-          onSelectionChanged: (s) {
-            if (!s.contains(scope)) onScopeChanged(s.first);
-          },
-        ),
-        TextButton(onPressed: onToday, child: Text(l10n.journalPresetToday)),
-        Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (scope != _TableScope.interval)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: const Icon(Symbols.chevron_left),
-                  onPressed: onPrev,
-                  tooltip: l10n.journalNavPrev,
-                ),
-              InkWell(
-                onTap: scope == _TableScope.interval ? onPickRange : null,
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  child: Text(rangeLabel, style: theme.textTheme.labelLarge),
-                ),
-              ),
-              if (scope != _TableScope.interval)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: const Icon(Symbols.chevron_right),
-                  onPressed: onNext,
-                  tooltip: l10n.journalNavNext,
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  (int, int) _effectiveRange(_TableScope scope, _JournalFilters f) {
-    if (f.fromUtcMs != null && f.toUtcMs != null) {
-      return (f.fromUtcMs!, f.toUtcMs!);
-    }
-    return switch (scope) {
-      _TableScope.day => (
-        reportPeriodToday().fromUtcMs,
-        reportPeriodToday().toUtcMs,
-      ),
-      _TableScope.week => (
-        reportPeriodWeek().fromUtcMs,
-        reportPeriodWeek().toUtcMs,
-      ),
-      _TableScope.month => (
-        reportPeriodMonth().fromUtcMs,
-        reportPeriodMonth().toUtcMs,
-      ),
-      _TableScope.interval => (
-        reportPeriodMonth().fromUtcMs,
-        reportPeriodMonth().toUtcMs,
-      ),
-    };
-  }
-}
-
-class _TimelineRangeControls extends StatelessWidget {
-  const _TimelineRangeControls({
-    required this.filters,
-    required this.onFiltersChanged,
-  });
-
-  final _JournalFilters filters;
-  final void Function(_JournalFilters) onFiltersChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final locale = Localizations.localeOf(context).toString();
-    final scope = filters.timelineScope;
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-
-    final (fromUtcMs, toUtcMs) = _effectiveRange(scope, filters);
-    final fromLocal = DateTime.fromMillisecondsSinceEpoch(
-      fromUtcMs,
-      isUtc: true,
-    ).toLocal();
-    final toLocal = DateTime.fromMillisecondsSinceEpoch(
-      toUtcMs,
-      isUtc: true,
-    ).toLocal();
-    final baseDate = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
-
-    final dateFormat = DateFormat('MMM d', locale);
-    final endDate = DateTime(toLocal.year, toLocal.month, toLocal.day);
-    final rangeLabel =
-        '${dateFormat.format(baseDate)} – ${dateFormat.format(endDate)}';
-
-    void onToday() {
-      final r = switch (scope) {
-        _TimelineScope.week => reportPeriodWeek(),
-        _TimelineScope.month => reportPeriodMonth(),
-        _TimelineScope.interval => reportPeriodMonth(),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onPrev() {
-      if (scope == _TimelineScope.interval) return;
-      final r = switch (scope) {
-        _TimelineScope.week => reportPeriodWeekContaining(
-          baseDate.subtract(const Duration(days: 7)),
-        ),
-        _TimelineScope.month => reportPeriodMonthContaining(
-          DateTime(baseDate.year, baseDate.month - 1, 1),
-        ),
-        _TimelineScope.interval => throw StateError('unreachable'),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onNext() {
-      if (scope == _TimelineScope.interval) return;
-      final r = switch (scope) {
-        _TimelineScope.week => reportPeriodWeekContaining(
-          baseDate.add(const Duration(days: 7)),
-        ),
-        _TimelineScope.month => reportPeriodMonthContaining(
-          DateTime(baseDate.year, baseDate.month + 1, 1),
-        ),
-        _TimelineScope.interval => throw StateError('unreachable'),
-      };
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: r.fromUtcMs, toUtcMs: r.toUtcMs),
-      );
-    }
-
-    void onScopeChanged(_TimelineScope newScope) {
-      if (newScope == scope) return;
-      final r = switch (newScope) {
-        _TimelineScope.week => reportPeriodWeekContaining(baseDate),
-        _TimelineScope.month => reportPeriodMonthContaining(baseDate),
-        _TimelineScope.interval => (fromUtcMs: fromUtcMs, toUtcMs: toUtcMs),
-      };
-      onFiltersChanged(
-        filters.copyWith(
-          timelineScope: newScope,
-          fromUtcMs: r.fromUtcMs,
-          toUtcMs: r.toUtcMs,
-        ),
-      );
-    }
-
-    Future<void> onPickRange() async {
-      final from = DateTime(fromLocal.year, fromLocal.month, fromLocal.day);
-      final to = DateTime(toLocal.year, toLocal.month, toLocal.day);
-      final picked = await pickDateRange(
-        context,
-        initialStartDate: from,
-        initialEndDate: to,
-      );
-      if (picked == null || !context.mounted) return;
-      onFiltersChanged(
-        filters.copyWith(fromUtcMs: picked.fromUtcMs, toUtcMs: picked.toUtcMs),
-      );
-    }
-
-    return Wrap(
-      spacing: 8,
-      runSpacing: 8,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        SegmentedButton<_TimelineScope>(
-          showSelectedIcon: false,
-          style: SegmentedButton.styleFrom(
-            visualDensity: VisualDensity.compact,
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          ),
-          segments: [
-            ButtonSegment(
-              value: _TimelineScope.week,
-              label: Text(l10n.journalScopeWeek),
-            ),
-            ButtonSegment(
-              value: _TimelineScope.month,
-              label: Text(l10n.journalScopeMonth),
-            ),
-            ButtonSegment(
-              value: _TimelineScope.interval,
-              label: Text(l10n.journalScopeInterval),
-            ),
-          ],
-          selected: {scope},
-          onSelectionChanged: (s) {
-            if (!s.contains(scope)) onScopeChanged(s.first);
-          },
-        ),
-        TextButton(onPressed: onToday, child: Text(l10n.journalPresetToday)),
-        Container(
-          decoration: BoxDecoration(
-            color: colorScheme.surfaceContainerHighest,
-            borderRadius: BorderRadius.circular(8),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (scope != _TimelineScope.interval)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: const Icon(Symbols.chevron_left),
-                  onPressed: onPrev,
-                  tooltip: l10n.journalNavPrev,
-                ),
-              InkWell(
-                onTap: scope == _TimelineScope.interval ? onPickRange : null,
-                borderRadius: BorderRadius.circular(4),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 2,
-                  ),
-                  child: Text(rangeLabel, style: theme.textTheme.labelLarge),
-                ),
-              ),
-              if (scope != _TimelineScope.interval)
-                IconButton.filledTonal(
-                  style: IconButton.styleFrom(
-                    visualDensity: VisualDensity.compact,
-                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                  ),
-                  icon: const Icon(Symbols.chevron_right),
-                  onPressed: onNext,
-                  tooltip: l10n.journalNavNext,
-                ),
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-
-  (int, int) _effectiveRange(_TimelineScope scope, _JournalFilters f) {
-    if (f.fromUtcMs != null && f.toUtcMs != null) {
-      return (f.fromUtcMs!, f.toUtcMs!);
-    }
-    return switch (scope) {
-      _TimelineScope.week => (
-        reportPeriodWeek().fromUtcMs,
-        reportPeriodWeek().toUtcMs,
-      ),
-      _TimelineScope.month => (
-        reportPeriodMonth().fromUtcMs,
-        reportPeriodMonth().toUtcMs,
-      ),
-      _TimelineScope.interval => (
-        reportPeriodMonth().fromUtcMs,
-        reportPeriodMonth().toUtcMs,
-      ),
-    };
-  }
 }
 
 class _JournalFilters {
@@ -1240,6 +748,7 @@ class _JournalTable extends ConsumerWidget {
                         return l10n.durationHm(h, m);
                       })();
                 final isOpen = s.status == 'OPEN';
+                final isNotClosed = isOpen && _isNotClosed(s);
 
                 return DataRow(
                   cells: [
@@ -1249,12 +758,27 @@ class _JournalTable extends ConsumerWidget {
                     DataCell(Center(child: Text(duration))),
                     DataCell(
                       Center(
-                        child: Icon(
-                          isOpen ? Symbols.schedule : Symbols.check_circle,
-                          size: 20,
-                          color: isOpen
-                              ? Theme.of(context).colorScheme.primary
-                              : Theme.of(context).colorScheme.onSurfaceVariant,
+                        child: Tooltip(
+                          message: isNotClosed
+                              ? l10n.journalFilterStatusNotClosed
+                              : isOpen
+                              ? l10n.commonOngoing
+                              : l10n.journalFilterStatusClosed,
+                          child: Icon(
+                            isNotClosed
+                                ? Symbols.warning_amber_rounded
+                                : isOpen
+                                ? Symbols.schedule
+                                : Symbols.check_circle,
+                            size: 20,
+                            color: isNotClosed
+                                ? Theme.of(context).colorScheme.error
+                                : isOpen
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
+                          ),
                         ),
                       ),
                     ),
@@ -1295,6 +819,7 @@ class _JournalTable extends ConsumerWidget {
     final initialStartUtcMs = s.startTs;
     final initialEndUtcMs = s.endTs;
 
+    String? validationError;
     final saved = await showDialog<bool>(
       context: context,
       builder: (context) {
@@ -1316,6 +841,7 @@ class _JournalTable extends ConsumerWidget {
             final startOrEndChanged =
                 startUtcMs != initialStartUtcMs || endUtcMs != initialEndUtcMs;
             final reasonRequired = startOrEndChanged;
+            final reasonEmpty = reasonCtrl.text.trim().isEmpty;
 
             return AlertDialog(
               title: Text(l10n.journalEditDialogTitle),
@@ -1323,7 +849,40 @@ class _JournalTable extends ConsumerWidget {
                 width: 520,
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (validationError != null) ...[
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Theme.of(context)
+                              .colorScheme
+                              .errorContainer
+                              .withValues(alpha: 0.5),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Symbols.error,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                validationError!,
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onErrorContainer,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -1413,6 +972,9 @@ class _JournalTable extends ConsumerWidget {
                         hintText: reasonRequired
                             ? null
                             : l10n.journalUpdateReasonHint,
+                        errorText: reasonRequired && reasonEmpty
+                            ? l10n.sessionsUpdateReasonRequired
+                            : null,
                         border: const OutlineInputBorder(),
                       ),
                     ),
@@ -1435,9 +997,97 @@ class _JournalTable extends ConsumerWidget {
                   child: Text(l10n.commonCancel),
                 ),
                 FilledButton(
-                  onPressed: (reasonRequired && reasonCtrl.text.trim().isEmpty)
-                      ? null
-                      : () => Navigator.of(context).pop(true),
+                  onPressed: (reasonRequired && reasonEmpty) ? null : () async {
+                    validationError = null;
+                    setState(() {});
+
+                    if (reasonRequired && reasonCtrl.text.trim().isEmpty) {
+                      validationError = l10n.sessionsUpdateReasonRequired;
+                      setState(() {});
+                      return;
+                    }
+                    if (endUtcMs != null) {
+                      if (endUtcMs! <= startUtcMs) {
+                        validationError = l10n.journalErrorEndBeforeStart;
+                        setState(() {});
+                        return;
+                      }
+                      if (!isSameLocalCalendarDay(startUtcMs, endUtcMs!)) {
+                        validationError = l10n.journalErrorCrossDay;
+                        setState(() {});
+                        return;
+                      }
+                    }
+                    final emp = row.employee;
+                    final startLocal = DateTime.fromMillisecondsSinceEpoch(
+                      startUtcMs,
+                      isUtc: true,
+                    ).toLocal();
+                    final startYmd = dateToYmd(
+                      DateTime(startLocal.year, startLocal.month, startLocal.day),
+                    );
+                    if (!isDateWithinEmployment(
+                      emp.hireDate,
+                      emp.terminationDate,
+                      startYmd,
+                    )) {
+                      validationError = l10n.journalErrorOutsideEmployment;
+                      setState(() {});
+                      return;
+                    }
+                    if (endUtcMs != null) {
+                      final endLocal = DateTime.fromMillisecondsSinceEpoch(
+                        endUtcMs!,
+                        isUtc: true,
+                      ).toLocal();
+                      final endYmd = dateToYmd(
+                        DateTime(
+                          endLocal.year,
+                          endLocal.month,
+                          endLocal.day,
+                        ),
+                      );
+                      if (!isDateWithinEmployment(
+                        emp.hireDate,
+                        emp.terminationDate,
+                        endYmd,
+                      )) {
+                        validationError = l10n.journalErrorOutsideEmployment;
+                        setState(() {});
+                        return;
+                      }
+                    }
+                    try {
+                      final useCase = ref.read(
+                        updateSessionAsAdminUseCaseProvider,
+                      );
+                      await useCase(
+                        sessionId: s.id,
+                        startUtcMs: startUtcMs,
+                        endUtcMs: endUtcMs,
+                        note: noteCtrl.text.trim().isEmpty
+                            ? null
+                            : noteCtrl.text.trim(),
+                        updateReason: startOrEndChanged
+                            ? reasonCtrl.text.trim()
+                            : '',
+                        updatedBy: 'admin',
+                      );
+                      if (context.mounted) {
+                        Navigator.of(context).pop(true);
+                      }
+                    } on DomainValidationException catch (e) {
+                      if (!context.mounted) return;
+                      validationError = switch (e.message) {
+                        'sessionsErrorSameDayRequired' =>
+                          l10n.journalErrorCrossDay,
+                        'journalErrorOutsideEmployment' =>
+                          l10n.journalErrorOutsideEmployment,
+                        _ => errorMessageForUser(e, l10n.commonErrorOccurred),
+                      };
+                      setState(() {});
+                    }
+                  },
                   child: Text(l10n.commonSave),
                 ),
               ],
@@ -1447,64 +1097,7 @@ class _JournalTable extends ConsumerWidget {
       },
     );
 
-    if (saved != true) return;
-
-    final startOrEndChanged =
-        startUtcMs != initialStartUtcMs || endUtcMs != initialEndUtcMs;
-    final reason = reasonCtrl.text.trim();
-    if (startOrEndChanged && reason.isEmpty) {
-      if (context.mounted) {
-        final l10n = AppLocalizations.of(context);
-        showAppSnack(context, l10n.sessionsUpdateReasonRequired, isError: true);
-      }
-      return;
-    }
-
-    if (endUtcMs != null) {
-      final endMs = endUtcMs!;
-      if (endMs <= startUtcMs) {
-        if (context.mounted) {
-          showAppSnack(
-            context,
-            AppLocalizations.of(context).journalErrorEndBeforeStart,
-            isError: true,
-          );
-        }
-        return;
-      }
-      if (!isSameLocalCalendarDay(startUtcMs, endMs)) {
-        if (context.mounted) {
-          showAppSnack(
-            context,
-            AppLocalizations.of(context).journalErrorCrossDay,
-            isError: true,
-          );
-        }
-        return;
-      }
-    }
-
-    try {
-      final useCase = ref.read(updateSessionAsAdminUseCaseProvider);
-      await useCase(
-        sessionId: s.id,
-        startUtcMs: startUtcMs,
-        endUtcMs: endUtcMs,
-        note: noteCtrl.text.trim().isEmpty ? null : noteCtrl.text.trim(),
-        updateReason: startOrEndChanged ? reason : '',
-        updatedBy: 'admin',
-      );
-    } on DomainValidationException catch (e) {
-      if (!context.mounted) return;
-      final l10n = AppLocalizations.of(context);
-      final msg = e.message == 'sessionsErrorSameDayRequired'
-          ? l10n.journalErrorCrossDay
-          : errorMessageForUser(e, l10n.commonErrorOccurred);
-      showAppSnack(context, msg, isError: true);
-      return;
-    }
-
-    if (context.mounted) {
+    if (saved == true && context.mounted) {
       showAppSnack(context, AppLocalizations.of(context).journalSaved);
     }
   }

@@ -424,6 +424,12 @@ abstract class AppLocalizations {
   /// **'No scheduled work today.'**
   String get terminalErrorNoScheduleForDay;
 
+  /// No description provided for @terminalErrorAttendanceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance settings could not be loaded.'**
+  String get terminalErrorAttendanceUnavailable;
+
   /// No description provided for @terminalNoteRequiredTitle.
   ///
   /// In en, this message translates to:
@@ -435,6 +441,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'A note is required for this attendance deviation.'**
   String get terminalNoteRequiredMessage;
+
+  /// No description provided for @terminalNoteReasonLateArrival.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: Late arrival'**
+  String get terminalNoteReasonLateArrival;
+
+  /// No description provided for @terminalNoteReasonEarlyDeparture.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: Early departure'**
+  String get terminalNoteReasonEarlyDeparture;
+
+  /// No description provided for @terminalNoteReasonLateDeparture.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason: Late departure'**
+  String get terminalNoteReasonLateDeparture;
 
   /// No description provided for @terminalNoteLabel.
   ///
@@ -909,6 +933,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Must be 0 or more'**
   String get employeeVacationDaysPerYearInvalid;
+
+  /// No description provided for @employeeTerminationDateBeforeHireError.
+  ///
+  /// In en, this message translates to:
+  /// **'Termination date must be on or after hire date.'**
+  String get employeeTerminationDateBeforeHireError;
 
   /// No description provided for @employeeFirstLastRequired.
   ///
@@ -2272,6 +2302,12 @@ abstract class AppLocalizations {
   /// **'Closed'**
   String get journalFilterStatusClosed;
 
+  /// No description provided for @journalFilterStatusNotClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Not closed'**
+  String get journalFilterStatusNotClosed;
+
   /// No description provided for @journalFilterSearch.
   ///
   /// In en, this message translates to:
@@ -2361,6 +2397,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Start and end must be on the same day.'**
   String get journalErrorCrossDay;
+
+  /// No description provided for @journalErrorOutsideEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Session dates must fall within the employee\'s employment period.'**
+  String get journalErrorOutsideEmployment;
 
   /// No description provided for @journalUpdateReasonHint.
   ///
@@ -2913,6 +2955,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sick leave cannot start more than 3 days ago.'**
   String get absenceErrorDateRestrictionSickLeave;
+
+  /// No description provided for @absenceErrorOutsideEmployment.
+  ///
+  /// In en, this message translates to:
+  /// **'Absence must be within employee employment period (from hire date to termination date).'**
+  String get absenceErrorOutsideEmployment;
 
   /// No description provided for @absencesEmpty.
   ///

@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../common/utils/date_utils.dart';
+import '../common/widgets/date_range_filter_bar.dart';
 import '../data/repositories/repo_providers.dart';
 import '../domain/entities/employee_day_report_row.dart';
 import '../domain/entities/employee_info.dart';
@@ -85,17 +86,32 @@ final journalIntervalOverviewUseCaseProvider =
       );
     });
 
-/// Report filters (From/To date range, employee filter). Used by Reports page and watchReportWithNormProvider.
+/// Report filters (scope, date range, employee). Used by Reports page and watchReportWithNormProvider.
 /// Default period: current month.
 final reportFiltersProvider =
-    StateProvider<({int? fromUtcMs, int? toUtcMs, int? employeeId})>((ref) {
+    StateProvider<({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId})>((ref) {
       final month = reportPeriodMonth();
       return (
+        scope: DateRangeScope.month,
         fromUtcMs: month.fromUtcMs,
         toUtcMs: month.toUtcMs,
         employeeId: null,
       );
     });
+
+({int fromUtcMs, int toUtcMs}) reportEffectiveRange(
+  ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId}) f,
+) {
+  if (f.fromUtcMs != null && f.toUtcMs != null) {
+    return (fromUtcMs: f.fromUtcMs!, toUtcMs: f.toUtcMs!);
+  }
+  return switch (f.scope) {
+    DateRangeScope.day => reportPeriodToday(),
+    DateRangeScope.week => reportPeriodWeek(),
+    DateRangeScope.month => reportPeriodMonth(),
+    DateRangeScope.interval => reportPeriodMonth(),
+  };
+}
 
 /// Selected employee for details drawer. Null when drawer is closed.
 final selectedEmployeeForDetailsProvider = StateProvider<int?>((ref) => null);
@@ -105,17 +121,14 @@ final watchEmployeeDayReportProvider =
     StreamProvider<List<EmployeeDayReportRow>>((ref) {
       final filters = ref.watch(reportFiltersProvider);
       final selectedId = ref.watch(selectedEmployeeForDetailsProvider);
-      if (selectedId == null ||
-          filters.fromUtcMs == null ||
-          filters.toUtcMs == null) {
-        return Stream.value([]);
-      }
+      if (selectedId == null) return Stream.value([]);
+      final r = reportEffectiveRange(filters);
       return ref
           .watch(employeeDayReportUseCaseProvider)
           .streamEmployeeDayReport(
             employeeId: selectedId,
-            fromUtcMs: filters.fromUtcMs!,
-            toUtcMs: filters.toUtcMs!,
+            fromUtcMs: r.fromUtcMs,
+            toUtcMs: r.toUtcMs,
           );
     });
 
@@ -123,11 +136,12 @@ final watchEmployeeDayReportProvider =
 final watchReportWithNormProvider = StreamProvider<List<EmployeeReportRowInfo>>(
   (ref) {
     final filters = ref.watch(reportFiltersProvider);
+    final r = reportEffectiveRange(filters);
     return ref
         .watch(employeeReportWithNormUseCaseProvider)
         .streamEmployeeReportWithNorm(
-          fromUtcMs: filters.fromUtcMs,
-          toUtcMs: filters.toUtcMs,
+          fromUtcMs: r.fromUtcMs,
+          toUtcMs: r.toUtcMs,
         );
   },
 );

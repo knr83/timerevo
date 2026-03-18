@@ -12,8 +12,8 @@ import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/usecase_providers.dart';
 import '../../../common/pdf/employee_daily_pdf_export.dart';
-import '../../../common/utils/date_time_picker.dart';
 import '../../../common/utils/date_utils.dart';
+import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/error_message_helper.dart';
@@ -77,7 +77,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       rows = rows.where((r) => r.employeeId == filters.employeeId).toList();
     }
 
-    final periodLabel = _periodLabel(filters);
+    final r = reportEffectiveRange(filters);
 
     return Scaffold(
       body: Padding(
@@ -95,9 +95,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 FilledButton.icon(
                   onPressed: () async {
                     if (rows.isEmpty) return;
+                    final range = reportEffectiveRange(filters);
                     await _exportPdf(
                       context,
-                      filters: filters,
+                      fromUtcMs: range.fromUtcMs,
+                      toUtcMs: range.toUtcMs,
+                      employeeId: filters.employeeId,
                       rows: rows,
                       sortColumnIndex: _sortColumnIndex,
                       sortAscending: _sortAscending,
@@ -110,51 +113,27 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
             ),
             const SizedBox(height: 8),
             Wrap(
-              spacing: 12,
-              runSpacing: 12,
+              spacing: 8,
+              runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                InputChip(
-                  label: Text(periodLabel),
-                  onPressed: () async {
-                    final range = await pickDateRange(
-                      context,
-                      initialStartDate: filters.fromUtcMs != null
-                          ? DateTime.fromMillisecondsSinceEpoch(
-                              filters.fromUtcMs!,
-                              isUtc: true,
-                            ).toLocal()
-                          : DateTime.now(),
-                      initialEndDate: filters.toUtcMs != null
-                          ? DateTime.fromMillisecondsSinceEpoch(
-                              filters.toUtcMs!,
-                              isUtc: true,
-                            ).toLocal()
-                          : DateTime.now(),
-                    );
-                    if (range == null) return;
-                    ref.read(reportFiltersProvider.notifier).state = (
-                      fromUtcMs: range.fromUtcMs,
-                      toUtcMs: range.toUtcMs,
-                      employeeId: filters.employeeId,
-                    );
-                  },
-                ),
-                InputChip(
-                  label: Text(l10n.reportsPeriodPresetToday),
-                  onPressed: () => _applyPreset(reportPeriodToday()),
-                ),
-                InputChip(
-                  label: Text(l10n.reportsPeriodPresetWeek),
-                  onPressed: () => _applyPreset(reportPeriodWeek()),
-                ),
-                InputChip(
-                  label: Text(l10n.reportsPeriodPresetMonth),
-                  onPressed: () => _applyPreset(reportPeriodMonth()),
-                ),
-                InputChip(
-                  label: Text(l10n.reportsPeriodPresetLastMonth),
-                  onPressed: () => _applyPreset(reportPeriodLastMonth()),
+                DateRangeFilterBar(
+                  scope: filters.scope,
+                  fromUtcMs: r.fromUtcMs,
+                  toUtcMs: r.toUtcMs,
+                  availableScopes: const [
+                    DateRangeScope.day,
+                    DateRangeScope.week,
+                    DateRangeScope.month,
+                    DateRangeScope.interval,
+                  ],
+                  onChanged: (scope, from, to) =>
+                      ref.read(reportFiltersProvider.notifier).state = (
+                        scope: scope,
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        employeeId: filters.employeeId,
+                      ),
                 ),
                 _EmployeeFilterDropdown(filters: filters),
               ],
@@ -221,41 +200,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     );
   }
 
-  void _applyPreset(({int fromUtcMs, int toUtcMs}) preset) {
-    final filters = ref.read(reportFiltersProvider);
-    ref.read(reportFiltersProvider.notifier).state = (
-      fromUtcMs: preset.fromUtcMs,
-      toUtcMs: preset.toUtcMs,
-      employeeId: filters.employeeId,
-    );
-  }
-
-  String _periodLabel(({int? fromUtcMs, int? toUtcMs, int? employeeId}) f) {
-    if (f.fromUtcMs == null || f.toUtcMs == null) {
-      return AppLocalizations.of(context).reportsPeriodLabel;
-    }
-    final fromDt = DateTime.fromMillisecondsSinceEpoch(
-      f.fromUtcMs!,
-      isUtc: true,
-    ).toLocal();
-    final toDt = DateTime.fromMillisecondsSinceEpoch(
-      f.toUtcMs!,
-      isUtc: true,
-    ).toLocal();
-    final from =
-        '${fromDt.year}-${fromDt.month.toString().padLeft(2, '0')}-${fromDt.day.toString().padLeft(2, '0')}';
-    final to =
-        '${toDt.year}-${toDt.month.toString().padLeft(2, '0')}-${toDt.day.toString().padLeft(2, '0')}';
-    return '$from – $to';
-  }
-
   AppLocalizations get l10n => AppLocalizations.of(context);
 }
 
 class _EmployeeFilterDropdown extends ConsumerWidget {
   const _EmployeeFilterDropdown({required this.filters});
 
-  final ({int? fromUtcMs, int? toUtcMs, int? employeeId}) filters;
+  final ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId}) filters;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -280,6 +231,7 @@ class _EmployeeFilterDropdown extends ConsumerWidget {
           ],
           onSelected: (v) {
             ref.read(reportFiltersProvider.notifier).state = (
+              scope: filters.scope,
               fromUtcMs: filters.fromUtcMs,
               toUtcMs: filters.toUtcMs,
               employeeId: v,
@@ -444,12 +396,7 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                 TextButton(
                   onPressed: () async {
                     final filters = ref.read(reportFiltersProvider);
-                    if (filters.fromUtcMs == null || filters.toUtcMs == null) {
-                      if (context.mounted) {
-                        showAppSnack(context, l10n.reportsPeriodLabel);
-                      }
-                      return;
-                    }
+                    final r = reportEffectiveRange(filters);
                     await exportEmployeeDailyPdf(
                       context,
                       dayReportUseCase: ref.read(
@@ -457,8 +404,8 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                       ),
                       employeeId: selectedId,
                       employeeName: employeeName,
-                      fromUtcMs: filters.fromUtcMs!,
-                      toUtcMs: filters.toUtcMs!,
+                      fromUtcMs: r.fromUtcMs,
+                      toUtcMs: r.toUtcMs,
                       sortColumnName: sortColumnIndex != null
                           ? _sortColumnName(l10n, sortColumnIndex)
                           : null,
@@ -555,7 +502,9 @@ String _sortColumnName(AppLocalizations l10n, int? sortColumnIndex) {
 
 Future<void> _exportPdf(
   BuildContext context, {
-  required ({int? fromUtcMs, int? toUtcMs, int? employeeId}) filters,
+  required int fromUtcMs,
+  required int toUtcMs,
+  required int? employeeId,
   required List<EmployeeReportRowInfo> rows,
   int? sortColumnIndex,
   bool sortAscending = false,
@@ -602,26 +551,16 @@ Future<void> _exportPdf(
       });
     }
 
-    final employeeName = filters.employeeId == null
+    final employeeName = employeeId == null
         ? l10n.sessionsEmployeeAll
         : (rows.firstOrNull?.employeeName ?? l10n.sessionsEmployeeAll);
 
-    final fromStr = filters.fromUtcMs != null
-        ? dateToYmd(
-            DateTime.fromMillisecondsSinceEpoch(
-              filters.fromUtcMs!,
-              isUtc: true,
-            ).toLocal(),
-          )
-        : '—';
-    final toStr = filters.toUtcMs != null
-        ? dateToYmd(
-            DateTime.fromMillisecondsSinceEpoch(
-              filters.toUtcMs!,
-              isUtc: true,
-            ).toLocal(),
-          )
-        : '—';
+    final fromStr = dateToYmd(
+      DateTime.fromMillisecondsSinceEpoch(fromUtcMs, isUtc: true).toLocal(),
+    );
+    final toStr = dateToYmd(
+      DateTime.fromMillisecondsSinceEpoch(toUtcMs, isUtc: true).toLocal(),
+    );
     final generatedStr = DateFormat.yMMMd().add_Hm().format(
       DateTime.now().toLocal(),
     );

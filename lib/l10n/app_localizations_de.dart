@@ -198,11 +198,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get terminalErrorNoScheduleForDay => 'Heute keine Arbeit geplant.';
 
   @override
+  String get terminalErrorAttendanceUnavailable =>
+      'Einstellungen zur Anwesenheit konnten nicht geladen werden.';
+
+  @override
   String get terminalNoteRequiredTitle => 'Notiz erforderlich';
 
   @override
   String get terminalNoteRequiredMessage =>
       'Für diese Abweichung ist eine Notiz erforderlich.';
+
+  @override
+  String get terminalNoteReasonLateArrival => 'Grund: Später Antritt';
+
+  @override
+  String get terminalNoteReasonEarlyDeparture => 'Grund: Früher Austritt';
+
+  @override
+  String get terminalNoteReasonLateDeparture => 'Grund: Später Austritt';
 
   @override
   String get terminalNoteLabel => 'Notiz';
@@ -457,6 +470,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get employeeVacationDaysPerYearInvalid => 'Muss 0 oder mehr sein';
+
+  @override
+  String get employeeTerminationDateBeforeHireError =>
+      'Das Austrittsdatum muss am oder nach dem Einstellungsdatum liegen.';
 
   @override
   String get employeeFirstLastRequired =>
@@ -1219,6 +1236,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalFilterStatusClosed => 'Geschlossen';
 
   @override
+  String get journalFilterStatusNotClosed => 'Nicht geschlossen';
+
+  @override
   String get journalFilterSearch => 'Suchen';
 
   @override
@@ -1264,6 +1284,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get journalErrorCrossDay =>
       'Start und Ende müssen am gleichen Tag liegen.';
+
+  @override
+  String get journalErrorOutsideEmployment =>
+      'Sitzungsdaten müssen in die Beschäftigungszeit des Mitarbeiters fallen.';
 
   @override
   String get journalUpdateReasonHint =>
@@ -1565,6 +1589,10 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get absenceErrorDateRestrictionSickLeave =>
       'Krankschreibung kann nicht mehr als 3 Tage zurück datiert werden.';
+
+  @override
+  String get absenceErrorOutsideEmployment =>
+      'Abwesenheit muss innerhalb der Beschäftigungszeit des Mitarbeiters liegen (Einstellungsdatum bis Austrittsdatum).';
 
   @override
   String get absencesEmpty => 'Keine Abwesenheiten.';

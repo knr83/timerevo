@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import '../core/attendance_mode.dart';
-import '../core/debug_session_log.dart';
 import '../core/domain_errors.dart';
 import '../core/journal_interval_projection.dart';
 import '../core/employee_pin_status.dart';
@@ -133,24 +132,8 @@ class ClockOutUseCase {
     required AttendanceMode attendanceMode,
     required int toleranceMinutes,
   }) async {
-    // #region agent log
-    debugLog(
-      location: 'ClockOutUseCase:entry',
-      message: 'ClockOut call',
-      data: {'employeeId': employeeId, 'attendanceMode': attendanceMode.name},
-      hypothesisId: 'H2',
-    );
-    // #endregion
     final open = await _sessionsRepo.getOpenSessionInfoForEmployee(employeeId);
     if (open == null) {
-      // #region agent log
-      debugLog(
-        location: 'ClockOutUseCase:openNull',
-        message: 'getOpenSessionInfoForEmployee returned null',
-        data: {'employeeId': employeeId},
-        hypothesisId: 'H2',
-      );
-      // #endregion
       return const ClockError(ClockErrorKind.noOpenSession);
     }
 
@@ -169,14 +152,6 @@ class ClockOutUseCase {
         dateLocal: sessionDate,
       );
       if (schedule.isDayOff || schedule.intervals.isEmpty) {
-        // #region agent log
-        debugLog(
-          location: 'ClockOutUseCase:scheduleEmpty',
-          message: 'Schedule empty or day off',
-          data: {'employeeId': employeeId, 'sessionStartTs': open.startTs},
-          hypothesisId: 'H1',
-        );
-        // #endregion
         return const ClockError(ClockErrorKind.noOpenSession);
       }
       final startMin = sessionStartLocal.hour * 60 + sessionStartLocal.minute;
@@ -184,15 +159,6 @@ class ClockOutUseCase {
       if (interval == null) {
         // Session started outside schedule intervals (e.g. in Flexible mode).
         // Allow clock-out without tolerance check; cannot enforce schedule rules.
-        // #region agent log
-        debugLog(
-          location: 'ClockOutUseCase:intervalNullAllowed',
-          message:
-              'Session start outside intervals - allowing clock-out without tolerance',
-          data: {'employeeId': employeeId, 'startMin': startMin},
-          hypothesisId: 'H1',
-        );
-        // #endregion
       } else {
         final now = DateTime.now();
         final nowMin = now.hour * 60 + now.minute;
@@ -714,6 +680,11 @@ class JournalDayOverviewUseCase {
       var d = fromDate;
       while (!d.isAfter(toDate)) {
         final ymd = dateToYmd(d);
+        if (!isDateWithinEmployment(emp.hireDate, emp.terminationDate, ymd)) {
+          cells.add(JournalDayState.noData);
+          d = d.add(const Duration(days: 1));
+          continue;
+        }
         final hasOngoing = ongoingByEmpYmd[emp.id]?.contains(ymd) ?? false;
         final workedMs = workedByEmpYmd[emp.id]?[ymd] ?? 0;
         final hasWorked = workedMs > 0;
@@ -1005,8 +976,9 @@ class CloseOpenSessionWithEndUseCase {
 
 /// Admin use case for updating sessions (edit end time, note, etc.).
 class UpdateSessionAsAdminUseCase {
-  UpdateSessionAsAdminUseCase(this._repo);
-  final ISessionsRepo _repo;
+  UpdateSessionAsAdminUseCase(this._sessionsRepo, this._employeesRepo);
+  final ISessionsRepo _sessionsRepo;
+  final IEmployeesRepo _employeesRepo;
 
   Future<void> call({
     required int sessionId,
@@ -1015,14 +987,63 @@ class UpdateSessionAsAdminUseCase {
     required String? note,
     required String updateReason,
     String? updatedBy,
-  }) => _repo.updateSessionAsAdmin(
-    sessionId: sessionId,
-    startUtcMs: startUtcMs,
-    endUtcMs: endUtcMs,
-    note: note,
-    updateReason: updateReason,
-    updatedBy: updatedBy,
-  );
+  }) async {
+    final employeeId = await _sessionsRepo.getSessionEmployeeId(sessionId);
+    if (employeeId == null) {
+      await _sessionsRepo.updateSessionAsAdmin(
+        sessionId: sessionId,
+        startUtcMs: startUtcMs,
+        endUtcMs: endUtcMs,
+        note: note,
+        updateReason: updateReason,
+        updatedBy: updatedBy,
+      );
+      return;
+    }
+    final employee = await _employeesRepo.getEmployee(employeeId);
+    if (employee != null) {
+      final startLocal = DateTime.fromMillisecondsSinceEpoch(
+        startUtcMs,
+        isUtc: true,
+      ).toLocal();
+      final startYmd = dateToYmd(
+        DateTime(startLocal.year, startLocal.month, startLocal.day),
+      );
+      if (!isDateWithinEmployment(
+        employee.hireDate,
+        employee.terminationDate,
+        startYmd,
+      )) {
+        throw const DomainValidationException('journalErrorOutsideEmployment');
+      }
+      if (endUtcMs != null) {
+        final endLocal = DateTime.fromMillisecondsSinceEpoch(
+          endUtcMs,
+          isUtc: true,
+        ).toLocal();
+        final endYmd = dateToYmd(
+          DateTime(endLocal.year, endLocal.month, endLocal.day),
+        );
+        if (!isDateWithinEmployment(
+          employee.hireDate,
+          employee.terminationDate,
+          endYmd,
+        )) {
+          throw const DomainValidationException(
+            'journalErrorOutsideEmployment',
+          );
+        }
+      }
+    }
+    await _sessionsRepo.updateSessionAsAdmin(
+      sessionId: sessionId,
+      startUtcMs: startUtcMs,
+      endUtcMs: endUtcMs,
+      note: note,
+      updateReason: updateReason,
+      updatedBy: updatedBy,
+    );
+  }
 }
 
 /// Admin use case for absence CRUD and status updates. Use from UI instead of repo.

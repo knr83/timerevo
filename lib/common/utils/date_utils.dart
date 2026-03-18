@@ -9,6 +9,38 @@ String todayYmd() {
   return '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
 }
 
+/// True if [dateYmd] falls within the employee's employment window.
+/// - [hireDate] null → no lower boundary (employable from any past date).
+/// - [terminationDate] null → no upper boundary (employable until any future date).
+/// - Boundaries are inclusive: hireDate <= dateYmd <= terminationDate.
+bool isDateWithinEmployment(
+  int? hireDate,
+  int? terminationDate,
+  String dateYmd,
+) {
+  if (hireDate != null) {
+    final hireLocal = DateTime.fromMillisecondsSinceEpoch(
+      hireDate,
+      isUtc: true,
+    ).toLocal();
+    final hireYmd = dateToYmd(
+      DateTime(hireLocal.year, hireLocal.month, hireLocal.day),
+    );
+    if (dateYmd.compareTo(hireYmd) < 0) return false;
+  }
+  if (terminationDate != null) {
+    final termLocal = DateTime.fromMillisecondsSinceEpoch(
+      terminationDate,
+      isUtc: true,
+    ).toLocal();
+    final termYmd = dateToYmd(
+      DateTime(termLocal.year, termLocal.month, termLocal.day),
+    );
+    if (dateYmd.compareTo(termYmd) > 0) return false;
+  }
+  return true;
+}
+
 /// N days ago as YYYY-MM-DD.
 String daysAgoYmd(int days) {
   final d = DateTime.now().subtract(Duration(days: days));
@@ -132,29 +164,6 @@ bool isSameLocalCalendarDay(int utcMs1, int utcMs2) {
   final end = DateTime(
     now.year,
     now.month + 1,
-    1,
-  ).subtract(const Duration(days: 1));
-  return (
-    fromUtcMs: start.toUtc().millisecondsSinceEpoch,
-    toUtcMs: DateTime(
-      end.year,
-      end.month,
-      end.day,
-      23,
-      59,
-      59,
-      999,
-    ).toUtc().millisecondsSinceEpoch,
-  );
-}
-
-/// Report period preset: last month.
-({int fromUtcMs, int toUtcMs}) reportPeriodLastMonth() {
-  final now = DateTime.now();
-  final start = DateTime(now.year, now.month - 1, 1);
-  final end = DateTime(
-    now.year,
-    now.month,
     1,
   ).subtract(const Duration(days: 1));
   return (

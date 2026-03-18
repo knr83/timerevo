@@ -58,6 +58,8 @@ class AbsencesRepo implements IAbsencesRepo {
     status: employeeStatusFromString(e.status),
     usePin: e.usePin == 1,
     policyAcknowledged: e.policyAcknowledged == 1,
+    hireDate: e.hireDate,
+    terminationDate: e.terminationDate,
   );
 
   static AbsenceWithEmployeeInfo _toAbsenceWithEmployeeInfo(
@@ -217,6 +219,22 @@ class AbsencesRepo implements IAbsencesRepo {
       throw DomainValidationException('Invalid type: $type');
     }
 
+    final emp = await (_db.select(
+      _db.employees,
+    )..where((e) => e.id.equals(employeeId))).getSingleOrNull();
+    if (emp != null) {
+      if (!isDateWithinEmployment(
+        emp.hireDate,
+        emp.terminationDate,
+        dateFrom,
+      )) {
+        throw const DomainValidationException('absenceErrorOutsideEmployment');
+      }
+      if (!isDateWithinEmployment(emp.hireDate, emp.terminationDate, dateTo)) {
+        throw const DomainValidationException('absenceErrorOutsideEmployment');
+      }
+    }
+
     final overlap = await hasOverlap(employeeId, dateFrom, dateTo);
     if (overlap) {
       throw const DomainValidationException('absenceErrorOverlap');
@@ -266,6 +284,18 @@ class AbsencesRepo implements IAbsencesRepo {
     final dt = dateTo ?? existing.dateTo;
     if (dt.compareTo(df) < 0) {
       throw const DomainValidationException('absenceErrorDateOrder');
+    }
+
+    final emp = await (_db.select(
+      _db.employees,
+    )..where((e) => e.id.equals(existing.employeeId))).getSingleOrNull();
+    if (emp != null) {
+      if (!isDateWithinEmployment(emp.hireDate, emp.terminationDate, df)) {
+        throw const DomainValidationException('absenceErrorOutsideEmployment');
+      }
+      if (!isDateWithinEmployment(emp.hireDate, emp.terminationDate, dt)) {
+        throw const DomainValidationException('absenceErrorOutsideEmployment');
+      }
     }
 
     final overlap = await hasOverlap(

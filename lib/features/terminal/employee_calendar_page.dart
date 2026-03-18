@@ -87,6 +87,7 @@ String _resolveAbsenceError(String key, AppLocalizations l10n) {
       l10n.absenceErrorApproveRejectPendingOnly,
     'absenceErrorRejectReasonRequired' => l10n.absenceErrorRejectReasonRequired,
     'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
+    'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
     _ => key,
   };
 }

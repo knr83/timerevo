@@ -98,6 +98,8 @@ class EmployeesRepo implements IEmployeesRepo {
               status: employeeStatusFromString(e.status),
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
+              hireDate: e.hireDate,
+              terminationDate: e.terminationDate,
             ),
           )
           .toList(),
@@ -116,6 +118,8 @@ class EmployeesRepo implements IEmployeesRepo {
               status: employeeStatusFromString(e.status),
               usePin: e.usePin == 1,
               policyAcknowledged: e.policyAcknowledged == 1,
+              hireDate: e.hireDate,
+              terminationDate: e.terminationDate,
             ),
           )
           .toList(),
@@ -312,6 +316,8 @@ class EmployeesRepo implements IEmployeesRepo {
       firstName: row.firstName,
       lastName: row.lastName,
       status: employeeStatusFromString(row.status),
+      hireDate: row.hireDate,
+      terminationDate: row.terminationDate,
     );
   }
 

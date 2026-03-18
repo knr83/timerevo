@@ -19,7 +19,6 @@ import '../../common/utils/employee_display_name.dart';
 import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
 import '../../common/widgets/app_snack.dart';
-import '../../core/debug_session_log.dart';
 import '../../core/domain_errors.dart';
 import '../../core/diagnostic_log.dart';
 import '../../core/employee_pin_status.dart';
@@ -79,7 +78,9 @@ class TerminalPage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     final state = ref.watch(terminalControllerProvider);
-    final employeesAsync = ref.watch(watchActiveEmployeesProvider);
+    final employeesAsync = ref.watch(terminalEmployeesProvider);
+    // Prefetch attendance settings so they are ready before user taps IN/OUT.
+    ref.watch(attendanceSettingsProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -1129,22 +1130,16 @@ Future<void> _handleClockIn(
     ),
   );
   final l10n = AppLocalizations.of(context);
-  // #region agent log
-  final attendanceAsync = ref.read(attendanceSettingsProvider);
-  debugLog(
-    location: '_handleClockIn:entry',
-    message: 'Clock-in attempt',
-    data: {
-      'employeeId': employeeId,
-      'attendanceLoading': attendanceAsync.isLoading,
-      'attendanceValue': attendanceAsync.value != null,
-    },
-    hypothesisId: 'H1',
-  );
-  // #endregion
-  final attendance =
-      ref.read(attendanceSettingsProvider).value ??
-      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
+  final rawValue = ref.read(attendanceSettingsProvider).value;
+  if (rawValue == null) {
+    showAppSnack(
+      context,
+      l10n.terminalErrorAttendanceUnavailable,
+      isError: true,
+    );
+    return;
+  }
+  final attendance = rawValue;
   final workingHours =
       ref.read(workingHoursSettingsProvider).value ??
       (
@@ -1175,7 +1170,11 @@ Future<void> _handleClockIn(
   );
   if (!context.mounted) return;
   if (result is ClockNeedsNote) {
-    final submittedNote = await _showMandatoryNoteDialog(context, l10n);
+    final submittedNote = await _showMandatoryNoteDialog(
+      context,
+      l10n,
+      result.kind,
+    );
     if (submittedNote != null && context.mounted) {
       await _handleClockIn(context, ref, employeeId, note: submittedNote);
     }
@@ -1222,20 +1221,17 @@ Future<void> _handleClockOut(
       ),
     ),
   );
-  // #region agent log
-  final attendanceOut =
-      ref.read(attendanceSettingsProvider).value ??
-      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
-  debugLog(
-    location: '_handleClockOut:entry',
-    message: 'Clock-out attempt',
-    data: {'employeeId': employeeId, 'attendanceMode': attendanceOut.mode.name},
-    hypothesisId: 'H1,H2',
-  );
-  // #endregion
-  final attendance =
-      ref.read(attendanceSettingsProvider).value ??
-      (mode: AttendanceMode.flexible, toleranceMinutes: 10);
+  final l10nOut = AppLocalizations.of(context);
+  final rawValueOut = ref.read(attendanceSettingsProvider).value;
+  if (rawValueOut == null) {
+    showAppSnack(
+      context,
+      l10nOut.terminalErrorAttendanceUnavailable,
+      isError: true,
+    );
+    return;
+  }
+  final attendance = rawValueOut;
   final result = await ref.read(clockOutUseCaseProvider)(
     employeeId,
     note: note,
@@ -1243,22 +1239,13 @@ Future<void> _handleClockOut(
     toleranceMinutes: attendance.toleranceMinutes,
   );
   if (!context.mounted) return;
-  // #region agent log
-  debugLog(
-    location: '_handleClockOut:result',
-    message: 'Clock-out result',
-    data: {
-      'resultType': result.runtimeType.toString(),
-      'isClockSaved': result is ClockSaved,
-      'isClockError': result is ClockError,
-      if (result is ClockError) 'errorKind': result.kind.name,
-    },
-    hypothesisId: 'H1,H2,H3',
-  );
-  // #endregion
   if (result is ClockNeedsNote) {
     final l10n = AppLocalizations.of(context);
-    final submittedNote = await _showMandatoryNoteDialog(context, l10n);
+    final submittedNote = await _showMandatoryNoteDialog(
+      context,
+      l10n,
+      result.kind,
+    );
     if (submittedNote != null && context.mounted) {
       await _handleClockOut(context, ref, employeeId, note: submittedNote);
     }
@@ -1335,9 +1322,18 @@ void _showClockResult(
   showAppSnack(context, text, isError: result is ClockError);
 }
 
+String _reasonTextForNoteKind(AppLocalizations l10n, ClockNeedsNoteKind kind) {
+  return switch (kind) {
+    ClockNeedsNoteKind.lateCheckIn => l10n.terminalNoteReasonLateArrival,
+    ClockNeedsNoteKind.earlyCheckOut => l10n.terminalNoteReasonEarlyDeparture,
+    ClockNeedsNoteKind.lateCheckOut => l10n.terminalNoteReasonLateDeparture,
+  };
+}
+
 Future<String?> _showMandatoryNoteDialog(
   BuildContext context,
   AppLocalizations l10n,
+  ClockNeedsNoteKind kind,
 ) async {
   return showDialog<String?>(
     context: context,
@@ -1345,6 +1341,7 @@ Future<String?> _showMandatoryNoteDialog(
     builder: (context) => _MandatoryNoteDialog(
       title: l10n.terminalNoteRequiredTitle,
       message: l10n.terminalNoteRequiredMessage,
+      reasonLine: _reasonTextForNoteKind(l10n, kind),
       noteLabel: l10n.terminalNoteLabel,
       confirmLabel: l10n.terminalNoteConfirm,
       cancelLabel: l10n.terminalNoteCancel,
@@ -1356,6 +1353,7 @@ class _MandatoryNoteDialog extends StatefulWidget {
   const _MandatoryNoteDialog({
     required this.title,
     required this.message,
+    required this.reasonLine,
     required this.noteLabel,
     required this.confirmLabel,
     required this.cancelLabel,
@@ -1363,6 +1361,7 @@ class _MandatoryNoteDialog extends StatefulWidget {
 
   final String title;
   final String message;
+  final String reasonLine;
   final String noteLabel;
   final String confirmLabel;
   final String cancelLabel;
@@ -1389,6 +1388,13 @@ class _MandatoryNoteDialogState extends State<_MandatoryNoteDialog> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(widget.message),
+          const SizedBox(height: 8),
+          Text(
+            widget.reasonLine,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
           const SizedBox(height: 16),
           TextField(
             controller: _controller,
@@ -1631,47 +1637,18 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
     );
     if (date == null || !context.mounted) return;
 
-    DateTime? picked;
-    while (true) {
-      picked = await pickTimeForDate(
-        context,
-        date: date,
-        initialTime: TimeFormat.timeOfDayFromMinutes(endMin),
-      );
-      if (picked == null || !context.mounted) return;
+    final result = await showDialog<DateTime?>(
+      context: context,
+      builder: (ctx) => _UnclosedSessionTimePickerDialog(
+        sessionDate: date,
+        openSessionStartTs: openSession.startTs,
+        endMin: endMin,
+        l10n: l10n,
+      ),
+    );
+    if (result == null || !context.mounted) return;
 
-      final endUtcMs = picked.toUtc().millisecondsSinceEpoch;
-      if (endUtcMs <= openSession.startTs) {
-        showAppSnack(
-          context,
-          l10n.terminalUnclosedSessionErrorEndBeforeStart,
-          isError: true,
-        );
-        continue;
-      }
-      if (endUtcMs > UtcClock.nowMs()) {
-        showAppSnack(
-          context,
-          l10n.terminalUnclosedSessionErrorEndInFuture,
-          isError: true,
-        );
-        continue;
-      }
-
-      final pickedMin = picked.hour * 60 + picked.minute;
-      if (pickedMin > endMin) {
-        showAppSnack(
-          context,
-          l10n.terminalUnclosedSessionErrorEndAfterWorkingHours,
-          isError: true,
-        );
-        continue;
-      }
-
-      break;
-    }
-
-    final endUtcMs = picked.toUtc().millisecondsSinceEpoch;
+    final endUtcMs = result.toUtc().millisecondsSinceEpoch;
     try {
       final ok = await ref.read(closeOpenSessionWithEndUseCaseProvider)(
         employeeId: employee.id,
@@ -1697,5 +1674,124 @@ class _ClosePreviousSessionBlock extends ConsumerWidget {
       showAppSnack(context, l10n.commonErrorOccurred, isError: true);
       return;
     }
+  }
+}
+
+class _UnclosedSessionTimePickerDialog extends StatefulWidget {
+  const _UnclosedSessionTimePickerDialog({
+    required this.sessionDate,
+    required this.openSessionStartTs,
+    required this.endMin,
+    required this.l10n,
+  });
+
+  final DateTime sessionDate;
+  final int openSessionStartTs;
+  final int endMin;
+  final AppLocalizations l10n;
+
+  @override
+  State<_UnclosedSessionTimePickerDialog> createState() =>
+      _UnclosedSessionTimePickerDialogState();
+}
+
+class _UnclosedSessionTimePickerDialogState
+    extends State<_UnclosedSessionTimePickerDialog> {
+  DateTime? _picked;
+  String? _validationError;
+
+  String? _validate(DateTime picked) {
+    final endUtcMs = picked.toUtc().millisecondsSinceEpoch;
+    if (endUtcMs <= widget.openSessionStartTs) {
+      return widget.l10n.terminalUnclosedSessionErrorEndBeforeStart;
+    }
+    if (endUtcMs > UtcClock.nowMs()) {
+      return widget.l10n.terminalUnclosedSessionErrorEndInFuture;
+    }
+    final pickedMin = picked.hour * 60 + picked.minute;
+    if (pickedMin > widget.endMin) {
+      return widget.l10n.terminalUnclosedSessionErrorEndAfterWorkingHours;
+    }
+    return null;
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await pickTimeForDate(
+      context,
+      date: widget.sessionDate,
+      initialTime: TimeFormat.timeOfDayFromMinutes(widget.endMin),
+    );
+    if (picked == null || !mounted) return;
+    final err = _validate(picked);
+    setState(() {
+      _validationError = err;
+      _picked = err == null ? picked : null;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = widget.l10n;
+    final cs = Theme.of(context).colorScheme;
+    return AlertDialog(
+      title: Text(l10n.terminalUnclosedSessionEndLabel),
+      content: SizedBox(
+        width: 360,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_validationError != null) ...[
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: cs.errorContainer.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Symbols.error, size: 20, color: cs.error),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        _validationError!,
+                        style: TextStyle(
+                          color: cs.onErrorContainer,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+            ],
+            OutlinedButton.icon(
+              onPressed: _pickTime,
+              icon: const Icon(Symbols.schedule),
+              label: Text(
+                _picked != null
+                    ? TimeFormat.formatTimeOnly(
+                        _picked!.toUtc().millisecondsSinceEpoch,
+                      )
+                    : l10n.terminalUnclosedSessionSelectEnd,
+              ),
+            ),
+          ],
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(null),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          onPressed: _picked != null
+              ? () => Navigator.of(context).pop(_picked)
+              : null,
+          child: Text(l10n.terminalUnclosedSessionConfirm),
+        ),
+      ],
+    );
   }
 }

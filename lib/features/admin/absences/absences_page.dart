@@ -5,10 +5,11 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/absences_providers.dart';
+import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../app/usecase_providers.dart';
+import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
-import '../../../common/widgets/date_time_filter_chip.dart';
 import '../../../core/domain_errors.dart';
 import '../../../domain/entities/absence_info.dart';
 import '../../../domain/entities/absence_with_employee_info.dart';
@@ -66,6 +67,7 @@ String _resolveAbsenceError(String key, AppLocalizations l10n) {
       l10n.absenceErrorApproveRejectPendingOnly,
     'absenceErrorRejectReasonRequired' => l10n.absenceErrorRejectReasonRequired,
     'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
+    'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
     _ => key,
   };
 }
@@ -78,20 +80,13 @@ final _employeesAllProvider = watchAllEmployeesProvider;
 
 final _absencesProvider = StreamProvider<List<AbsenceWithEmployeeInfo>>((ref) {
   final filters = ref.watch(_absencesFiltersProvider);
-  String? fromDate;
-  String? toDate;
-  if (filters.fromUtcMs != null) {
-    fromDate = _utcMsToYmd(filters.fromUtcMs!);
-  }
-  if (filters.toUtcMs != null) {
-    toDate = _utcMsToYmd(filters.toUtcMs!);
-  }
+  final r = filters.effectiveRange;
   return ref
       .watch(watchAbsencesUseCaseProvider)
       .streamAbsences(
         employeeId: filters.employeeId,
-        fromDate: fromDate,
-        toDate: toDate,
+        fromDate: _utcMsToYmd(r.fromUtcMs),
+        toDate: _utcMsToYmd(r.toUtcMs),
         status: filters.status,
       );
 });
@@ -102,25 +97,41 @@ class _AbsencesFilters {
     required this.fromUtcMs,
     required this.toUtcMs,
     required this.status,
+    required this.scope,
   });
 
   final int? employeeId;
   final int? fromUtcMs;
   final int? toUtcMs;
   final String? status;
+  final DateRangeScope scope;
 
   factory _AbsencesFilters.initial() => const _AbsencesFilters(
     employeeId: null,
     fromUtcMs: null,
     toUtcMs: null,
     status: null,
+    scope: DateRangeScope.month,
   );
+
+  ({int fromUtcMs, int toUtcMs}) get effectiveRange {
+    if (fromUtcMs != null && toUtcMs != null) {
+      return (fromUtcMs: fromUtcMs!, toUtcMs: toUtcMs!);
+    }
+    return switch (scope) {
+      DateRangeScope.day => reportPeriodToday(),
+      DateRangeScope.week => reportPeriodWeek(),
+      DateRangeScope.month => reportPeriodMonth(),
+      DateRangeScope.interval => reportPeriodMonth(),
+    };
+  }
 
   _AbsencesFilters copyWith({
     Object? employeeId = _sentinel,
     Object? fromUtcMs = _sentinel,
     Object? toUtcMs = _sentinel,
     Object? status = _sentinel,
+    Object? scope = _sentinel,
   }) {
     return _AbsencesFilters(
       employeeId: identical(employeeId, _sentinel)
@@ -131,6 +142,7 @@ class _AbsencesFilters {
           : fromUtcMs as int?,
       toUtcMs: identical(toUtcMs, _sentinel) ? this.toUtcMs : toUtcMs as int?,
       status: identical(status, _sentinel) ? this.status : status as String?,
+      scope: identical(scope, _sentinel) ? this.scope : scope as DateRangeScope,
     );
   }
 }
@@ -213,19 +225,72 @@ class AbsencesPage extends ConsumerWidget {
                 ),
                 const Spacer(),
                 FilledButton.icon(
-                  onPressed: () =>
-                      _openAddDialog(context, ref, l10n, employeesAsync),
+                  onPressed: employeesAsync.value?.isEmpty == true
+                      ? null
+                      : () =>
+                          _openAddDialog(context, ref, l10n, employeesAsync),
                   icon: const Icon(Symbols.add),
                   label: Text(l10n.absencesAdd),
                 ),
               ],
             ),
+            if (employeesAsync.value != null &&
+                employeesAsync.value!.isEmpty) ...[
+              const SizedBox(height: 8),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Theme.of(context)
+                      .colorScheme
+                      .errorContainer
+                      .withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(
+                      Symbols.info,
+                      size: 20,
+                      color: Theme.of(context).colorScheme.error,
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.sessionsNoEmployeesAvailable,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.onErrorContainer,
+                          fontSize: 13,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
             const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
+                DateRangeFilterBar(
+                  scope: filters.scope,
+                  fromUtcMs: filters.effectiveRange.fromUtcMs,
+                  toUtcMs: filters.effectiveRange.toUtcMs,
+                  availableScopes: const [
+                    DateRangeScope.day,
+                    DateRangeScope.week,
+                    DateRangeScope.month,
+                    DateRangeScope.interval,
+                  ],
+                  onChanged: (scope, from, to) =>
+                      ref.read(_absencesFiltersProvider.notifier).state =
+                          filters.copyWith(
+                        scope: scope,
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                      ),
+                ),
                 employeesAsync.when(
                   data: (employees) {
                     return DropdownMenu<int?>(
@@ -283,26 +348,6 @@ class AbsencesPage extends ConsumerWidget {
                       ref.read(_absencesFiltersProvider.notifier).state =
                           filters.copyWith(status: v),
                 ),
-                DateTimeFilterChip(
-                  label: l10n.sessionsFilterFrom,
-                  valueUtcMs: filters.fromUtcMs,
-                  onPickedUtcMs: (v) =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(fromUtcMs: v),
-                  onCleared: () =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(fromUtcMs: null),
-                ),
-                DateTimeFilterChip(
-                  label: l10n.sessionsFilterTo,
-                  valueUtcMs: filters.toUtcMs,
-                  onPickedUtcMs: (v) =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(toUtcMs: v),
-                  onCleared: () =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(toUtcMs: null),
-                ),
               ],
             ),
             const SizedBox(height: 12),
@@ -356,10 +401,7 @@ class AbsencesPage extends ConsumerWidget {
     AsyncValue<List<EmployeeInfo>> employeesAsync,
   ) async {
     final employees = employeesAsync.value ?? [];
-    if (employees.isEmpty) {
-      showAppSnack(context, l10n.sessionsNoEmployeesAvailable, isError: true);
-      return;
-    }
+    if (employees.isEmpty) return;
 
     final saved = await showDialog<bool>(
       context: context,

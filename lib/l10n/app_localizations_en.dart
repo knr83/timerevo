@@ -196,11 +196,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get terminalErrorNoScheduleForDay => 'No scheduled work today.';
 
   @override
+  String get terminalErrorAttendanceUnavailable =>
+      'Attendance settings could not be loaded.';
+
+  @override
   String get terminalNoteRequiredTitle => 'Note required';
 
   @override
   String get terminalNoteRequiredMessage =>
       'A note is required for this attendance deviation.';
+
+  @override
+  String get terminalNoteReasonLateArrival => 'Reason: Late arrival';
+
+  @override
+  String get terminalNoteReasonEarlyDeparture => 'Reason: Early departure';
+
+  @override
+  String get terminalNoteReasonLateDeparture => 'Reason: Late departure';
 
   @override
   String get terminalNoteLabel => 'Note';
@@ -453,6 +466,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeVacationDaysPerYearInvalid => 'Must be 0 or more';
+
+  @override
+  String get employeeTerminationDateBeforeHireError =>
+      'Termination date must be on or after hire date.';
 
   @override
   String get employeeFirstLastRequired =>
@@ -1210,6 +1227,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalFilterStatusClosed => 'Closed';
 
   @override
+  String get journalFilterStatusNotClosed => 'Not closed';
+
+  @override
   String get journalFilterSearch => 'Search';
 
   @override
@@ -1253,6 +1273,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get journalErrorCrossDay => 'Start and end must be on the same day.';
+
+  @override
+  String get journalErrorOutsideEmployment =>
+      'Session dates must fall within the employee\'s employment period.';
 
   @override
   String get journalUpdateReasonHint =>
@@ -1552,6 +1576,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get absenceErrorDateRestrictionSickLeave =>
       'Sick leave cannot start more than 3 days ago.';
+
+  @override
+  String get absenceErrorOutsideEmployment =>
+      'Absence must be within employee employment period (from hire date to termination date).';
 
   @override
   String get absencesEmpty => 'No absences.';

@@ -69,6 +69,9 @@ abstract interface class ISessionsRepo {
     int? toUtcMs,
   });
 
+  /// Returns the employee ID for the given session, or null if not found.
+  Future<int?> getSessionEmployeeId(int sessionId);
+
   /// Update session as admin (used by sessions page).
   Future<void> updateSessionAsAdmin({
     required int sessionId,

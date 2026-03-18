@@ -102,6 +102,8 @@ class SessionsRepo implements ISessionsRepo {
     status: employeeStatusFromString(e.status),
     usePin: e.usePin == 1,
     policyAcknowledged: e.policyAcknowledged == 1,
+    hireDate: e.hireDate,
+    terminationDate: e.terminationDate,
   );
 
   static SessionWithEmployeeInfo _toSessionWithEmployeeInfo(
@@ -434,6 +436,14 @@ class SessionsRepo implements ISessionsRepo {
           )
           .toList(growable: false),
     );
+  }
+
+  @override
+  Future<int?> getSessionEmployeeId(int sessionId) async {
+    final row = await (_db.select(
+      _db.workSessions,
+    )..where((s) => s.id.equals(sessionId))).getSingleOrNull();
+    return row?.employeeId;
   }
 
   @override

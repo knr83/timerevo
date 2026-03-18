@@ -198,11 +198,24 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сегодня нет запланированной работы.';
 
   @override
+  String get terminalErrorAttendanceUnavailable =>
+      'Не удалось загрузить настройки учёта посещений.';
+
+  @override
   String get terminalNoteRequiredTitle => 'Требуется заметка';
 
   @override
   String get terminalNoteRequiredMessage =>
       'Для этого отклонения требуется заметка.';
+
+  @override
+  String get terminalNoteReasonLateArrival => 'Причина: Опоздание';
+
+  @override
+  String get terminalNoteReasonEarlyDeparture => 'Причина: Ранний уход';
+
+  @override
+  String get terminalNoteReasonLateDeparture => 'Причина: Поздний уход';
 
   @override
   String get terminalNoteLabel => 'Заметка';
@@ -454,6 +467,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get employeeVacationDaysPerYearInvalid => 'Должно быть 0 или больше';
+
+  @override
+  String get employeeTerminationDateBeforeHireError =>
+      'Дата увольнения должна быть не раньше даты приёма.';
 
   @override
   String get employeeFirstLastRequired => 'Имя и фамилия обязательны.';
@@ -1215,6 +1232,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journalFilterStatusClosed => 'Закрытые';
 
   @override
+  String get journalFilterStatusNotClosed => 'Не закрыто';
+
+  @override
   String get journalFilterSearch => 'Поиск';
 
   @override
@@ -1259,6 +1279,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get journalErrorCrossDay => 'Начало и конец должны быть в один день.';
+
+  @override
+  String get journalErrorOutsideEmployment =>
+      'Даты сессии должны попадать в период занятости сотрудника.';
 
   @override
   String get journalUpdateReasonHint =>
@@ -1557,6 +1581,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get absenceErrorDateRestrictionSickLeave =>
       'Больничный не может начинаться более чем 3 дня назад.';
+
+  @override
+  String get absenceErrorOutsideEmployment =>
+      'Отсутствие должно попадать в период работы сотрудника (дата приёма — дата увольнения).';
 
   @override
   String get absencesEmpty => 'Нет заявок на отсутствие.';
