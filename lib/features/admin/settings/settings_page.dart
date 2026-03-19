@@ -59,22 +59,25 @@ class _ToleranceFieldState extends State<_ToleranceField> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 120,
-      child: TextField(
-        controller: _controller,
-        keyboardType: TextInputType.number,
-        decoration: InputDecoration(
-          labelText: widget.label,
-          border: const OutlineInputBorder(),
+    return TextField(
+      controller: _controller,
+      keyboardType: TextInputType.number,
+      style: Theme.of(context).textTheme.bodyMedium,
+      decoration: InputDecoration(
+        labelText: widget.label,
+        border: const OutlineInputBorder(),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 10,
         ),
-        onSubmitted: (v) {
-          final n = int.tryParse(v);
-          if (n != null && n >= 0) {
-            widget.onSave(n);
-          }
-        },
       ),
+      onSubmitted: (v) {
+        final n = int.tryParse(v);
+        if (n != null && n >= 0) {
+          widget.onSave(n);
+        }
+      },
     );
   }
 }
@@ -96,8 +99,10 @@ class _AttendanceModeSection extends ConsumerWidget {
       );
     }
 
+    const toleranceFieldWidth = 150.0;
+
     final children = <Widget>[
-      Flexible(
+      Expanded(
         child: SegmentedButton<AttendanceMode>(
           segments: [
             ButtonSegment(
@@ -141,7 +146,7 @@ class _AttendanceModeSection extends ConsumerWidget {
       if (attendance.mode == AttendanceMode.fixed) ...[
         const SizedBox(width: 12),
         SizedBox(
-          width: 120,
+          width: toleranceFieldWidth,
           child: _ToleranceField(
             initialValue: attendance.toleranceMinutes,
             label: l10n.settingsAttendanceToleranceLabel,
@@ -153,7 +158,7 @@ class _AttendanceModeSection extends ConsumerWidget {
     ];
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.center,
       children: children,
     );
   }

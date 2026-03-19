@@ -9,6 +9,7 @@ import '../domain/entities/employee_info.dart';
 import '../domain/entities/employee_report_row_info.dart';
 import '../domain/entities/schedule_entities.dart';
 import '../domain/usecases.dart';
+import '../domain/usecases/schedule_roster_pdf_data_usecase.dart';
 
 final clockInUseCaseProvider = Provider<ClockInUseCase>((ref) {
   return ClockInUseCase(
@@ -195,4 +196,12 @@ final watchTemplateWeekProvider =
       return ref
           .watch(schedulesTemplatesUseCaseProvider)
           .streamTemplateWeek(templateId);
+    });
+
+final scheduleRosterPdfDataUseCaseProvider =
+    Provider<ScheduleRosterPdfDataUseCase>((ref) {
+      return ScheduleRosterPdfDataUseCase(
+        ref.watch(employeesRepoProvider),
+        ref.watch(schedulesRepoProvider),
+      );
     });

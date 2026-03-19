@@ -725,6 +725,27 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeTabAdditional => 'Дополнительно';
 
   @override
+  String get employeeDataPdfTitle => 'Данные сотрудника';
+
+  @override
+  String get employeeDataPdfSectionEmployeeInfo => 'Информация о сотруднике';
+
+  @override
+  String get employeeExportEmployeeData => 'Экспорт данных сотрудника';
+
+  @override
+  String get employeeDataPdfExported => 'Данные сотрудника экспортированы.';
+
+  @override
+  String employeeDataPdfFailed(String error) {
+    return 'Не удалось экспортировать: $error';
+  }
+
+  @override
+  String get employeeDataPdfAdminOnly =>
+      'Экспорт доступен только в режиме администратора.';
+
+  @override
   String get schedulesEmptyHint => 'Создайте шаблон расписания.';
 
   @override
@@ -864,6 +885,27 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get schedulesDeleteBlockedAssignedMessage =>
       'Расписание назначено сотрудникам. Снимите назначение перед удалением.';
+
+  @override
+  String get schedulesRosterPdfTitle => 'Сводное расписание работы';
+
+  @override
+  String get schedulesRosterPdfExportTooltip =>
+      'Экспорт сводного расписания (PDF)';
+
+  @override
+  String get schedulesRosterPdfColumnEmployee => 'Сотрудник';
+
+  @override
+  String get schedulesRosterPdfColumnWeeklyHours => 'Часов в неделю';
+
+  @override
+  String get schedulesRosterPdfExported => 'Экспорт выполнен.';
+
+  @override
+  String schedulesRosterPdfFailed(String error) {
+    return 'Не удалось экспортировать расписание: $error';
+  }
 
   @override
   String intervalStart(String time) {

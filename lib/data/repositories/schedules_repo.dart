@@ -69,6 +69,7 @@ class SchedulesRepo implements ISchedulesRepo {
   }
 
   /// One-shot: get assigned template ID for employee, or null.
+  @override
   Future<int?> getAssignmentTemplateId(int employeeId) async {
     final a =
         await (_db.select(_db.employeeScheduleAssignments)
@@ -176,6 +177,7 @@ class SchedulesRepo implements ISchedulesRepo {
     });
   }
 
+  @override
   Future<Map<int, DaySchedule>> getTemplateWeek(int templateId) async {
     return watchTemplateWeek(templateId).first;
   }

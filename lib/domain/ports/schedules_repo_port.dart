@@ -6,4 +6,10 @@ abstract interface class ISchedulesRepo {
     required int employeeId,
     required DateTime dateLocal,
   });
+
+  /// Assigned template id for [employeeId], or null if none.
+  Future<int?> getAssignmentTemplateId(int employeeId);
+
+  /// Weekday 1..Mon .. 7..Sun → template day definition.
+  Future<Map<int, DaySchedule>> getTemplateWeek(int templateId);
 }

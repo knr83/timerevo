@@ -6,6 +6,8 @@ import 'package:intl/intl.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/usecase_providers.dart';
+import '../../../data/repositories/repo_providers.dart';
+import '../../../common/pdf/employee_data_pdf_export.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/config/data_retention_config.dart';
@@ -658,6 +660,25 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 ),
           automaticallyImplyLeading: !widget.embedded,
           actions: [
+            if (widget.existing != null)
+              TextButton(
+                onPressed: () async {
+                  await exportEmployeeDataPdf(
+                    context,
+                    isAdminContext: true,
+                    employeesAdminUseCase: ref.read(
+                      employeesAdminUseCaseProvider,
+                    ),
+                    schedulesRepo: ref.read(schedulesRepoProvider),
+                    employeeId: widget.existing!.id,
+                    templates: widget.templates,
+                    showSnack: (msg) => showAppSnack(context, msg),
+                    showErrorSnack: (msg, {bool isError = false}) =>
+                        showAppSnack(context, msg, isError: isError),
+                  );
+                },
+                child: Text(l10n.employeeExportEmployeeData),
+              ),
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: FilledButton(
@@ -967,22 +988,35 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               ),
               const SizedBox(height: 8),
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Expanded(
                     child: TextField(
-                      controller: _weeklyHoursCtrl,
+                      controller: _departmentCtrl,
                       onChanged: (_) => setState(() {}),
                       decoration: InputDecoration(
-                        labelText: l10n.employeeWeeklyHours,
+                        labelText: l10n.employeeDepartment,
                         border: const OutlineInputBorder(),
-                        hintText: l10n.employeeWeeklyHoursHint,
-                      ),
-                      keyboardType: const TextInputType.numberWithOptions(
-                        decimal: true,
                       ),
                     ),
                   ),
                   const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _jobTitleCtrl,
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeJobTitle,
+                        border: const OutlineInputBorder(),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
                   Expanded(
                     child: TextField(
                       controller: _vacationDaysPerYearCtrl,
@@ -1010,34 +1044,11 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                       keyboardType: TextInputType.number,
                     ),
                   ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Row(
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _departmentCtrl,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        labelText: l10n.employeeDepartment,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: TextField(
-                      controller: _jobTitleCtrl,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        labelText: l10n.employeeJobTitle,
-                        border: const OutlineInputBorder(),
-                      ),
-                    ),
-                  ),
+                  const Expanded(child: SizedBox()),
                 ],
               ),
+              // weeklyHours: [_weeklyHoursCtrl] still loaded/saved; no field on card.
             ],
           ),
         ),

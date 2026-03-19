@@ -9,6 +9,7 @@ import '../../../core/domain_errors.dart';
 import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import 'day_card.dart';
+import 'schedule_roster_pdf_export.dart';
 
 const _minCardWidth = 240.0;
 
@@ -48,47 +49,79 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           if (context.mounted && ok) Navigator.of(context).pop();
         }
       },
-      child: Padding(
-        padding: const EdgeInsets.all(12),
-        child: templatesAsync.when(
-          data: (templates) {
-            final hasDraft = draftState != null;
-            final hasTemplates = templates.isNotEmpty;
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    l10n.schedulesTitle,
+                    style: Theme.of(context).textTheme.headlineSmall,
+                  ),
+                ),
+                IconButton(
+                  tooltip: l10n.schedulesRosterPdfExportTooltip,
+                  icon: const Icon(Symbols.picture_as_pdf),
+                  onPressed: () => exportScheduleRosterPdf(context, ref),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: templatesAsync.when(
+                data: (templates) {
+                  final hasDraft = draftState != null;
+                  final hasTemplates = templates.isNotEmpty;
 
-            if (!hasDraft && !hasTemplates) {
-              return _EmptyState(
-                onNewSchedule: () =>
-                    ref.read(scheduleDraftProvider.notifier).createNewDraft(),
-              );
-            }
+                  if (!hasDraft && !hasTemplates) {
+                    return _EmptyState(
+                      onNewSchedule: () => ref
+                          .read(scheduleDraftProvider.notifier)
+                          .createNewDraft(),
+                    );
+                  }
 
-            if (!hasDraft && hasTemplates) {
-              return _InitialTemplateLoader(
-                templateId: templates.first.id,
-                templates: templates,
-                onLoaded: (week) {
-                  final t = templates.first;
-                  ref
-                      .read(scheduleDraftProvider.notifier)
-                      .loadFromTemplateWithName(t.id, t.name, t.isActive, week);
+                  if (!hasDraft && hasTemplates) {
+                    return _InitialTemplateLoader(
+                      templateId: templates.first.id,
+                      templates: templates,
+                      onLoaded: (week) {
+                        final t = templates.first;
+                        ref
+                            .read(scheduleDraftProvider.notifier)
+                            .loadFromTemplateWithName(
+                              t.id,
+                              t.name,
+                              t.isActive,
+                              week,
+                            );
+                      },
+                    );
+                  }
+
+                  return _WeekEditorContent(
+                    templates: templates,
+                    draftState: draftState!,
+                  );
                 },
-              );
-            }
-
-            return _WeekEditorContent(
-              templates: templates,
-              draftState: draftState!,
-            );
-          },
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => Center(
-            child: Text(
-              l10n.schedulesFailedLoad(
-                errorMessageForUser(e, l10n.commonErrorOccurred),
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (e, _) => Center(
+                  child: Text(
+                    l10n.schedulesFailedLoad(
+                      errorMessageForUser(e, l10n.commonErrorOccurred),
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -353,7 +386,6 @@ class _WeekEditorContent extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final l10n = AppLocalizations.of(context);
     final dirty = ref.watch(scheduleDraftDirtyProvider);
     final draft = draftState.draft;
     final source = draftState.source;
@@ -361,11 +393,6 @@ class _WeekEditorContent extends ConsumerWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          l10n.schedulesTitle,
-          style: Theme.of(context).textTheme.headlineSmall,
-        ),
-        const SizedBox(height: 24),
         _WeekEditorControlRow(
           templates: templates,
           draft: draft,

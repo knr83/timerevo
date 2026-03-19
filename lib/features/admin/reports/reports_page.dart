@@ -5,13 +5,14 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/usecase_providers.dart';
 import '../../../common/pdf/employee_daily_pdf_export.dart';
+import 'package:timerevo/core/pdf/pdf_print_form_frame.dart';
+import '../../../common/pdf/time_report_pdf_suggested_filename.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../common/utils/employee_display_name.dart';
@@ -511,8 +512,13 @@ Future<void> _exportPdf(
   bool sortAscending = false,
 }) async {
   final l10n = AppLocalizations.of(context);
+  final generatedAt = DateTime.now().toLocal();
   final saveLocation = await getSaveLocation(
-    suggestedName: 'report.pdf',
+    suggestedName: timeReportPdfSuggestedFileName(
+      fromUtcMs: fromUtcMs,
+      toUtcMs: toUtcMs,
+      generatedAt: generatedAt,
+    ),
     acceptedTypeGroups: [
       XTypeGroup(label: l10n.reportsPdfFileType, extensions: const ['pdf']),
     ],
@@ -562,60 +568,39 @@ Future<void> _exportPdf(
     final toStr = dateToYmd(
       DateTime.fromMillisecondsSinceEpoch(toUtcMs, isUtc: true).toLocal(),
     );
-    final generatedStr = DateFormat.yMMMd().add_Hm().format(
-      DateTime.now().toLocal(),
-    );
-
     pdf.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        footer: (pw.Context ctx) => pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 8),
-          child: pw.Row(
-            mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-            children: [
-              pw.Text(
-                l10n.reportsPdfFooterBrand,
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-              pw.Text(
-                l10n.reportsPdfFooterPage(ctx.pageNumber, ctx.pagesCount),
-                style: const pw.TextStyle(fontSize: 10),
-              ),
-            ],
-          ),
+        margin: pdfPrintFormPageMargin,
+        header: (pw.Context ctx) => pdfPrintFormRunningHeader(),
+        footer: pdfPrintFormFooterBuilder(
+          generatedAtLocal: generatedAt,
+          footerPage: l10n.reportsPdfFooterPage,
         ),
         build: (pw.Context ctx) {
+          final tableHeaderStyle = pw.TextStyle(
+            fontWeight: pw.FontWeight.bold,
+            fontSize: pdfPrintFormTableFontSize,
+          );
+          final tableCellStyle = const pw.TextStyle(
+            fontSize: pdfPrintFormTableFontSize,
+          );
+
           final header = pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.start,
             mainAxisSize: pw.MainAxisSize.min,
             children: [
-              pw.Text(
-                'Timerevo',
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 14,
-                ),
-              ),
-              pw.SizedBox(height: 4),
+              pw.SizedBox(height: pdfPrintFormHeaderToTitleGap),
               pw.Text(
                 l10n.reportsPdfTitle,
-                style: pw.TextStyle(
-                  fontWeight: pw.FontWeight.bold,
-                  fontSize: 18,
-                ),
+                style: pdfPrintFormDocumentTitleStyle,
               ),
               pw.SizedBox(height: 6),
               pw.Text(
                 l10n.reportsPdfPeriod(fromStr, toStr),
                 style: const pw.TextStyle(fontSize: 12),
               ),
-              pw.SizedBox(height: 2),
-              pw.Text(
-                l10n.reportsPdfGenerated(generatedStr),
-                style: const pw.TextStyle(fontSize: 12),
-              ),
-              pw.SizedBox(height: 6),
+              pw.SizedBox(height: 4),
               pw.Text(
                 l10n.reportsPdfEmployee(employeeName),
                 style: const pw.TextStyle(fontSize: 11),
@@ -632,7 +617,7 @@ Future<void> _exportPdf(
           );
 
           final table = pw.Table(
-            border: pw.TableBorder.all(color: PdfColors.grey400),
+            border: pdfPrintFormTableBorderHorizontal(),
             columnWidths: {
               0: const pw.FlexColumnWidth(3),
               1: const pw.FlexColumnWidth(1.5),
@@ -648,7 +633,7 @@ Future<void> _exportPdf(
                     padding: const pw.EdgeInsets.all(6),
                     child: pw.Text(
                       l10n.reportsTableEmployee,
-                      style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                      style: tableHeaderStyle,
                     ),
                   ),
                   pw.Padding(
@@ -657,7 +642,7 @@ Future<void> _exportPdf(
                       alignment: pw.Alignment.centerRight,
                       child: pw.Text(
                         l10n.reportsTableWorked,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        style: tableHeaderStyle,
                       ),
                     ),
                   ),
@@ -667,7 +652,7 @@ Future<void> _exportPdf(
                       alignment: pw.Alignment.centerRight,
                       child: pw.Text(
                         l10n.reportsTablePlanned,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        style: tableHeaderStyle,
                       ),
                     ),
                   ),
@@ -677,7 +662,7 @@ Future<void> _exportPdf(
                       alignment: pw.Alignment.centerRight,
                       child: pw.Text(
                         l10n.reportsTableBalance,
-                        style: pw.TextStyle(fontWeight: pw.FontWeight.bold),
+                        style: tableHeaderStyle,
                       ),
                     ),
                   ),
@@ -695,6 +680,7 @@ Future<void> _exportPdf(
                         sorted[i].employeeName,
                         maxLines: 2,
                         overflow: pw.TextOverflow.clip,
+                        style: tableCellStyle,
                       ),
                     ),
                     pw.Padding(
@@ -703,6 +689,7 @@ Future<void> _exportPdf(
                         alignment: pw.Alignment.centerRight,
                         child: pw.Text(
                           formatDurationMs(sorted[i].totalMs, l10n),
+                          style: tableCellStyle,
                         ),
                       ),
                     ),
@@ -714,6 +701,7 @@ Future<void> _exportPdf(
                           sorted[i].anyDayHasSchedule
                               ? formatDurationMs(sorted[i].normMs, l10n)
                               : l10n.reportsPlannedNoSchedule,
+                          style: tableCellStyle,
                         ),
                       ),
                     ),
@@ -721,8 +709,13 @@ Future<void> _exportPdf(
                       padding: const pw.EdgeInsets.all(6),
                       child: pw.Align(
                         alignment: pw.Alignment.centerRight,
-                        child: pw.Text(
-                          formatBalanceMs(sorted[i].deltaMs, l10n),
+                        child: pdfPrintFormBalanceText(
+                          ms: sorted[i].deltaMs,
+                          absHmDuration: formatDurationMs(
+                            sorted[i].deltaMs.abs(),
+                            l10n,
+                          ),
+                          baseStyle: tableCellStyle,
                         ),
                       ),
                     ),

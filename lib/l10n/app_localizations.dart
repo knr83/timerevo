@@ -1141,7 +1141,7 @@ abstract class AppLocalizations {
   /// No description provided for @employeeJobTitle.
   ///
   /// In en, this message translates to:
-  /// **'Job Title'**
+  /// **'Job title'**
   String get employeeJobTitle;
 
   /// No description provided for @employeeInternalComment.
@@ -1402,6 +1402,42 @@ abstract class AppLocalizations {
   /// **'Additional'**
   String get employeeTabAdditional;
 
+  /// No description provided for @employeeDataPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Data'**
+  String get employeeDataPdfTitle;
+
+  /// No description provided for @employeeDataPdfSectionEmployeeInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee Information'**
+  String get employeeDataPdfSectionEmployeeInfo;
+
+  /// No description provided for @employeeExportEmployeeData.
+  ///
+  /// In en, this message translates to:
+  /// **'Export employee data'**
+  String get employeeExportEmployeeData;
+
+  /// No description provided for @employeeDataPdfExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee data exported.'**
+  String get employeeDataPdfExported;
+
+  /// No description provided for @employeeDataPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to export employee data: {error}'**
+  String employeeDataPdfFailed(String error);
+
+  /// No description provided for @employeeDataPdfAdminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Export is available only in admin mode.'**
+  String get employeeDataPdfAdminOnly;
+
   /// No description provided for @schedulesEmptyHint.
   ///
   /// In en, this message translates to:
@@ -1647,6 +1683,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This schedule is assigned to employees. Unassign it before deleting.'**
   String get schedulesDeleteBlockedAssignedMessage;
+
+  /// No description provided for @schedulesRosterPdfTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Work schedule roster'**
+  String get schedulesRosterPdfTitle;
+
+  /// No description provided for @schedulesRosterPdfExportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export schedule roster (PDF)'**
+  String get schedulesRosterPdfExportTooltip;
+
+  /// No description provided for @schedulesRosterPdfColumnEmployee.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee'**
+  String get schedulesRosterPdfColumnEmployee;
+
+  /// No description provided for @schedulesRosterPdfColumnWeeklyHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Weekly hours'**
+  String get schedulesRosterPdfColumnWeeklyHours;
+
+  /// No description provided for @schedulesRosterPdfExported.
+  ///
+  /// In en, this message translates to:
+  /// **'Exported.'**
+  String get schedulesRosterPdfExported;
+
+  /// No description provided for @schedulesRosterPdfFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not export schedule roster: {error}'**
+  String schedulesRosterPdfFailed(String error);
 
   /// No description provided for @intervalStart.
   ///

@@ -583,7 +583,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeDepartment => 'Department';
 
   @override
-  String get employeeJobTitle => 'Job Title';
+  String get employeeJobTitle => 'Job title';
 
   @override
   String get employeeInternalComment => 'Internal Comment';
@@ -724,6 +724,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeTabAdditional => 'Additional';
 
   @override
+  String get employeeDataPdfTitle => 'Employee Data';
+
+  @override
+  String get employeeDataPdfSectionEmployeeInfo => 'Employee Information';
+
+  @override
+  String get employeeExportEmployeeData => 'Export employee data';
+
+  @override
+  String get employeeDataPdfExported => 'Employee data exported.';
+
+  @override
+  String employeeDataPdfFailed(String error) {
+    return 'Failed to export employee data: $error';
+  }
+
+  @override
+  String get employeeDataPdfAdminOnly =>
+      'Export is available only in admin mode.';
+
+  @override
   String get schedulesEmptyHint => 'Create a schedule template.';
 
   @override
@@ -862,6 +883,26 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get schedulesDeleteBlockedAssignedMessage =>
       'This schedule is assigned to employees. Unassign it before deleting.';
+
+  @override
+  String get schedulesRosterPdfTitle => 'Work schedule roster';
+
+  @override
+  String get schedulesRosterPdfExportTooltip => 'Export schedule roster (PDF)';
+
+  @override
+  String get schedulesRosterPdfColumnEmployee => 'Employee';
+
+  @override
+  String get schedulesRosterPdfColumnWeeklyHours => 'Weekly hours';
+
+  @override
+  String get schedulesRosterPdfExported => 'Exported.';
+
+  @override
+  String schedulesRosterPdfFailed(String error) {
+    return 'Could not export schedule roster: $error';
+  }
 
   @override
   String intervalStart(String time) {

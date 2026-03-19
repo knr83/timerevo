@@ -299,6 +299,17 @@
   "employeeTabContact": "Контакт",
   "employeeTabTerminalAccess": "Доступ к терминалу",
   "employeeTabAdditional": "Дополнительно",
+  "employeeDataPdfTitle": "Данные сотрудника",
+  "employeeDataPdfSectionEmployeeInfo": "Информация о сотруднике",
+  "employeeExportEmployeeData": "Экспорт данных сотрудника",
+  "employeeDataPdfExported": "Данные сотрудника экспортированы.",
+  "employeeDataPdfFailed": "Не удалось экспортировать: {error}",
+  "@employeeDataPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "employeeDataPdfAdminOnly": "Экспорт доступен только в режиме администратора.",
 
   "schedulesEmptyHint": "Создайте шаблон расписания.",
   "schedulesFailedLoad": "Не удалось загрузить расписания: {error}",
@@ -356,6 +367,17 @@
   },
   "schedulesDeleteBlockedAssignedTitle": "Удалить невозможно",
   "schedulesDeleteBlockedAssignedMessage": "Расписание назначено сотрудникам. Снимите назначение перед удалением.",
+  "schedulesRosterPdfTitle": "Сводное расписание работы",
+  "schedulesRosterPdfExportTooltip": "Экспорт сводного расписания (PDF)",
+  "schedulesRosterPdfColumnEmployee": "Сотрудник",
+  "schedulesRosterPdfColumnWeeklyHours": "Часов в неделю",
+  "schedulesRosterPdfExported": "Экспорт выполнен.",
+  "schedulesRosterPdfFailed": "Не удалось экспортировать расписание: {error}",
+  "@schedulesRosterPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
 
   "intervalStart": "Начало: {time}",
   "intervalEnd": "Конец: {time}",

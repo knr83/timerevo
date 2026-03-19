@@ -299,6 +299,17 @@
   "employeeTabContact": "Kontakt",
   "employeeTabTerminalAccess": "Terminal-Zugang",
   "employeeTabAdditional": "Zusätzlich",
+  "employeeDataPdfTitle": "Mitarbeiterdaten",
+  "employeeDataPdfSectionEmployeeInfo": "Mitarbeiterinformationen",
+  "employeeExportEmployeeData": "Mitarbeiterdaten exportieren",
+  "employeeDataPdfExported": "Mitarbeiterdaten exportiert.",
+  "employeeDataPdfFailed": "Export fehlgeschlagen: {error}",
+  "@employeeDataPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "employeeDataPdfAdminOnly": "Export ist nur im Admin-Modus verfügbar.",
 
   "schedulesEmptyHint": "Erstellen Sie eine Planvorlage.",
   "schedulesFailedLoad": "Pläne konnten nicht geladen werden: {error}",
@@ -356,6 +367,17 @@
   },
   "schedulesDeleteBlockedAssignedTitle": "Löschen nicht möglich",
   "schedulesDeleteBlockedAssignedMessage": "Dieser Plan ist Mitarbeitern zugewiesen. Heben Sie die Zuweisung auf, bevor Sie löschen.",
+  "schedulesRosterPdfTitle": "Arbeitszeitplan (Übersicht)",
+  "schedulesRosterPdfExportTooltip": "Dienstplan als PDF exportieren",
+  "schedulesRosterPdfColumnEmployee": "Mitarbeiter",
+  "schedulesRosterPdfColumnWeeklyHours": "Wochenstunden",
+  "schedulesRosterPdfExported": "Exportiert.",
+  "schedulesRosterPdfFailed": "Dienstplan konnte nicht exportiert werden: {error}",
+  "@schedulesRosterPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
 
   "intervalStart": "Start: {time}",
   "intervalEnd": "Ende: {time}",

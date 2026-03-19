@@ -729,6 +729,27 @@ class AppLocalizationsDe extends AppLocalizations {
   String get employeeTabAdditional => 'Zusätzlich';
 
   @override
+  String get employeeDataPdfTitle => 'Mitarbeiterdaten';
+
+  @override
+  String get employeeDataPdfSectionEmployeeInfo => 'Mitarbeiterinformationen';
+
+  @override
+  String get employeeExportEmployeeData => 'Mitarbeiterdaten exportieren';
+
+  @override
+  String get employeeDataPdfExported => 'Mitarbeiterdaten exportiert.';
+
+  @override
+  String employeeDataPdfFailed(String error) {
+    return 'Export fehlgeschlagen: $error';
+  }
+
+  @override
+  String get employeeDataPdfAdminOnly =>
+      'Export ist nur im Admin-Modus verfügbar.';
+
+  @override
   String get schedulesEmptyHint => 'Erstellen Sie eine Planvorlage.';
 
   @override
@@ -867,6 +888,27 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get schedulesDeleteBlockedAssignedMessage =>
       'Dieser Plan ist Mitarbeitern zugewiesen. Heben Sie die Zuweisung auf, bevor Sie löschen.';
+
+  @override
+  String get schedulesRosterPdfTitle => 'Arbeitszeitplan (Übersicht)';
+
+  @override
+  String get schedulesRosterPdfExportTooltip =>
+      'Dienstplan als PDF exportieren';
+
+  @override
+  String get schedulesRosterPdfColumnEmployee => 'Mitarbeiter';
+
+  @override
+  String get schedulesRosterPdfColumnWeeklyHours => 'Wochenstunden';
+
+  @override
+  String get schedulesRosterPdfExported => 'Exportiert.';
+
+  @override
+  String schedulesRosterPdfFailed(String error) {
+    return 'Dienstplan konnte nicht exportiert werden: $error';
+  }
 
   @override
   String intervalStart(String time) {

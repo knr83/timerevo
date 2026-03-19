@@ -270,7 +270,7 @@
   "employeeEmail": "Email",
   "employeePhone": "Phone",
   "employeeDepartment": "Department",
-  "employeeJobTitle": "Job Title",
+  "employeeJobTitle": "Job title",
   "employeeInternalComment": "Internal Comment",
   "employeePolicyAcknowledged": "Policy Acknowledged",
   "employeePolicyAcknowledgedAt": "Acknowledged At",
@@ -334,6 +334,17 @@
   "employeeTabContact": "Contact",
   "employeeTabTerminalAccess": "Terminal Access",
   "employeeTabAdditional": "Additional",
+  "employeeDataPdfTitle": "Employee Data",
+  "employeeDataPdfSectionEmployeeInfo": "Employee Information",
+  "employeeExportEmployeeData": "Export employee data",
+  "employeeDataPdfExported": "Employee data exported.",
+  "employeeDataPdfFailed": "Failed to export employee data: {error}",
+  "@employeeDataPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
+  "employeeDataPdfAdminOnly": "Export is available only in admin mode.",
 
   "schedulesEmptyHint": "Create a schedule template.",
   "schedulesFailedLoad": "Failed to load schedules: {error}",
@@ -406,6 +417,17 @@
   },
   "schedulesDeleteBlockedAssignedTitle": "Cannot delete",
   "schedulesDeleteBlockedAssignedMessage": "This schedule is assigned to employees. Unassign it before deleting.",
+  "schedulesRosterPdfTitle": "Work schedule roster",
+  "schedulesRosterPdfExportTooltip": "Export schedule roster (PDF)",
+  "schedulesRosterPdfColumnEmployee": "Employee",
+  "schedulesRosterPdfColumnWeeklyHours": "Weekly hours",
+  "schedulesRosterPdfExported": "Exported.",
+  "schedulesRosterPdfFailed": "Could not export schedule roster: {error}",
+  "@schedulesRosterPdfFailed": {
+    "placeholders": {
+      "error": { "type": "String" }
+    }
+  },
 
   "intervalStart": "Start: {time}",
   "@intervalStart": {
