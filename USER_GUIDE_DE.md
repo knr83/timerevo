@@ -44,11 +44,12 @@ Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 - **Hinzufügen** (➕): neuen Mitarbeiter anlegen.
 - Mitarbeiter auswählen, um die Karte anzuzeigen oder zu bearbeiten.
 - Pflichtfelder: Code, Vorname, Nachname.
-- Optional: Einstellungsdatum, Rolle, Beschäftigungsart, Wochenstunden, Abteilung, Position, Kontaktdaten.
+- Optional: Einstellungsdatum, Austrittsdatum, Urlaubstage pro Jahr, Rolle, Beschäftigungsart, Abteilung, Position, Kontaktdaten.
+- **Status**: aktiv, inaktiv oder archiviert. Im Terminal erscheinen nur **aktive** Mitarbeiter (innerhalb Einstellungs- und Austrittsdatum).
 - **PIN aktivieren**: PIN für Stempeln verlangen; PIN pro Mitarbeiter setzen oder zurücksetzen.
 - **NFC aktivieren**: alternativer Zugang per NFC-Token.
-- **Planzettel** zuweisen.
-- Aktiv/Inaktiv markieren — Anzeige im Terminal ein- oder ausblenden.
+- **Planzettel** zuweisen (geplante Wochenstunden ergeben sich aus dem Planzettel, kein separates Feld in der Karte).
+- **Mitarbeiterdaten (PDF) exportieren** — in der Karte beim Bearbeiten eines vorhandenen Mitarbeiters.
 
 ### Pläne
 - Planzettel erstellen und verwalten (z. B. „Standardwoche“).
@@ -56,15 +57,16 @@ Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 - Arbeitszeiten pro Wochentag festlegen (Mo–So).
 - Beginn- und Endzeit wählen; Schalter „Nachtschicht“ für Schichten über Mitternacht.
 - Planzettel Mitarbeitern in der Mitarbeiterkarte zuweisen.
+- **PDF** (Symbol in der Leiste): Export einer Übersicht aller Mitarbeiter und Wochenplanzettel.
 
 ### Journal
-- Arbeitszeiten in einer Tabelle durchsuchen (Mitarbeiter, Beginn, Ende, Dauer, Status).
-- Filter: Zeitraum (Von/Bis), Voreinstellungen (Heute, Woche, Monat, Letzter Monat), **Status** (Alle / Offen / Geschlossen), Mitarbeiter, **Suchen** (Name oder Notiz).
-- Datum-Chips zum Setzen oder Löschen der Filter nutzen.
+- Ansichten: **Tabelle**, **Zeitleiste**, **Nach Intervallen**.
+- **Zeitraumleiste**: Bereich **Tag** / **Woche** / **Monat** / **Intervall**; **Heute** und Vor/Zurück; bei **Intervall** Datumsbereich wählen.
+- **Tabellen**ansicht: Spalten Mitarbeiter, Beginn, Ende, Dauer, Status. **Status**-Filter: Alle / Offen / **Nicht geschlossen** / Geschlossen; Mitarbeiter; **Suchen** (Name oder Notiz).
 - Zeile bearbeiten: Beginn/Ende, Notiz, Grund der Änderung (Pflichtfeld), „Jetzt beenden“, „Ende zurücksetzen“.
 
 ### Abwesenheiten
-- Filter: Mitarbeiter, Status (Alle / Ausstehend / Genehmigt / Abgelehnt), Zeitraum (Von/Bis).
+- Filter: Mitarbeiter, Status (Alle / Ausstehend / Genehmigt / Abgelehnt), **Zeitraum** (dieselbe Zeitraumleiste: Bereich, Heute, Navigation, optional eigener Bereich).
 - Tabelle: Mitarbeiter, Art, Von/Bis, Status, Genehmigt von, Wann.
 - Arten: Urlaub, Krankheit, Unbezahlter Urlaub, Elternzeit, Bildungsurlaub, Sonstige.
 - **Abwesenheit hinzufügen** — Schaltfläche zum Anlegen.
@@ -72,12 +74,13 @@ Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 
 ### Berichte
 - Übersicht nach Mitarbeiter und Zeitraum anzeigen. In die Summen gehen nur **geschlossene** Schichten ein.
-- Filter nach Datumsbereich (Chips Von/Bis).
+- **Zeitraumleiste** (Tag / Woche / Monat / Intervall, Heute, Navigation).
 - PDF-Export: gesamt oder pro ausgewähltem Mitarbeiter aus dem Detailbereich.
 
 ### Einstellungen
 - **Sprache**: Systemstandard, Deutsch, Russisch oder Englisch.
 - **Design**: System, Hell, Dunkel, Hoher Kontrast (hell), Hoher Kontrast (dunkel).
+- **Anwesenheitsmodus**: **Flexibel** oder **Fest**; im **festen** Modus **Toleranz (Minuten)** für die Bewertung des Schichtendes.
 - **Arbeitszeit**: Beginn und Ende für das Terminal (Einschränkungen beim Stempeln).
 - **PIN ändern** — Admin-PIN ändern.
 - **Diagnosedaten exportieren** — Speicherung von Diagnosedaten in eine Datei (für den Support).

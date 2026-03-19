@@ -44,11 +44,12 @@ Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks auto
 - **Add** (➕): create a new employee.
 - Select an employee to view or edit their card.
 - Required: Code, first name, last name.
-- Optional: hire date, role, employment type, weekly hours, department, job title, contact details.
+- Optional: hire date, termination date, vacation days per year, role, employment type, department, job title, contact details.
+- **Status**: active, inactive, or archived. Only **active** employees (within hire/termination dates) appear in the terminal.
 - **Enable PIN**: require PIN for clock-in/out; set or reset PIN per employee.
 - **Enable NFC**: alternative access via NFC token.
-- Assign a **schedule template**.
-- Mark as active/inactive to show or hide in the terminal.
+- Assign a **schedule template** (planned weekly hours follow the template, not a separate field on the card).
+- **Export employee data (PDF)** — available from the card when editing an existing employee.
 
 ### Schedules
 - Create and manage schedule templates (e.g. "Standard Week").
@@ -56,15 +57,16 @@ Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks auto
 - Define working intervals for each weekday (Mon–Sun).
 - Set start/end times; use the night toggle for shifts crossing midnight.
 - Assign templates to employees in the Employee card.
+- **PDF** (toolbar icon): export a roster overview of employees and weekly templates.
 
 ### Journal
-- Browse work sessions in a table (Employee, Start, End, Duration, Status).
-- Filters: date range (From/To), presets (Today, Week, Month, Last month), **Status** (All / Open / Closed), employee, **Search** (name or note).
-- Use the date chips to set or clear filters.
+- Switch views: **Table**, **Timeline**, and **By intervals**.
+- **Period bar**: scope **day** / **week** / **month** / **interval**; **Today** and previous/next controls; pick a custom range when **interval** is selected.
+- **Table** view: columns Employee, Start, End, Duration, Status. **Status** filter: All / Open / **Not closed** / Closed; employee filter; **Search** (name or note).
 - Edit row: start/end, note, update reason (required), "Set end now", "Clear end".
 
 ### Absences
-- Filters: employee, status (All / Pending / Approved / Rejected), period (From/To).
+- Filters: employee, status (All / Pending / Approved / Rejected), **period** (same period bar as elsewhere: scope, Today, navigation, optional custom range).
 - Table: Employee, Type, From/To, Status, Approved by, When.
 - Types: vacation, sick leave, unpaid leave, parental leave, study leave, other.
 - **Add absence** — button to create an entry.
@@ -72,12 +74,13 @@ Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks auto
 
 ### Reports
 - View summary by employee and period. Only **closed** sessions are included in totals.
-- Filter by date range using the From/To chips.
+- Filter the **period bar** (day / week / month / interval, Today, navigation).
 - Export PDF: full report or per selected employee from the details panel.
 
 ### Settings
 - **Language**: System default, German, Russian, or English.
 - **Theme**: System, Light, Dark, High contrast (light), High contrast (dark).
+- **Attendance mode**: **Flexible** or **Fixed**; in **Fixed** mode, set **tolerance (minutes)** for end-of-shift evaluation.
 - **Allowed working time**: start and end for the terminal (clock-in restrictions).
 - **Change PIN** — change the admin PIN.
 - **Export diagnostics** — save diagnostic data to a file (for support).
