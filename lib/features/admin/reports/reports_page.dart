@@ -9,7 +9,10 @@ import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
+import '../../../app/tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../app/usecase_providers.dart';
+import '../../../core/tracking_start_range_clamp.dart';
 import '../../../common/pdf/employee_daily_pdf_export.dart';
 import 'package:timerevo/core/pdf/pdf_print_form_frame.dart';
 import '../../../common/pdf/time_report_pdf_suggested_filename.dart';
@@ -73,12 +76,34 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       }
     });
 
+    ref.listen(trackingStartSettingsProvider, (prev, next) {
+      final ymd = trackingStartYmdFromWatch(next);
+      final f = ref.read(reportFiltersProvider);
+      final base = reportEffectiveRange(f);
+      final c = clampUtcRangeToTrackingStart(
+        fromUtcMs: base.fromUtcMs,
+        toUtcMs: base.toUtcMs,
+        trackingStartYmd: ymd,
+      );
+      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+        ref.read(reportFiltersProvider.notifier).state = (
+          scope: f.scope,
+          fromUtcMs: c.fromUtcMs,
+          toUtcMs: c.toUtcMs,
+          employeeId: f.employeeId,
+        );
+      }
+    });
+
     var rows = rowsAsync.value ?? [];
     if (filters.employeeId != null) {
       rows = rows.where((r) => r.employeeId == filters.employeeId).toList();
     }
 
-    final r = reportEffectiveRange(filters);
+    final ymdWatch = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final r = reportClampedRange(filters, ymdWatch);
 
     return Scaffold(
       body: Padding(
@@ -96,7 +121,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                 FilledButton.icon(
                   onPressed: () async {
                     if (rows.isEmpty) return;
-                    final range = reportEffectiveRange(filters);
+                    final range = reportClampedRange(
+                      filters,
+                      trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      ),
+                    );
                     await _exportPdf(
                       context,
                       fromUtcMs: range.fromUtcMs,
@@ -128,13 +158,22 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     DateRangeScope.month,
                     DateRangeScope.interval,
                   ],
-                  onChanged: (scope, from, to) =>
-                      ref.read(reportFiltersProvider.notifier).state = (
-                        scope: scope,
-                        fromUtcMs: from,
-                        toUtcMs: to,
-                        employeeId: filters.employeeId,
-                      ),
+                  onChanged: (scope, from, to) {
+                    final ymd = trackingStartYmdFromWatch(
+                      ref.read(trackingStartSettingsProvider),
+                    );
+                    final c = clampUtcRangeToTrackingStart(
+                      fromUtcMs: from,
+                      toUtcMs: to,
+                      trackingStartYmd: ymd,
+                    );
+                    ref.read(reportFiltersProvider.notifier).state = (
+                      scope: scope,
+                      fromUtcMs: c.fromUtcMs,
+                      toUtcMs: c.toUtcMs,
+                      employeeId: filters.employeeId,
+                    );
+                  },
                 ),
                 _EmployeeFilterDropdown(filters: filters),
               ],
@@ -398,7 +437,12 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                 TextButton(
                   onPressed: () async {
                     final filters = ref.read(reportFiltersProvider);
-                    final r = reportEffectiveRange(filters);
+                    final r = reportClampedRange(
+                      filters,
+                      trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      ),
+                    );
                     await exportEmployeeDailyPdf(
                       context,
                       dayReportUseCase: ref.read(

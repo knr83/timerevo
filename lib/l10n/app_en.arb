@@ -266,7 +266,6 @@
   "employeeAccessTokenRequiredWhenNfc": "Required when NFC enabled.",
   "employeeEmploymentType": "Employment type",
   "employeeWeeklyHours": "Weekly hours",
-  "employeeWeeklyHoursHint": "40",
   "employeeEmail": "Email",
   "employeePhone": "Phone",
   "employeeDepartment": "Department",
@@ -485,6 +484,10 @@
       "value": { "type": "String" }
     }
   },
+  "settingsTrackingStartDateLabel": "Tracking start date",
+  "settingsTrackingStartDateHelp": "Data analysis starts from this date. Earlier entries are not included in reports.",
+  "settingsTrackingStartDateUnset": "Not set",
+  "settingsTrackingStartDateClear": "Clear",
   "settingsPrivacyPolicy": "Privacy Policy",
   "settingsCreateBackup": "Create backup",
   "settingsBackupCreated": "Backup created: {path}",

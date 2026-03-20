@@ -64,7 +64,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   late TextEditingController _lastNameCtrl;
   late TextEditingController _accessTokenCtrl;
   late TextEditingController _accessNoteCtrl;
-  late TextEditingController _weeklyHoursCtrl;
   late TextEditingController _emailCtrl;
   late TextEditingController _phoneCtrl;
   late TextEditingController _departmentCtrl;
@@ -109,9 +108,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         ? null
         : _accessNoteCtrl.text.trim(),
     'employmentType': _employmentType,
-    'weeklyHours': _weeklyHoursCtrl.text.trim().isEmpty
-        ? null
-        : double.tryParse(_weeklyHoursCtrl.text.trim()),
     'email': _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
     'phone': _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
     'secondaryPhone': _secondaryPhoneCtrl.text.trim().isEmpty
@@ -151,7 +147,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         'accessToken': null,
         'accessNote': null,
         'employmentType': null,
-        'weeklyHours': null,
         'email': null,
         'phone': null,
         'secondaryPhone': null,
@@ -177,7 +172,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       'accessToken': e.accessToken,
       'accessNote': e.accessNote,
       'employmentType': e.employmentType,
-      'weeklyHours': e.weeklyHours,
       'email': e.email,
       'phone': e.phone,
       'secondaryPhone': e.secondaryPhone,
@@ -221,11 +215,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     if (_templateId == null) return false;
     if (_codeError != null) return false;
     if (_useNfc && _accessTokenCtrl.text.trim().isEmpty) return false;
-    final wh = _weeklyHoursCtrl.text.trim();
-    if (wh.isNotEmpty) {
-      final v = double.tryParse(wh);
-      if (v == null || v <= 0) return false;
-    }
     final vd = _vacationDaysPerYearCtrl.text.trim();
     if (vd.isNotEmpty) {
       final v = int.tryParse(vd);
@@ -262,9 +251,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _lastNameCtrl = TextEditingController(text: e?.lastName ?? '');
     _accessTokenCtrl = TextEditingController(text: e?.accessToken ?? '');
     _accessNoteCtrl = TextEditingController(text: e?.accessNote ?? '');
-    _weeklyHoursCtrl = TextEditingController(
-      text: e?.weeklyHours != null ? e!.weeklyHours.toString() : '',
-    );
     _emailCtrl = TextEditingController(text: e?.email ?? '');
     _phoneCtrl = TextEditingController(text: e?.phone ?? '');
     _departmentCtrl = TextEditingController(text: e?.department ?? '');
@@ -296,7 +282,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _lastNameCtrl.addListener(() => setState(() {}));
     _accessTokenCtrl.addListener(() => setState(() {}));
     _accessNoteCtrl.addListener(() => setState(() {}));
-    _weeklyHoursCtrl.addListener(() => setState(() {}));
     _emailCtrl.addListener(() => setState(() {}));
     _phoneCtrl.addListener(() => setState(() {}));
     _departmentCtrl.addListener(() => setState(() {}));
@@ -324,7 +309,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _lastNameCtrl.dispose();
     _accessTokenCtrl.dispose();
     _accessNoteCtrl.dispose();
-    _weeklyHoursCtrl.dispose();
     _emailCtrl.dispose();
     _phoneCtrl.dispose();
     _departmentCtrl.dispose();
@@ -472,9 +456,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               ? null
               : _accessNoteCtrl.text.trim(),
           employmentType: _employmentType,
-          weeklyHours: _weeklyHoursCtrl.text.trim().isEmpty
-              ? null
-              : double.tryParse(_weeklyHoursCtrl.text.trim()),
           email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
           phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
           department: _departmentCtrl.text.trim().isEmpty
@@ -512,9 +493,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               ? null
               : _accessNoteCtrl.text.trim(),
           employmentType: _employmentType,
-          weeklyHours: _weeklyHoursCtrl.text.trim().isEmpty
-              ? null
-              : double.tryParse(_weeklyHoursCtrl.text.trim()),
           email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
           phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
           secondaryPhone: _secondaryPhoneCtrl.text.trim().isEmpty
@@ -1048,7 +1026,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   const Expanded(child: SizedBox()),
                 ],
               ),
-              // weeklyHours: [_weeklyHoursCtrl] still loaded/saved; no field on card.
             ],
           ),
         ),

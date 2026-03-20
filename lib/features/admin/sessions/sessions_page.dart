@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../app/sessions_providers.dart';
+import '../../../app/tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../app/usecase_providers.dart';
 import '../../../app/working_hours/working_hours_settings_controller.dart';
 import '../../../common/utils/date_time_picker.dart';
@@ -14,6 +16,7 @@ import '../../../common/utils/time_format.dart';
 import '../../../common/utils/utc_clock.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
+import '../../../core/tracking_start_range_clamp.dart';
 import '../../../core/domain_errors.dart';
 import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
@@ -86,6 +89,15 @@ _DetailedScope _dateRangeScopeToDetailedScope(DateRangeScope s) {
   };
 }
 
+(int, int) _clampJournalRange(String? trackingYmd, int from, int to) {
+  final c = clampUtcRangeToTrackingStart(
+    fromUtcMs: from,
+    toUtcMs: to,
+    trackingStartYmd: trackingYmd,
+  );
+  return (c.fromUtcMs, c.toUtcMs);
+}
+
 (int, int) _detailedEffectiveRange(_JournalFilters f) {
   if (f.fromUtcMs != null && f.toUtcMs != null) {
     return (f.fromUtcMs!, f.toUtcMs!);
@@ -154,9 +166,13 @@ final _journalDayOverviewProvider = StreamProvider<List<JournalDayOverviewRow>>(
   (ref) {
     final filters = ref.watch(_journalFiltersProvider);
     final (from, to) = _timelineEffectiveRange(filters);
+    final ymd = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final (cf, ct) = _clampJournalRange(ymd, from, to);
     return ref
         .watch(journalDayOverviewUseCaseProvider)
-        .streamDayOverview(employeeId: null, fromUtcMs: from, toUtcMs: to);
+        .streamDayOverview(employeeId: null, fromUtcMs: cf, toUtcMs: ct);
   },
 );
 
@@ -167,13 +183,13 @@ final _journalFiltersProvider = StateProvider<_JournalFilters>(
 final _journalProvider = StreamProvider<List<SessionWithEmployeeInfo>>((ref) {
   final filters = ref.watch(_journalFiltersProvider);
   final (from, to) = _tableEffectiveRange(filters);
+  final ymd = trackingStartYmdFromWatch(
+    ref.watch(trackingStartSettingsProvider),
+  );
+  final (cf, ct) = _clampJournalRange(ymd, from, to);
   return ref
       .watch(watchSessionsUseCaseProvider)
-      .streamSessionsWithEmployee(
-        employeeId: null,
-        fromUtcMs: from,
-        toUtcMs: to,
-      );
+      .streamSessionsWithEmployee(employeeId: null, fromUtcMs: cf, toUtcMs: ct);
 });
 
 class SessionsPage extends ConsumerWidget {
@@ -185,6 +201,26 @@ class SessionsPage extends ConsumerWidget {
     final sessionsAsync = ref.watch(_journalProvider);
     final filters = ref.watch(_journalFiltersProvider);
     final viewMode = ref.watch(journalViewModeProvider);
+    final trackingYmd = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+
+    ref.listen(trackingStartSettingsProvider, (prev, next) {
+      final ymd = trackingStartYmdFromWatch(next);
+      final f = ref.read(_journalFiltersProvider);
+      if (f.fromUtcMs == null || f.toUtcMs == null) return;
+      final c = clampUtcRangeToTrackingStart(
+        fromUtcMs: f.fromUtcMs!,
+        toUtcMs: f.toUtcMs!,
+        trackingStartYmd: ymd,
+      );
+      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+        ref.read(_journalFiltersProvider.notifier).state = f.copyWith(
+          fromUtcMs: c.fromUtcMs,
+          toUtcMs: c.toUtcMs,
+        );
+      }
+    });
 
     return Scaffold(
       body: Padding(
@@ -223,11 +259,19 @@ class SessionsPage extends ConsumerWidget {
                     final newMode = s.first;
                     if (newMode == JournalViewMode.timelineDetailed) {
                       final today = reportPeriodToday();
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: today.fromUtcMs,
+                        toUtcMs: today.toUtcMs,
+                        trackingStartYmd: ymd,
+                      );
                       ref.read(_journalFiltersProvider.notifier).state = ref
                           .read(_journalFiltersProvider)
                           .copyWith(
-                            fromUtcMs: today.fromUtcMs,
-                            toUtcMs: today.toUtcMs,
+                            fromUtcMs: c.fromUtcMs,
+                            toUtcMs: c.toUtcMs,
                             detailedScope: _DetailedScope.day,
                           );
                     }
@@ -247,61 +291,111 @@ class SessionsPage extends ConsumerWidget {
                     scope: _detailedScopeToDateRangeScope(
                       filters.detailedScope,
                     ),
-                    fromUtcMs: _detailedEffectiveRange(filters).$1,
-                    toUtcMs: _detailedEffectiveRange(filters).$2,
+                    fromUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _detailedEffectiveRange(filters).$1,
+                      _detailedEffectiveRange(filters).$2,
+                    ).$1,
+                    toUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _detailedEffectiveRange(filters).$1,
+                      _detailedEffectiveRange(filters).$2,
+                    ).$2,
                     availableScopes: const [
                       DateRangeScope.day,
                       DateRangeScope.week,
                     ],
-                    onChanged: (scope, from, to) =>
-                        ref
-                            .read(_journalFiltersProvider.notifier)
-                            .state = filters.copyWith(
-                          detailedScope: _dateRangeScopeToDetailedScope(scope),
-                          fromUtcMs: from,
-                          toUtcMs: to,
-                        ),
+                    onChanged: (scope, from, to) {
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        trackingStartYmd: ymd,
+                      );
+                      ref
+                          .read(_journalFiltersProvider.notifier)
+                          .state = filters.copyWith(
+                        detailedScope: _dateRangeScopeToDetailedScope(scope),
+                        fromUtcMs: c.fromUtcMs,
+                        toUtcMs: c.toUtcMs,
+                      );
+                    },
                   )
                 else if (viewMode == JournalViewMode.table)
                   DateRangeFilterBar(
                     scope: _tableScopeToDateRangeScope(filters.tableScope),
-                    fromUtcMs: _tableEffectiveRange(filters).$1,
-                    toUtcMs: _tableEffectiveRange(filters).$2,
+                    fromUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _tableEffectiveRange(filters).$1,
+                      _tableEffectiveRange(filters).$2,
+                    ).$1,
+                    toUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _tableEffectiveRange(filters).$1,
+                      _tableEffectiveRange(filters).$2,
+                    ).$2,
                     availableScopes: const [
                       DateRangeScope.day,
                       DateRangeScope.week,
                       DateRangeScope.month,
                       DateRangeScope.interval,
                     ],
-                    onChanged: (scope, from, to) =>
-                        ref
-                            .read(_journalFiltersProvider.notifier)
-                            .state = filters.copyWith(
-                          tableScope: _dateRangeScopeToTableScope(scope),
-                          fromUtcMs: from,
-                          toUtcMs: to,
-                        ),
+                    onChanged: (scope, from, to) {
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        trackingStartYmd: ymd,
+                      );
+                      ref.read(_journalFiltersProvider.notifier).state = filters
+                          .copyWith(
+                            tableScope: _dateRangeScopeToTableScope(scope),
+                            fromUtcMs: c.fromUtcMs,
+                            toUtcMs: c.toUtcMs,
+                          );
+                    },
                   )
                 else
                   DateRangeFilterBar(
                     scope: _timelineScopeToDateRangeScope(
                       filters.timelineScope,
                     ),
-                    fromUtcMs: _timelineEffectiveRange(filters).$1,
-                    toUtcMs: _timelineEffectiveRange(filters).$2,
+                    fromUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _timelineEffectiveRange(filters).$1,
+                      _timelineEffectiveRange(filters).$2,
+                    ).$1,
+                    toUtcMs: _clampJournalRange(
+                      trackingYmd,
+                      _timelineEffectiveRange(filters).$1,
+                      _timelineEffectiveRange(filters).$2,
+                    ).$2,
                     availableScopes: const [
                       DateRangeScope.week,
                       DateRangeScope.month,
                       DateRangeScope.interval,
                     ],
-                    onChanged: (scope, from, to) =>
-                        ref
-                            .read(_journalFiltersProvider.notifier)
-                            .state = filters.copyWith(
-                          timelineScope: _dateRangeScopeToTimelineScope(scope),
-                          fromUtcMs: from,
-                          toUtcMs: to,
-                        ),
+                    onChanged: (scope, from, to) {
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        trackingStartYmd: ymd,
+                      );
+                      ref
+                          .read(_journalFiltersProvider.notifier)
+                          .state = filters.copyWith(
+                        timelineScope: _dateRangeScopeToTimelineScope(scope),
+                        fromUtcMs: c.fromUtcMs,
+                        toUtcMs: c.toUtcMs,
+                      );
+                    },
                   ),
                 if (viewMode == JournalViewMode.table)
                   DropdownMenu<_JournalStatusFilter>(
@@ -395,6 +489,11 @@ final _journalIntervalOverviewProvider =
               return (m.fromUtcMs, m.toUtcMs);
             })();
 
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final (cf, ct) = _clampJournalRange(ymd, fromUtcMs, toUtcMs);
+
       final workingHours = workingHoursAsync.value;
       if (workingHours == null) return Stream.value([]);
 
@@ -402,8 +501,8 @@ final _journalIntervalOverviewProvider =
           .watch(journalIntervalOverviewUseCaseProvider)
           .streamIntervalOverview(
             employeeId: null,
-            fromUtcMs: fromUtcMs,
-            toUtcMs: toUtcMs,
+            fromUtcMs: cf,
+            toUtcMs: ct,
             startMin: workingHours.startMin,
             endMin: workingHours.endMin,
           );
@@ -446,14 +545,18 @@ class _JournalDetailedTimelineContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final filters = ref.watch(_journalFiltersProvider);
     final (
-      fromUtcMs,
-      toUtcMs,
+      rawFrom,
+      rawTo,
     ) = (filters.fromUtcMs != null && filters.toUtcMs != null)
         ? (filters.fromUtcMs!, filters.toUtcMs!)
         : (() {
             final t = reportPeriodToday();
             return (t.fromUtcMs, t.toUtcMs);
           })();
+    final ymd = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final (fromUtcMs, toUtcMs) = _clampJournalRange(ymd, rawFrom, rawTo);
     final workingHoursAsync = ref.watch(workingHoursSettingsProvider);
     final intervalAsync = ref.watch(_journalIntervalOverviewProvider);
 
@@ -500,7 +603,11 @@ class _JournalTimelineContent extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final filters = ref.watch(_journalFiltersProvider);
-    final (fromUtcMs, toUtcMs) = _timelineEffectiveRange(filters);
+    final (tf, tt) = _timelineEffectiveRange(filters);
+    final ymd = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final (fromUtcMs, toUtcMs) = _clampJournalRange(ymd, tf, tt);
     final overviewAsync = ref.watch(_journalDayOverviewProvider);
     return overviewAsync.when(
       data: (rows) {

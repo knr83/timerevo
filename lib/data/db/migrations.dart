@@ -208,7 +208,6 @@ FROM employees;
           'ALTER TABLE employees ADD COLUMN access_token TEXT;',
           'ALTER TABLE employees ADD COLUMN access_note TEXT;',
           'ALTER TABLE employees ADD COLUMN employment_type TEXT;',
-          'ALTER TABLE employees ADD COLUMN weekly_hours REAL;',
           'ALTER TABLE employees ADD COLUMN email TEXT;',
           'ALTER TABLE employees ADD COLUMN phone TEXT;',
           'ALTER TABLE employees ADD COLUMN department TEXT;',
@@ -319,7 +318,6 @@ CREATE TABLE employees_new (
   access_token TEXT,
   access_note TEXT,
   employment_type TEXT,
-  weekly_hours REAL,
   email TEXT,
   phone TEXT,
   department TEXT,
@@ -338,7 +336,7 @@ INSERT INTO employees_new (
   id, code, first_name, last_name, status,
   termination_date, vacation_days_per_year, secondary_phone,
   hire_date, employee_role, use_pin, use_nfc,
-  access_token, access_note, employment_type, weekly_hours,
+  access_token, access_note, employment_type,
   email, phone, department, job_title, internal_comment,
   policy_acknowledged, policy_acknowledged_at,
   created_at, updated_at, created_by, updated_by
@@ -347,7 +345,7 @@ SELECT
   id, code, first_name, last_name, status,
   termination_date, vacation_days_per_year, secondary_phone,
   hire_date, employee_role, use_pin, use_nfc,
-  access_token, access_note, employment_type, weekly_hours,
+  access_token, access_note, employment_type,
   email, phone, department, job_title, internal_comment,
   policy_acknowledged, policy_acknowledged_at,
   created_at, updated_at, created_by, updated_by
@@ -359,6 +357,76 @@ FROM employees;
             );
             await db.customStatement('PRAGMA foreign_keys=ON;');
           }
+        });
+      }
+
+      if (from < 11) {
+        // Drop legacy employees.weekly_hours (planned hours come from schedule templates).
+        await db.transaction(() async {
+          final cols = await db
+              .customSelect('PRAGMA table_info(employees);')
+              .get();
+          final names = cols.map((r) => r.read<String>('name')).toSet();
+          if (!names.contains('weekly_hours')) {
+            return;
+          }
+
+          await db.customStatement('PRAGMA foreign_keys=OFF;');
+          await db.customStatement('''
+CREATE TABLE employees_new (
+  id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+  code TEXT NOT NULL UNIQUE,
+  first_name TEXT NOT NULL,
+  last_name TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active','inactive','archived')),
+  termination_date INTEGER,
+  vacation_days_per_year INTEGER,
+  secondary_phone TEXT,
+  hire_date INTEGER,
+  employee_role TEXT NOT NULL DEFAULT 'employee',
+  use_pin INTEGER NOT NULL DEFAULT 0,
+  use_nfc INTEGER NOT NULL DEFAULT 0,
+  access_token TEXT,
+  access_note TEXT,
+  employment_type TEXT,
+  email TEXT,
+  phone TEXT,
+  department TEXT,
+  job_title TEXT,
+  internal_comment TEXT,
+  policy_acknowledged INTEGER NOT NULL DEFAULT 0,
+  policy_acknowledged_at INTEGER,
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER,
+  created_by TEXT,
+  updated_by TEXT
+);
+''');
+          await db.customStatement('''
+INSERT INTO employees_new (
+  id, code, first_name, last_name, status,
+  termination_date, vacation_days_per_year, secondary_phone,
+  hire_date, employee_role, use_pin, use_nfc,
+  access_token, access_note, employment_type,
+  email, phone, department, job_title, internal_comment,
+  policy_acknowledged, policy_acknowledged_at,
+  created_at, updated_at, created_by, updated_by
+)
+SELECT
+  id, code, first_name, last_name, status,
+  termination_date, vacation_days_per_year, secondary_phone,
+  hire_date, employee_role, use_pin, use_nfc,
+  access_token, access_note, employment_type,
+  email, phone, department, job_title, internal_comment,
+  policy_acknowledged, policy_acknowledged_at,
+  created_at, updated_at, created_by, updated_by
+FROM employees;
+''');
+          await db.customStatement('DROP TABLE employees;');
+          await db.customStatement(
+            'ALTER TABLE employees_new RENAME TO employees;',
+          );
+          await db.customStatement('PRAGMA foreign_keys=ON;');
         });
       }
 

@@ -9,6 +9,8 @@ import '../../app/auth/admin_auth_controller.dart';
 import '../../app/router.dart';
 import '../../app/terminal_providers.dart';
 import '../../app/usecase_providers.dart';
+import '../../app/tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../app/attendance/attendance_settings_controller.dart';
 import '../../app/working_hours/working_hours_settings_controller.dart';
 import '../../core/attendance_mode.dart';
@@ -20,6 +22,7 @@ import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
 import '../../common/widgets/app_snack.dart';
 import '../../core/domain_errors.dart';
+import '../../core/tracking_start_range_clamp.dart';
 import '../../core/diagnostic_log.dart';
 import '../../core/employee_pin_status.dart';
 import '../../core/error_message_helper.dart';
@@ -1098,6 +1101,14 @@ Future<void> _handleMyPdf(
   final l10n = AppLocalizations.of(context);
   final period = await _showMyPdfPeriodDialog(context, l10n);
   if (period == null || !context.mounted) return;
+  final ymd = trackingStartYmdFromWatch(
+    ref.read(trackingStartSettingsProvider),
+  );
+  final clamped = clampUtcRangeToTrackingStart(
+    fromUtcMs: period.fromUtcMs,
+    toUtcMs: period.toUtcMs,
+    trackingStartYmd: ymd,
+  );
   final employeeName = EmployeeDisplayName.of(
     EmployeeDisplay(firstName: employee.firstName, lastName: employee.lastName),
   );
@@ -1106,8 +1117,8 @@ Future<void> _handleMyPdf(
     dayReportUseCase: ref.read(employeeDayReportUseCaseProvider),
     employeeId: employee.id,
     employeeName: employeeName,
-    fromUtcMs: period.fromUtcMs,
-    toUtcMs: period.toUtcMs,
+    fromUtcMs: clamped.fromUtcMs,
+    toUtcMs: clamped.toUtcMs,
     sortColumnName: null,
     showSnack: (msg) => showAppSnack(context, msg),
     showErrorSnack: (msg, {bool isError = false}) =>

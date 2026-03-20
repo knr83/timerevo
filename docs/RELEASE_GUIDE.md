@@ -55,15 +55,17 @@ This format must be used consistently for:
 
 Release artifacts must use the same version string as the tag and release.
 
-Recommended naming pattern:
+Produced by `.github/workflows/release-assets.yml` (GitHub Actions):
 
-    timerevo-<version>-<platform>.<ext>
+    timerevo-windows-<version>.zip
+    timerevo-linux-<version>.tar.gz
+    timerevo-macos-<version>.zip
 
-Examples:
+Example for version `2026.3.0`:
 
-    timerevo-2026.3.0-win64.zip
-    timerevo-2026.3.0-linux-x64.tar.gz
-    timerevo-2026.3.0-macos-universal.zip
+    timerevo-windows-2026.3.0.zip
+    timerevo-linux-2026.3.0.tar.gz
+    timerevo-macos-2026.3.0.zip
 
 Rules:
 - always include the full release version

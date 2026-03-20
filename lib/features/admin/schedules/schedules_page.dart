@@ -843,12 +843,9 @@ class _WeekEditorControlRow extends StatelessWidget {
           ),
         ),
         const Spacer(),
-        Tooltip(
-          message: l10n.commonSave,
-          child: FilledButton(
-            onPressed: dirty ? onSave : null,
-            child: Text(l10n.commonSave),
-          ),
+        FilledButton(
+          onPressed: dirty ? onSave : null,
+          child: Text(l10n.commonSave),
         ),
       ],
     );

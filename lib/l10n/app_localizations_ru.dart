@@ -572,9 +572,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeWeeklyHours => 'Часов в неделю';
 
   @override
-  String get employeeWeeklyHoursHint => '40';
-
-  @override
   String get employeeEmail => 'E-mail';
 
   @override
@@ -1019,6 +1016,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String settingsWorkingHoursToWithValue(String value) {
     return 'До: $value';
   }
+
+  @override
+  String get settingsTrackingStartDateLabel => 'Дата начала учёта';
+
+  @override
+  String get settingsTrackingStartDateHelp =>
+      'Анализ данных начинается с этой даты. Более ранние записи в отчёты не включаются.';
+
+  @override
+  String get settingsTrackingStartDateUnset => 'Не задано';
+
+  @override
+  String get settingsTrackingStartDateClear => 'Сбросить';
 
   @override
   String get settingsPrivacyPolicy => 'Политика конфиденциальности';

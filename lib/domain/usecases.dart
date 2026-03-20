@@ -206,8 +206,13 @@ class WatchSessionsUseCase {
 
   Stream<List<SessionInfo>> streamSessionsForEmployeeLastDays(
     int employeeId,
-    int days,
-  ) => _repo.streamSessionsForEmployeeLastDays(employeeId, days);
+    int days, {
+    int? minStartUtcMs,
+  }) => _repo.streamSessionsForEmployeeLastDays(
+    employeeId,
+    days,
+    minStartUtcMs: minStartUtcMs,
+  );
 
   Stream<List<SessionInfo>> streamSessions({
     required int employeeId,
@@ -239,7 +244,11 @@ class WatchSessionsUseCase {
 
   Stream<List<SessionWithEmployeeInfo>> streamRecentSessionsWithEmployee({
     int limit = 10,
-  }) => _repo.streamRecentSessionsWithEmployee(limit: limit);
+    int? fromUtcMs,
+  }) => _repo.streamRecentSessionsWithEmployee(
+    limit: limit,
+    fromUtcMs: fromUtcMs,
+  );
 
   Stream<List<EmployeeReportRowInfo>> streamEmployeeReport({
     int? fromUtcMs,
@@ -1152,7 +1161,6 @@ class EmployeesAdminUseCase {
     String? accessToken,
     String? accessNote,
     String? employmentType,
-    double? weeklyHours,
     String? email,
     String? phone,
     String? secondaryPhone,
@@ -1177,7 +1185,6 @@ class EmployeesAdminUseCase {
     accessToken: accessToken,
     accessNote: accessNote,
     employmentType: employmentType,
-    weeklyHours: weeklyHours,
     email: email,
     phone: phone,
     secondaryPhone: secondaryPhone,
@@ -1205,7 +1212,6 @@ class EmployeesAdminUseCase {
     String? accessToken,
     String? accessNote,
     String? employmentType,
-    double? weeklyHours,
     String? email,
     String? phone,
     String? secondaryPhone,
@@ -1231,7 +1237,6 @@ class EmployeesAdminUseCase {
     accessToken: accessToken,
     accessNote: accessNote,
     employmentType: employmentType,
-    weeklyHours: weeklyHours,
     email: email,
     phone: phone,
     secondaryPhone: secondaryPhone,

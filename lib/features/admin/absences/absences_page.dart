@@ -5,12 +5,15 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/absences_providers.dart';
+import '../../../app/tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../app/usecase_providers.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/domain_errors.dart';
+import '../../../core/tracking_start_range_clamp.dart';
 import '../../../domain/entities/absence_info.dart';
 import '../../../domain/entities/absence_with_employee_info.dart';
 import '../../../domain/entities/employee_display.dart';
@@ -80,7 +83,10 @@ final _employeesAllProvider = watchAllEmployeesProvider;
 
 final _absencesProvider = StreamProvider<List<AbsenceWithEmployeeInfo>>((ref) {
   final filters = ref.watch(_absencesFiltersProvider);
-  final r = filters.effectiveRange;
+  final ymd = trackingStartYmdFromWatch(
+    ref.watch(trackingStartSettingsProvider),
+  );
+  final r = _absencesClampedRange(filters, ymd);
   return ref
       .watch(watchAbsencesUseCaseProvider)
       .streamAbsences(
@@ -149,6 +155,18 @@ class _AbsencesFilters {
 
 const _sentinel = Object();
 
+({int fromUtcMs, int toUtcMs}) _absencesClampedRange(
+  _AbsencesFilters f,
+  String? trackingYmd,
+) {
+  final r = f.effectiveRange;
+  return clampUtcRangeToTrackingStart(
+    fromUtcMs: r.fromUtcMs,
+    toUtcMs: r.toUtcMs,
+    trackingStartYmd: trackingYmd,
+  );
+}
+
 const _sortColumnEmployee = 0;
 const _sortColumnType = 1;
 const _sortColumnDateFrom = 2;
@@ -210,6 +228,27 @@ class AbsencesPage extends ConsumerWidget {
     final employeesAsync = ref.watch(_employeesAllProvider);
     final absencesAsync = ref.watch(_absencesProvider);
     final filters = ref.watch(_absencesFiltersProvider);
+    final ymdWatch = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final absencesRange = _absencesClampedRange(filters, ymdWatch);
+
+    ref.listen(trackingStartSettingsProvider, (prev, next) {
+      final ymd = trackingStartYmdFromWatch(next);
+      final f = ref.read(_absencesFiltersProvider);
+      if (f.fromUtcMs == null || f.toUtcMs == null) return;
+      final c = clampUtcRangeToTrackingStart(
+        fromUtcMs: f.fromUtcMs!,
+        toUtcMs: f.toUtcMs!,
+        trackingStartYmd: ymd,
+      );
+      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+        ref.read(_absencesFiltersProvider.notifier).state = f.copyWith(
+          fromUtcMs: c.fromUtcMs,
+          toUtcMs: c.toUtcMs,
+        );
+      }
+    });
 
     return Scaffold(
       body: Padding(
@@ -274,22 +313,30 @@ class AbsencesPage extends ConsumerWidget {
               children: [
                 DateRangeFilterBar(
                   scope: filters.scope,
-                  fromUtcMs: filters.effectiveRange.fromUtcMs,
-                  toUtcMs: filters.effectiveRange.toUtcMs,
+                  fromUtcMs: absencesRange.fromUtcMs,
+                  toUtcMs: absencesRange.toUtcMs,
                   availableScopes: const [
                     DateRangeScope.day,
                     DateRangeScope.week,
                     DateRangeScope.month,
                     DateRangeScope.interval,
                   ],
-                  onChanged: (scope, from, to) =>
-                      ref
-                          .read(_absencesFiltersProvider.notifier)
-                          .state = filters.copyWith(
-                        scope: scope,
-                        fromUtcMs: from,
-                        toUtcMs: to,
-                      ),
+                  onChanged: (scope, from, to) {
+                    final ymd = trackingStartYmdFromWatch(
+                      ref.read(trackingStartSettingsProvider),
+                    );
+                    final c = clampUtcRangeToTrackingStart(
+                      fromUtcMs: from,
+                      toUtcMs: to,
+                      trackingStartYmd: ymd,
+                    );
+                    ref.read(_absencesFiltersProvider.notifier).state = filters
+                        .copyWith(
+                          scope: scope,
+                          fromUtcMs: c.fromUtcMs,
+                          toUtcMs: c.toUtcMs,
+                        );
+                  },
                 ),
                 employeesAsync.when(
                   data: (employees) {

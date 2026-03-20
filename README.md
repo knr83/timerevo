@@ -35,6 +35,7 @@ Currently available and ready to use:
 - PDF reports
 - backup and restore
 - localization and theme settings
+- attendance mode (flexible / fixed) and **tracking start date** (limits how far back data is included in analysis)
 
 ## Features
 
@@ -54,9 +55,9 @@ Currently available and ready to use:
 - edit start and end times, add notes, and document update reasons
 
 ### Absence management
-- manage absence requests in one place
-- support approval and rejection workflows
-- keep planned and unplanned time off organized
+- employees submit requests from the **terminal** (My work calendar)
+- admins review the same records in **admin** (filters, edit/delete while pending, approve/reject)
+- keep planned and unplanned time off in one workflow
 
 ### Reports and exports
 - generate summaries by employee and date range
@@ -65,6 +66,8 @@ Currently available and ready to use:
 
 ### Settings and local data safety
 - switch language and theme
+- **Attendance mode** — flexible or fixed (with tolerance in fixed mode); see the [User Guide — Settings](USER_GUIDE_EN.md#settings)
+- **Tracking start date** — optional; analysis and reports treat this as the earliest relevant date (see in-app help on Settings)
 - create and restore backups
 - export diagnostics for support
 - keep all data stored locally on the machine
@@ -132,13 +135,13 @@ Build output:
 
 ## Distribution
 
-Timerevo is distributed as standalone builds per platform.
+Timerevo is distributed as standalone builds per platform via [GitHub Releases](https://github.com/knr83/timerevo/releases)
 
-**Windows:** Download `timerevo-<version>-win64.zip`, unpack, run `timerevo.exe`
+**Windows:** `timerevo-windows-<version>.zip` — unpack, run `timerevo.exe`
 
-**Linux:** Download `timerevo-<version>-linux64.tar.gz`, unpack, run `./timerevo`
+**Linux:** `timerevo-linux-<version>.tar.gz` — unpack, run `./timerevo`
 
-**macOS:** Download `timerevo-<version>-macos.zip`, unpack, open `timerevo.app`
+**macOS:** `timerevo-macos-<version>.zip` — unpack, open `timerevo.app`
 
 No installer is required.
 
@@ -164,13 +167,16 @@ No installer is required.
 
 ## Data storage
 
-Timerevo stores its local database on the machine.
+Timerevo stores its local database on the machine using Flutter’s [`getApplicationSupportDirectory()`](https://pub.dev/documentation/path_provider/latest/path_provider/getApplicationSupportDirectory.html) with the filename `timerevo.sqlite` (companion `-wal` / `-shm` files may appear while the app runs).
 
-Typical database location:
+Resolved paths (current branding / bundle IDs in this repo):
 
-- **Windows:** `%LOCALAPPDATA%\timerevo\timerevo.sqlite`
-- **Linux:** `~/.local/share/timerevo/timerevo.sqlite`
-- **macOS:** `~/Library/Application Support/timerevo/timerevo.sqlite`
+- **Windows:** `%APPDATA%\Timerevo\Timerevo\timerevo.sqlite`  
+  (`path_provider` uses **Roaming** app data, not Local; the folder is `CompanyName\ProductName` from the app’s `VERSIONINFO` — both are `Timerevo` in [`windows/runner/Runner.rc`](windows/runner/Runner.rc).)
+- **Linux:** `~/.local/share/com.example.timerevo/timerevo.sqlite`  
+  (Application ID `com.example.timerevo` in [`linux/CMakeLists.txt`](linux/CMakeLists.txt).)
+- **macOS:** `~/Library/Application Support/com.example.timerevo/timerevo.sqlite`  
+  (Bundle identifier `com.example.timerevo` in [`macos/Runner/Configs/AppInfo.xcconfig`](macos/Runner/Configs/AppInfo.xcconfig); Application Support uses this as a subdirectory.)
 
 This keeps the application self-contained and easy to back up or restore.
 

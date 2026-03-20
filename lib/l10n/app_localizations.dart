@@ -1114,12 +1114,6 @@ abstract class AppLocalizations {
   /// **'Weekly hours'**
   String get employeeWeeklyHours;
 
-  /// No description provided for @employeeWeeklyHoursHint.
-  ///
-  /// In en, this message translates to:
-  /// **'40'**
-  String get employeeWeeklyHoursHint;
-
   /// No description provided for @employeeEmail.
   ///
   /// In en, this message translates to:
@@ -1923,6 +1917,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'To: {value}'**
   String settingsWorkingHoursToWithValue(String value);
+
+  /// No description provided for @settingsTrackingStartDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking start date'**
+  String get settingsTrackingStartDateLabel;
+
+  /// No description provided for @settingsTrackingStartDateHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Data analysis starts from this date. Earlier entries are not included in reports.'**
+  String get settingsTrackingStartDateHelp;
+
+  /// No description provided for @settingsTrackingStartDateUnset.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get settingsTrackingStartDateUnset;
+
+  /// No description provided for @settingsTrackingStartDateClear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get settingsTrackingStartDateClear;
 
   /// No description provided for @settingsPrivacyPolicy.
   ///

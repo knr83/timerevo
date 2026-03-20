@@ -40,8 +40,6 @@ class Employees extends Table {
 
   TextColumn get employmentType => text().named('employment_type').nullable()();
 
-  RealColumn get weeklyHours => real().named('weekly_hours').nullable()();
-
   TextColumn get email => text().nullable()();
 
   TextColumn get phone => text().nullable()();

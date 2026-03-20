@@ -1,10 +1,13 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../common/utils/date_utils.dart';
+import '../core/tracking_start_range_clamp.dart';
 import '../data/repositories/repo_providers.dart';
 import '../domain/entities/session_info.dart';
 import '../domain/entities/session_with_employee_info.dart';
 import '../domain/usecases.dart';
+import 'tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 
 final watchSessionsUseCaseProvider = Provider<WatchSessionsUseCase>((ref) {
   return WatchSessionsUseCase(ref.watch(sessionsRepoProvider));
@@ -30,9 +33,15 @@ final watchOpenSessionsProvider = StreamProvider<List<SessionWithEmployeeInfo>>(
 /// Recent sessions (last 10) with employee info. Used by dashboard "Recent Activity".
 final watchRecentSessionsProvider =
     StreamProvider<List<SessionWithEmployeeInfo>>((ref) {
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final int? fromUtcMs = (ymd != null && ymd.isNotEmpty)
+          ? trackingStartLocalDayStartUtcMsFromYmd(ymd)
+          : null;
       return ref
           .watch(watchSessionsUseCaseProvider)
-          .streamRecentSessionsWithEmployee(limit: 10);
+          .streamRecentSessionsWithEmployee(limit: 10, fromUtcMs: fromUtcMs);
     });
 
 ({int fromUtcMs, int toUtcMs}) _todayRange() =>
@@ -42,11 +51,19 @@ final watchRecentSessionsProvider =
 final watchTodaySessionsProvider =
     StreamProvider<List<SessionWithEmployeeInfo>>((ref) {
       final range = _todayRange();
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final clamped = clampUtcRangeToTrackingStart(
+        fromUtcMs: range.fromUtcMs,
+        toUtcMs: range.toUtcMs,
+        trackingStartYmd: ymd,
+      );
       return ref
           .watch(watchSessionsUseCaseProvider)
           .streamSessionsWithEmployee(
-            fromUtcMs: range.fromUtcMs,
-            toUtcMs: range.toUtcMs,
+            fromUtcMs: clamped.fromUtcMs,
+            toUtcMs: clamped.toUtcMs,
           );
     });
 
@@ -62,9 +79,19 @@ final watchSessionsForEmployeeTodayProvider =
 final watchSessionsForEmployeeLastDaysProvider =
     StreamProvider.family<List<SessionInfo>, (int, int)>((ref, args) {
       final (employeeId, days) = args;
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final int? minStartUtcMs = (ymd != null && ymd.isNotEmpty)
+          ? trackingStartLocalDayStartUtcMsFromYmd(ymd)
+          : null;
       return ref
           .watch(watchSessionsUseCaseProvider)
-          .streamSessionsForEmployeeLastDays(employeeId, days);
+          .streamSessionsForEmployeeLastDays(
+            employeeId,
+            days,
+            minStartUtcMs: minStartUtcMs,
+          );
     });
 
 /// Sessions for calendar range (3 months around focused month). Used by employee calendar markers.
@@ -74,12 +101,20 @@ final watchSessionsForCalendarRangeProvider =
       final start = DateTime(year, month - 1, 1);
       final lastDay = DateTime(year, month + 2, 0);
       final endRange = localDayRangeUtcMs(lastDay);
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final clamped = clampUtcRangeToTrackingStart(
+        fromUtcMs: start.toUtc().millisecondsSinceEpoch,
+        toUtcMs: endRange.toUtcMs,
+        trackingStartYmd: ymd,
+      );
       return ref
           .watch(watchSessionsUseCaseProvider)
           .streamSessions(
             employeeId: employeeId,
-            fromUtcMs: start.toUtc().millisecondsSinceEpoch,
-            toUtcMs: endRange.toUtcMs,
+            fromUtcMs: clamped.fromUtcMs,
+            toUtcMs: clamped.toUtcMs,
           );
     });
 

@@ -30,10 +30,13 @@ abstract interface class ISessionsRepo {
   Stream<List<SessionInfo>> streamSessionsForEmployeeToday(int employeeId);
 
   /// Stream of sessions for employee in the last [days] days.
+  /// When [minStartUtcMs] is set, the query lower bound is the later of the
+  /// natural range start and this value (tracking start date).
   Stream<List<SessionInfo>> streamSessionsForEmployeeLastDays(
     int employeeId,
-    int days,
-  );
+    int days, {
+    int? minStartUtcMs,
+  });
 
   /// Stream of sessions for employee in date range (for calendar).
   Stream<List<SessionInfo>> streamSessions({
@@ -59,8 +62,10 @@ abstract interface class ISessionsRepo {
   Stream<List<SessionWithEmployeeInfo>> streamOpenSessionsWithEmployee();
 
   /// Stream of recent sessions with employee info, limited to [limit] rows.
+  /// When [fromUtcMs] is set, only sessions with start >= [fromUtcMs] are included.
   Stream<List<SessionWithEmployeeInfo>> streamRecentSessionsWithEmployee({
     int limit = 10,
+    int? fromUtcMs,
   });
 
   /// Stream of employee report rows (total ms, closed count) for date range.

@@ -13,7 +13,6 @@ class EmployeeDetails {
     this.accessToken,
     this.accessNote,
     this.employmentType,
-    this.weeklyHours,
     this.email,
     this.phone,
     this.secondaryPhone,
@@ -41,7 +40,6 @@ class EmployeeDetails {
   final String? accessToken;
   final String? accessNote;
   final String? employmentType;
-  final double? weeklyHours;
   final String? email;
   final String? phone;
   final String? secondaryPhone;

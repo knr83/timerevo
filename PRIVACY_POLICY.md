@@ -31,7 +31,7 @@ Timerevo may store the following fields (depending on what the organization ente
 - Role (e.g., employee/manager)
 - Department, job title
 - Email, phone
-- Employment type, weekly hours
+- Employment type
 - Internal comments (free text)
 
 ### 3.2 Administrator / user data

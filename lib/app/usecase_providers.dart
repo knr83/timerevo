@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/legacy.dart';
 
 import '../common/utils/date_utils.dart';
 import '../common/widgets/date_range_filter_bar.dart';
+import '../core/tracking_start_range_clamp.dart';
 import '../data/repositories/repo_providers.dart';
 import '../domain/entities/employee_day_report_row.dart';
 import '../domain/entities/employee_info.dart';
@@ -10,6 +11,8 @@ import '../domain/entities/employee_report_row_info.dart';
 import '../domain/entities/schedule_entities.dart';
 import '../domain/usecases.dart';
 import '../domain/usecases/schedule_roster_pdf_data_usecase.dart';
+import 'tracking_start/tracking_start_settings_controller.dart'
+    show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 
 final clockInUseCaseProvider = Provider<ClockInUseCase>((ref) {
   return ClockInUseCase(
@@ -116,6 +119,19 @@ final reportFiltersProvider =
   };
 }
 
+/// Effective report range with optional tracking-start lower bound ([toUtcMs] never changed).
+({int fromUtcMs, int toUtcMs}) reportClampedRange(
+  ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId}) f,
+  String? trackingStartYmd,
+) {
+  final base = reportEffectiveRange(f);
+  return clampUtcRangeToTrackingStart(
+    fromUtcMs: base.fromUtcMs,
+    toUtcMs: base.toUtcMs,
+    trackingStartYmd: trackingStartYmd,
+  );
+}
+
 /// Selected employee for details drawer. Null when drawer is closed.
 final selectedEmployeeForDetailsProvider = StateProvider<int?>((ref) => null);
 
@@ -125,7 +141,10 @@ final watchEmployeeDayReportProvider =
       final filters = ref.watch(reportFiltersProvider);
       final selectedId = ref.watch(selectedEmployeeForDetailsProvider);
       if (selectedId == null) return Stream.value([]);
-      final r = reportEffectiveRange(filters);
+      final ymd = trackingStartYmdFromWatch(
+        ref.watch(trackingStartSettingsProvider),
+      );
+      final r = reportClampedRange(filters, ymd);
       return ref
           .watch(employeeDayReportUseCaseProvider)
           .streamEmployeeDayReport(
@@ -139,7 +158,10 @@ final watchEmployeeDayReportProvider =
 final watchReportWithNormProvider = StreamProvider<List<EmployeeReportRowInfo>>(
   (ref) {
     final filters = ref.watch(reportFiltersProvider);
-    final r = reportEffectiveRange(filters);
+    final ymd = trackingStartYmdFromWatch(
+      ref.watch(trackingStartSettingsProvider),
+    );
+    final r = reportClampedRange(filters, ymd);
     return ref
         .watch(employeeReportWithNormUseCaseProvider)
         .streamEmployeeReportWithNorm(

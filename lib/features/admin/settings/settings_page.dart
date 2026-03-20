@@ -8,9 +8,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/attendance/attendance_settings_controller.dart';
 import '../../../app/locale/locale_settings_controller.dart';
 import '../../../app/theme/theme_settings_controller.dart';
+import '../../../app/tracking_start/tracking_start_settings_controller.dart';
 import '../../../app/working_hours/working_hours_settings_controller.dart';
 import '../../../core/attendance_mode.dart';
 import '../../../common/utils/backup_error_messages.dart';
+import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/time_format.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../common/widgets/success_animation_overlay.dart';
@@ -430,6 +432,13 @@ class SettingsPage extends ConsumerWidget {
                         ),
                     ],
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    l10n.settingsTrackingStartDateLabel,
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  const _TrackingStartDateSection(),
                   const SizedBox(height: 24),
                   ElevatedButton.icon(
                     onPressed: () async {
@@ -547,6 +556,81 @@ class SettingsPage extends ConsumerWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _TrackingStartDateSection extends ConsumerWidget {
+  const _TrackingStartDateSection();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context);
+    final async = ref.watch(trackingStartSettingsProvider);
+    return async.when(
+      data: (ymd) {
+        return Tooltip(
+          message: l10n.settingsTrackingStartDateHelp,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: () async {
+                    final today = DateTime.now();
+                    final todayNorm = DateTime(
+                      today.year,
+                      today.month,
+                      today.day,
+                    );
+                    late DateTime initial;
+                    if (ymd != null) {
+                      final parts = ymd.split('-');
+                      if (parts.length == 3) {
+                        initial = DateTime(
+                          int.parse(parts[0]),
+                          int.parse(parts[1]),
+                          int.parse(parts[2]),
+                        );
+                      } else {
+                        initial = todayNorm;
+                      }
+                    } else {
+                      initial = todayNorm;
+                    }
+                    final picked = await showDatePicker(
+                      context: context,
+                      initialDate: initial,
+                      firstDate: DateTime(2000),
+                      lastDate: todayNorm,
+                    );
+                    if (picked == null || !context.mounted) return;
+                    final s = dateToYmd(picked);
+                    await ref
+                        .read(trackingStartSettingsProvider.notifier)
+                        .set(s);
+                  },
+                  child: Text(ymd ?? l10n.settingsTrackingStartDateUnset),
+                ),
+              ),
+              if (ymd != null) ...[
+                const SizedBox(width: 8),
+                TextButton(
+                  onPressed: () => ref
+                      .read(trackingStartSettingsProvider.notifier)
+                      .set(null),
+                  child: Text(l10n.settingsTrackingStartDateClear),
+                ),
+              ],
+            ],
+          ),
+        );
+      },
+      loading: () => const SizedBox(
+        height: 40,
+        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+      ),
+      error: (_, _) => Text(l10n.commonErrorOccurred),
     );
   }
 }

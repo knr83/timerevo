@@ -154,11 +154,13 @@ class SessionsRepo implements ISessionsRepo {
   @override
   Stream<List<SessionInfo>> streamSessionsForEmployeeLastDays(
     int employeeId,
-    int days,
-  ) {
+    int days, {
+    int? minStartUtcMs,
+  }) {
     return watchSessionsForEmployeeLastDays(
       employeeId,
       days,
+      minStartUtcMs: minStartUtcMs,
     ).map((list) => list.map(_toSessionInfo).toList());
   }
 
@@ -185,9 +187,11 @@ class SessionsRepo implements ISessionsRepo {
   @override
   Stream<List<SessionWithEmployeeInfo>> streamRecentSessionsWithEmployee({
     int limit = 10,
+    int? fromUtcMs,
   }) {
     return watchRecentSessionsWithEmployee(
       limit: limit,
+      fromUtcMs: fromUtcMs,
     ).map((list) => list.map(_toSessionWithEmployeeInfo).toList());
   }
 
@@ -317,17 +321,22 @@ class SessionsRepo implements ISessionsRepo {
   /// Sessions for [employeeId] in the last [days] days (inclusive of today).
   Stream<List<WorkSession>> watchSessionsForEmployeeLastDays(
     int employeeId,
-    int days,
-  ) {
+    int days, {
+    int? minStartUtcMs,
+  }) {
     final now = DateTime.now();
     final todayRange = localDayRangeUtcMs(now);
     final startDate = now.subtract(Duration(days: days - 1));
     final startRange = localDayRangeUtcMs(
       DateTime(startDate.year, startDate.month, startDate.day),
     );
+    var fromUtcMs = startRange.fromUtcMs;
+    if (minStartUtcMs != null && fromUtcMs < minStartUtcMs) {
+      fromUtcMs = minStartUtcMs;
+    }
     return watchSessions(
       employeeId: employeeId,
-      fromUtcMs: startRange.fromUtcMs,
+      fromUtcMs: fromUtcMs,
       toUtcMs: todayRange.toUtcMs,
     );
   }
@@ -415,6 +424,7 @@ class SessionsRepo implements ISessionsRepo {
   /// Recent sessions with employee data, limited to [limit] rows.
   Stream<List<SessionWithEmployee>> watchRecentSessionsWithEmployee({
     int limit = 10,
+    int? fromUtcMs,
   }) {
     final ws = _db.workSessions;
     final e = _db.employees;
@@ -422,6 +432,10 @@ class SessionsRepo implements ISessionsRepo {
     final join = _db.select(ws).join([
       innerJoin(e, e.id.equalsExp(ws.employeeId)),
     ]);
+
+    if (fromUtcMs != null) {
+      join.where(ws.startTs.isBiggerOrEqualValue(fromUtcMs));
+    }
 
     join.orderBy([OrderingTerm.desc(ws.startTs)]);
     join.limit(limit);

@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../core/error_message_helper.dart';
+import '../../core/weekly_template_hours_display.dart';
 import '../../domain/entities/employee_status.dart';
 import '../../domain/entities/schedule_entities.dart';
 import '../../domain/ports/schedules_repo_port.dart';
@@ -95,7 +96,7 @@ Future<void> exportEmployeeDataPdf(
     if (details.templateId != null) {
       final week = await schedulesRepo.getTemplateWeek(details.templateId!);
       final totalMin = scheduleTemplateWeekTotalWorkMinutes(week);
-      weeklyHoursDisplay = l10n.durationHm(totalMin ~/ 60, totalMin % 60);
+      weeklyHoursDisplay = formatTemplateWeeklyHoursDisplay(totalMin);
     }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');

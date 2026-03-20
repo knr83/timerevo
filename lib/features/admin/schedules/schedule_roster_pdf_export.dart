@@ -11,7 +11,7 @@ import '../../../app/usecase_providers.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/error_message_helper.dart';
 import '../../../core/pdf/schedule_roster_pdf_builder.dart';
-import '../../../domain/entities/schedule_roster_pdf_row.dart';
+import '../../../core/weekly_template_hours_display.dart';
 
 String _scheduleRosterPdfSuggestedFileName() {
   final gen = DateTime.now().toLocal();
@@ -51,12 +51,7 @@ Future<void> exportScheduleRosterPdf(
   try {
     final data = await ref.read(scheduleRosterPdfDataUseCaseProvider).build();
     final tableRows = data.rows.map((r) {
-      final wh = r.weeklyTotalWorkMinutes == null
-          ? scheduleRosterPdfEmptyCell
-          : l10n.durationHm(
-              r.weeklyTotalWorkMinutes! ~/ 60,
-              r.weeklyTotalWorkMinutes! % 60,
-            );
+      final wh = formatTemplateWeeklyHoursDisplay(r.weeklyTotalWorkMinutes);
       return ScheduleRosterPdfTableRow(
         employee: r.employeeDisplayName,
         weekdayCells: List<String>.from(r.weekdayCells),

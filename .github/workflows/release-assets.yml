@@ -1,6 +1,6 @@
 # Build Windows, Linux, and macOS release assets when a release is published.
-# Run publish_release_win64.ps1 on Windows first to create the release with notes and Windows asset.
-# This workflow then adds (or overwrites) all platform assets.
+# Create the release with notes first (e.g. tools/publish_release_win64.ps1 or gh release create).
+# This workflow uploads all platform assets for the tag.
 name: Release Assets
 
 on:

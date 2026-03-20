@@ -231,7 +231,6 @@
   "employeeAccessTokenRequiredWhenNfc": "Обязательно при включённом NFC.",
   "employeeEmploymentType": "Тип занятости",
   "employeeWeeklyHours": "Часов в неделю",
-  "employeeWeeklyHoursHint": "40",
   "employeeEmail": "E-mail",
   "employeePhone": "Телефон",
   "employeeDepartment": "Отдел",
@@ -425,6 +424,10 @@
       "value": { "type": "String" }
     }
   },
+  "settingsTrackingStartDateLabel": "Дата начала учёта",
+  "settingsTrackingStartDateHelp": "Анализ данных начинается с этой даты. Более ранние записи в отчёты не включаются.",
+  "settingsTrackingStartDateUnset": "Не задано",
+  "settingsTrackingStartDateClear": "Сбросить",
   "settingsPrivacyPolicy": "Политика конфиденциальности",
   "settingsCreateBackup": "Создать резервную копию",
   "settingsBackupCreated": "Резервная копия создана: {path}",

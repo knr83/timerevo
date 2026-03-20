@@ -174,17 +174,6 @@ class $EmployeesTable extends Employees
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
-  static const VerificationMeta _weeklyHoursMeta = const VerificationMeta(
-    'weeklyHours',
-  );
-  @override
-  late final GeneratedColumn<double> weeklyHours = GeneratedColumn<double>(
-    'weekly_hours',
-    aliasedName,
-    true,
-    type: DriftSqlType.double,
-    requiredDuringInsert: false,
-  );
   static const VerificationMeta _emailMeta = const VerificationMeta('email');
   @override
   late final GeneratedColumn<String> email = GeneratedColumn<String>(
@@ -318,7 +307,6 @@ class $EmployeesTable extends Employees
     accessToken,
     accessNote,
     employmentType,
-    weeklyHours,
     email,
     phone,
     department,
@@ -451,15 +439,6 @@ class $EmployeesTable extends Employees
         employmentType.isAcceptableOrUnknown(
           data['employment_type']!,
           _employmentTypeMeta,
-        ),
-      );
-    }
-    if (data.containsKey('weekly_hours')) {
-      context.handle(
-        _weeklyHoursMeta,
-        weeklyHours.isAcceptableOrUnknown(
-          data['weekly_hours']!,
-          _weeklyHoursMeta,
         ),
       );
     }
@@ -609,10 +588,6 @@ class $EmployeesTable extends Employees
         DriftSqlType.string,
         data['${effectivePrefix}employment_type'],
       ),
-      weeklyHours: attachedDatabase.typeMapping.read(
-        DriftSqlType.double,
-        data['${effectivePrefix}weekly_hours'],
-      ),
       email: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}email'],
@@ -682,7 +657,6 @@ class Employee extends DataClass implements Insertable<Employee> {
   final String? accessToken;
   final String? accessNote;
   final String? employmentType;
-  final double? weeklyHours;
   final String? email;
   final String? phone;
   final String? department;
@@ -710,7 +684,6 @@ class Employee extends DataClass implements Insertable<Employee> {
     this.accessToken,
     this.accessNote,
     this.employmentType,
-    this.weeklyHours,
     this.email,
     this.phone,
     this.department,
@@ -754,9 +727,6 @@ class Employee extends DataClass implements Insertable<Employee> {
     }
     if (!nullToAbsent || employmentType != null) {
       map['employment_type'] = Variable<String>(employmentType);
-    }
-    if (!nullToAbsent || weeklyHours != null) {
-      map['weekly_hours'] = Variable<double>(weeklyHours);
     }
     if (!nullToAbsent || email != null) {
       map['email'] = Variable<String>(email);
@@ -821,9 +791,6 @@ class Employee extends DataClass implements Insertable<Employee> {
       employmentType: employmentType == null && nullToAbsent
           ? const Value.absent()
           : Value(employmentType),
-      weeklyHours: weeklyHours == null && nullToAbsent
-          ? const Value.absent()
-          : Value(weeklyHours),
       email: email == null && nullToAbsent
           ? const Value.absent()
           : Value(email),
@@ -879,7 +846,6 @@ class Employee extends DataClass implements Insertable<Employee> {
       accessToken: serializer.fromJson<String?>(json['accessToken']),
       accessNote: serializer.fromJson<String?>(json['accessNote']),
       employmentType: serializer.fromJson<String?>(json['employmentType']),
-      weeklyHours: serializer.fromJson<double?>(json['weeklyHours']),
       email: serializer.fromJson<String?>(json['email']),
       phone: serializer.fromJson<String?>(json['phone']),
       department: serializer.fromJson<String?>(json['department']),
@@ -914,7 +880,6 @@ class Employee extends DataClass implements Insertable<Employee> {
       'accessToken': serializer.toJson<String?>(accessToken),
       'accessNote': serializer.toJson<String?>(accessNote),
       'employmentType': serializer.toJson<String?>(employmentType),
-      'weeklyHours': serializer.toJson<double?>(weeklyHours),
       'email': serializer.toJson<String?>(email),
       'phone': serializer.toJson<String?>(phone),
       'department': serializer.toJson<String?>(department),
@@ -945,7 +910,6 @@ class Employee extends DataClass implements Insertable<Employee> {
     Value<String?> accessToken = const Value.absent(),
     Value<String?> accessNote = const Value.absent(),
     Value<String?> employmentType = const Value.absent(),
-    Value<double?> weeklyHours = const Value.absent(),
     Value<String?> email = const Value.absent(),
     Value<String?> phone = const Value.absent(),
     Value<String?> department = const Value.absent(),
@@ -981,7 +945,6 @@ class Employee extends DataClass implements Insertable<Employee> {
     employmentType: employmentType.present
         ? employmentType.value
         : this.employmentType,
-    weeklyHours: weeklyHours.present ? weeklyHours.value : this.weeklyHours,
     email: email.present ? email.value : this.email,
     phone: phone.present ? phone.value : this.phone,
     department: department.present ? department.value : this.department,
@@ -1029,9 +992,6 @@ class Employee extends DataClass implements Insertable<Employee> {
       employmentType: data.employmentType.present
           ? data.employmentType.value
           : this.employmentType,
-      weeklyHours: data.weeklyHours.present
-          ? data.weeklyHours.value
-          : this.weeklyHours,
       email: data.email.present ? data.email.value : this.email,
       phone: data.phone.present ? data.phone.value : this.phone,
       department: data.department.present
@@ -1072,7 +1032,6 @@ class Employee extends DataClass implements Insertable<Employee> {
           ..write('accessToken: $accessToken, ')
           ..write('accessNote: $accessNote, ')
           ..write('employmentType: $employmentType, ')
-          ..write('weeklyHours: $weeklyHours, ')
           ..write('email: $email, ')
           ..write('phone: $phone, ')
           ..write('department: $department, ')
@@ -1105,7 +1064,6 @@ class Employee extends DataClass implements Insertable<Employee> {
     accessToken,
     accessNote,
     employmentType,
-    weeklyHours,
     email,
     phone,
     department,
@@ -1137,7 +1095,6 @@ class Employee extends DataClass implements Insertable<Employee> {
           other.accessToken == this.accessToken &&
           other.accessNote == this.accessNote &&
           other.employmentType == this.employmentType &&
-          other.weeklyHours == this.weeklyHours &&
           other.email == this.email &&
           other.phone == this.phone &&
           other.department == this.department &&
@@ -1167,7 +1124,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
   final Value<String?> accessToken;
   final Value<String?> accessNote;
   final Value<String?> employmentType;
-  final Value<double?> weeklyHours;
   final Value<String?> email;
   final Value<String?> phone;
   final Value<String?> department;
@@ -1195,7 +1151,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.accessToken = const Value.absent(),
     this.accessNote = const Value.absent(),
     this.employmentType = const Value.absent(),
-    this.weeklyHours = const Value.absent(),
     this.email = const Value.absent(),
     this.phone = const Value.absent(),
     this.department = const Value.absent(),
@@ -1224,7 +1179,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.accessToken = const Value.absent(),
     this.accessNote = const Value.absent(),
     this.employmentType = const Value.absent(),
-    this.weeklyHours = const Value.absent(),
     this.email = const Value.absent(),
     this.phone = const Value.absent(),
     this.department = const Value.absent(),
@@ -1256,7 +1210,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Expression<String>? accessToken,
     Expression<String>? accessNote,
     Expression<String>? employmentType,
-    Expression<double>? weeklyHours,
     Expression<String>? email,
     Expression<String>? phone,
     Expression<String>? department,
@@ -1286,7 +1239,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       if (accessToken != null) 'access_token': accessToken,
       if (accessNote != null) 'access_note': accessNote,
       if (employmentType != null) 'employment_type': employmentType,
-      if (weeklyHours != null) 'weekly_hours': weeklyHours,
       if (email != null) 'email': email,
       if (phone != null) 'phone': phone,
       if (department != null) 'department': department,
@@ -1318,7 +1270,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Value<String?>? accessToken,
     Value<String?>? accessNote,
     Value<String?>? employmentType,
-    Value<double?>? weeklyHours,
     Value<String?>? email,
     Value<String?>? phone,
     Value<String?>? department,
@@ -1347,7 +1298,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       accessToken: accessToken ?? this.accessToken,
       accessNote: accessNote ?? this.accessNote,
       employmentType: employmentType ?? this.employmentType,
-      weeklyHours: weeklyHours ?? this.weeklyHours,
       email: email ?? this.email,
       phone: phone ?? this.phone,
       department: department ?? this.department,
@@ -1410,9 +1360,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     if (employmentType.present) {
       map['employment_type'] = Variable<String>(employmentType.value);
     }
-    if (weeklyHours.present) {
-      map['weekly_hours'] = Variable<double>(weeklyHours.value);
-    }
     if (email.present) {
       map['email'] = Variable<String>(email.value);
     }
@@ -1467,7 +1414,6 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
           ..write('accessToken: $accessToken, ')
           ..write('accessNote: $accessNote, ')
           ..write('employmentType: $employmentType, ')
-          ..write('weeklyHours: $weeklyHours, ')
           ..write('email: $email, ')
           ..write('phone: $phone, ')
           ..write('department: $department, ')
@@ -5553,7 +5499,6 @@ typedef $$EmployeesTableCreateCompanionBuilder =
       Value<String?> accessToken,
       Value<String?> accessNote,
       Value<String?> employmentType,
-      Value<double?> weeklyHours,
       Value<String?> email,
       Value<String?> phone,
       Value<String?> department,
@@ -5583,7 +5528,6 @@ typedef $$EmployeesTableUpdateCompanionBuilder =
       Value<String?> accessToken,
       Value<String?> accessNote,
       Value<String?> employmentType,
-      Value<double?> weeklyHours,
       Value<String?> email,
       Value<String?> phone,
       Value<String?> department,
@@ -5753,11 +5697,6 @@ class $$EmployeesTableFilterComposer
 
   ColumnFilters<String> get employmentType => $composableBuilder(
     column: $table.employmentType,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<double> get weeklyHours => $composableBuilder(
-    column: $table.weeklyHours,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5980,11 +5919,6 @@ class $$EmployeesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<double> get weeklyHours => $composableBuilder(
-    column: $table.weeklyHours,
-    builder: (column) => ColumnOrderings(column),
-  );
-
   ColumnOrderings<String> get email => $composableBuilder(
     column: $table.email,
     builder: (column) => ColumnOrderings(column),
@@ -6106,11 +6040,6 @@ class $$EmployeesTableAnnotationComposer
 
   GeneratedColumn<String> get employmentType => $composableBuilder(
     column: $table.employmentType,
-    builder: (column) => column,
-  );
-
-  GeneratedColumn<double> get weeklyHours => $composableBuilder(
-    column: $table.weeklyHours,
     builder: (column) => column,
   );
 
@@ -6282,7 +6211,6 @@ class $$EmployeesTableTableManager
                 Value<String?> accessToken = const Value.absent(),
                 Value<String?> accessNote = const Value.absent(),
                 Value<String?> employmentType = const Value.absent(),
-                Value<double?> weeklyHours = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> department = const Value.absent(),
@@ -6310,7 +6238,6 @@ class $$EmployeesTableTableManager
                 accessToken: accessToken,
                 accessNote: accessNote,
                 employmentType: employmentType,
-                weeklyHours: weeklyHours,
                 email: email,
                 phone: phone,
                 department: department,
@@ -6340,7 +6267,6 @@ class $$EmployeesTableTableManager
                 Value<String?> accessToken = const Value.absent(),
                 Value<String?> accessNote = const Value.absent(),
                 Value<String?> employmentType = const Value.absent(),
-                Value<double?> weeklyHours = const Value.absent(),
                 Value<String?> email = const Value.absent(),
                 Value<String?> phone = const Value.absent(),
                 Value<String?> department = const Value.absent(),
@@ -6368,7 +6294,6 @@ class $$EmployeesTableTableManager
                 accessToken: accessToken,
                 accessNote: accessNote,
                 employmentType: employmentType,
-                weeklyHours: weeklyHours,
                 email: email,
                 phone: phone,
                 department: department,

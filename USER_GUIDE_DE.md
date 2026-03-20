@@ -2,15 +2,18 @@
 
 ## Installation Timerevo
 
-1. Entpacken Sie das Archiv timerevo-*.zip in einen geeigneten Ordner
-   (z. B. C:\Program Files\timerevo oder C:\Users\<Ihr_Name>\timerevo).
+1. Entpacken Sie das Release-Archiv in einen geeigneten Ordner
+   (z. B. `timerevo-windows-<Version>.zip` von [GitHub Releases](https://github.com/knr83/timerevo/releases);
+   z. B. `C:\Program Files\timerevo` oder `C:\Users\<Ihr_Name>\timerevo`).
 
 2. Starten Sie timerevo.exe.
 
-3. Beim ersten Start erstellt die Anwendung die Datenbank im Anwendungsdatenordner
-   (üblicherweise: %LOCALAPPDATA%\timerevo\ oder vergleichbar).
+3. Beim ersten Start erstellt die Anwendung die Datenbank im Windows-Profil **Roaming**
+   (üblicherweise: `%APPDATA%\Timerevo\Timerevo\`; die Datenbankdatei heißt `timerevo.sqlite`).
 
 Voraussetzungen: Windows 10/11 (64-bit)
+
+Dieses Handbuch bezieht sich auf die **Windows**-Desktopversion. Unter Linux und macOS unterscheiden sich Archivnamen und Datenbankpfade; siehe die **README.md** im Repository (Abschnitt *Data storage*).
 
 ## Start
 Doppelklicken Sie auf `timerevo.exe`.
@@ -21,7 +24,7 @@ Doppelklicken Sie auf `timerevo.exe`.
 
 1. Wählen Sie einen Mitarbeiter aus der Liste.
 2. Geben Sie die PIN ein, falls erforderlich (Mitarbeiter mit aktivierter PIN).
-3. Beim ersten Zugang — **Bestätigung der Richtlinie** (Datenschutzerklärung und Nutzungsbedingungen; Häkchen setzen zum Fortfahren).
+3. Beim ersten Mal, wenn es für einen Mitarbeiter nötig ist — **Bestätigung der Richtlinie** (Datenschutzerklärung und Nutzungsbedingungen; Häkchen setzen zum Fortfahren). Wird **pro Mitarbeiter** gespeichert (nach der PIN), nicht nur beim ersten App-Start.
 4. Tippen Sie auf **KOMMEN**, um eine Schicht zu beginnen, oder **GEHEN**, um sie zu beenden.
 5. **Mein Arbeitskalender** — Kalender mit Schichten und Abwesenheiten; hier können Sie eine Abwesenheitsanfrage stellen.
 6. **Zeitbericht (PDF)** — PDF-Export nach Zeitraum (Heute / Woche / Monat / Benutzerdefiniert).
@@ -82,6 +85,7 @@ Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 - **Design**: System, Hell, Dunkel, Hoher Kontrast (hell), Hoher Kontrast (dunkel).
 - **Anwesenheitsmodus**: **Flexibel** oder **Fest**; im **festen** Modus **Toleranz (Minuten)** für die Bewertung des Schichtendes.
 - **Arbeitszeit**: Beginn und Ende für das Terminal (Einschränkungen beim Stempeln).
+- **Startdatum der Erfassung (tracking start)**: optionales Kalenderdatum; Berichte und Auswertungen **berücksichtigen keine** Daten vor diesem Datum (wenn gesetzt). Leeren Sie das Datum, um wieder die gesamte Historie zu nutzen.
 - **PIN ändern** — Admin-PIN ändern.
 - **Diagnosedaten exportieren** — Speicherung von Diagnosedaten in eine Datei (für den Support).
 - **„Sicherung erstellen“** — speichert die Datenbank (timerevo.sqlite) im gewählten Ordner.
@@ -91,10 +95,16 @@ Menü **Hilfe**: Datenschutzerklärung, Nutzungsbedingungen, Über die App.
 
 ## Datenspeicherung (für Administratoren)
 
-**Datenbankpfad:**
-- Ordner: `%LOCALAPPDATA%\timerevo\`
+Die App speichert Daten in `timerevo.sqlite` im Anwendungs-Support-Verzeichnis (Flutter). Während die App läuft, können daneben `timerevo.sqlite-wal` und `timerevo.sqlite-shm` erscheinen.
+
+**Datenbankpfad (Windows):**
+- Ordner: `%APPDATA%\Timerevo\Timerevo\` (**Roaming**-Profil, nicht `Local`)
 - Datei: `timerevo.sqlite`
 
-**Vollständige Löschung der Daten:**
+Beispielpfad: `C:\Users\<Benutzer>\AppData\Roaming\Timerevo\Timerevo\timerevo.sqlite`
+
+**Linux / macOS:** Pfade unterscheiden sich (Anwendungs-ID / Bundle). Siehe **README.md** im Repository (*Data storage*).
+
+**Vollständige Löschung der Daten (Windows):**
 1. Anwendung schließen.
-2. Ordner `%LOCALAPPDATA%\timerevo\` löschen (z. B. `C:\Users\<Benutzer>\AppData\Local\timerevo`).
+2. Ordner `%APPDATA%\Timerevo\Timerevo\` löschen (oder den übergeordneten Ordner `Timerevo` unter Roaming, um alle App-Daten dieses Produkts zu entfernen).

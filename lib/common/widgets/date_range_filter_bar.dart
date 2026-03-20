@@ -174,7 +174,6 @@ class DateRangeFilterBar extends StatelessWidget {
                   ),
                   icon: const Icon(Symbols.chevron_left),
                   onPressed: handlePrev,
-                  tooltip: l10n.journalNavPrev,
                 ),
               InkWell(
                 onTap: scope == DateRangeScope.interval
@@ -197,7 +196,6 @@ class DateRangeFilterBar extends StatelessWidget {
                   ),
                   icon: const Icon(Symbols.chevron_right),
                   onPressed: handleNext,
-                  tooltip: l10n.journalNavNext,
                 ),
             ],
           ),

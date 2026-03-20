@@ -2,15 +2,18 @@
 
 ## Installation
 
-1. Extract the timerevo-*.zip archive to a folder of your choice
-   (e.g. C:\Program Files\timerevo or C:\Users\<your_name>\timerevo).
+1. Extract the release archive to a folder of your choice
+   (e.g. `timerevo-windows-<version>.zip` from [GitHub Releases](https://github.com/knr83/timerevo/releases);
+   e.g. `C:\Program Files\timerevo` or `C:\Users\<your_name>\timerevo`).
 
 2. Run timerevo.exe.
 
-3. On first run, the app creates the database in the application data folder
-   (typically: %LOCALAPPDATA%\timerevo\ or equivalent).
+3. On first run, the app creates the database under the Windows **Roaming** application data folder
+   (typically: `%APPDATA%\Timerevo\Timerevo\`; the database file is `timerevo.sqlite`).
 
 Requirements: Windows 10/11 (64-bit)
+
+This guide describes the **Windows** desktop build. Linux and macOS packages use different archive names and database locations; see the repository **README.md** (section *Data storage*).
 
 ## Launch
 Double-click `timerevo.exe`.
@@ -21,7 +24,7 @@ Double-click `timerevo.exe`.
 
 1. Select an employee from the list.
 2. Enter PIN if prompted (employees with PIN enabled).
-3. On first access — **policy acknowledgment** (Privacy Policy and Terms; check the box to continue).
+3. The first time an employee needs it — **policy acknowledgment** (Privacy Policy and Terms; check the box to continue). This is stored **per employee** (after PIN), not only on the first app launch.
 4. Tap **IN** to start a shift or **OUT** to end it.
 5. **My work calendar** — calendar of sessions and absences; submit absence requests from here.
 6. **Time report (PDF)** — export PDF by period (Today / Week / Month / Custom).
@@ -82,6 +85,7 @@ Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks auto
 - **Theme**: System, Light, Dark, High contrast (light), High contrast (dark).
 - **Attendance mode**: **Flexible** or **Fixed**; in **Fixed** mode, set **tolerance (minutes)** for end-of-shift evaluation.
 - **Allowed working time**: start and end for the terminal (clock-in restrictions).
+- **Tracking start date**: optional calendar date; reporting and analysis **do not include** data before this date (when set). Clear to use the full history again.
 - **Change PIN** — change the admin PIN.
 - **Export diagnostics** — save diagnostic data to a file (for support).
 - **"Create backup"** — saves the database (timerevo.sqlite) to a folder of your choice.
@@ -91,10 +95,16 @@ Enter the admin PIN to unlock. Press **Back** to exit — admin panel locks auto
 
 ## Data storage (for administrators)
 
-**Database path:**
-- Folder: `%LOCALAPPDATA%\timerevo\`
+The app stores data in `timerevo.sqlite` via Flutter’s application support directory. While the app runs, SQLite may also create `timerevo.sqlite-wal` and `timerevo.sqlite-shm` next to the database.
+
+**Database path (Windows):**
+- Folder: `%APPDATA%\Timerevo\Timerevo\` (Roaming profile, not `Local`)
 - File: `timerevo.sqlite`
 
-**Complete data removal:**
+Example full path: `C:\Users\<user>\AppData\Roaming\Timerevo\Timerevo\timerevo.sqlite`
+
+**Linux / macOS:** paths differ (application ID / bundle ID). See **README.md** in the repository (*Data storage*).
+
+**Complete data removal (Windows):**
 1. Close the app.
-2. Delete the folder `%LOCALAPPDATA%\timerevo\` (e.g. `C:\Users\<user>\AppData\Local\timerevo`).
+2. Delete the folder `%APPDATA%\Timerevo\Timerevo\` (or the parent `Timerevo` folder under Roaming if you want to remove all app data for this product).

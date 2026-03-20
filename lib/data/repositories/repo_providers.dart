@@ -11,6 +11,7 @@ import 'sessions_repo.dart';
 import 'theme_settings_repo.dart';
 import 'attendance_settings_repo.dart';
 import 'working_hours_settings_repo.dart';
+import 'tracking_start_settings_repo.dart';
 
 final attendanceSettingsRepoProvider = Provider<AttendanceSettingsRepo>((ref) {
   return AttendanceSettingsRepo(ref.watch(appSettingsRepoProvider));
@@ -58,4 +59,10 @@ final workingHoursSettingsRepoProvider = Provider<WorkingHoursSettingsRepo>((
   ref,
 ) {
   return WorkingHoursSettingsRepo(ref.watch(appSettingsRepoProvider));
+});
+
+final trackingStartSettingsRepoProvider = Provider<TrackingStartSettingsRepo>((
+  ref,
+) {
+  return TrackingStartSettingsRepo(ref.watch(appSettingsRepoProvider));
 });
