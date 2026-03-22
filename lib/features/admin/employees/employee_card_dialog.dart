@@ -1,15 +1,23 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:phone_form_field/phone_form_field.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
+import '../../../app/locale/locale_settings_controller.dart';
 import '../../../app/usecase_providers.dart';
 import '../../../data/repositories/repo_providers.dart';
+import '../../../common/input/starting_balance_input_formatter.dart';
 import '../../../common/pdf/employee_data_pdf_export.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../core/employee_email_validation.dart';
+import '../../../core/employee_phone_from_db.dart';
+import '../../../core/starting_balance_display.dart';
+import '../../../core/weekly_template_hours_display.dart';
 import '../../../core/config/data_retention_config.dart';
 import '../../../core/employee_pin_status.dart';
 import '../../../core/error_message_helper.dart';
@@ -55,6 +63,8 @@ class EmployeeCardDialog extends ConsumerStatefulWidget {
 class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   late final EmployeeCardGuardNotifier _guardNotifier;
 
+  final GlobalKey<FormState> _employeeCardFormKey = GlobalKey<FormState>();
+
   /// Avoid guard update loop: only call setFormState when dirty/save changed.
   bool? _lastGuardDirty;
   Future<bool> Function()? _lastGuardSave;
@@ -65,12 +75,13 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   late TextEditingController _accessTokenCtrl;
   late TextEditingController _accessNoteCtrl;
   late TextEditingController _emailCtrl;
-  late TextEditingController _phoneCtrl;
+  late PhoneController _phoneController;
+  late PhoneController _secondaryPhoneController;
   late TextEditingController _departmentCtrl;
   late TextEditingController _jobTitleCtrl;
   late TextEditingController _internalCommentCtrl;
-  late TextEditingController _secondaryPhoneCtrl;
   late TextEditingController _vacationDaysPerYearCtrl;
+  late TextEditingController _startingBalanceCtrl;
 
   late EmployeeStatus _status;
   late int? _terminationDate;
@@ -94,6 +105,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   /// Set when user attempts save; enables showing errorText on empty required fields.
   bool _submitted = false;
 
+  bool _phoneControllersInitialized = false;
+
   Map<String, dynamic> get _currentValues => {
     'code': _codeCtrl.text.trim().toUpperCase(),
     'firstName': _firstNameCtrl.text.trim(),
@@ -109,10 +122,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         : _accessNoteCtrl.text.trim(),
     'employmentType': _employmentType,
     'email': _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
-    'phone': _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-    'secondaryPhone': _secondaryPhoneCtrl.text.trim().isEmpty
-        ? null
-        : _secondaryPhoneCtrl.text.trim(),
+    'phone': phoneNumberToDbString(_phoneController.value),
+    'secondaryPhone': phoneNumberToDbString(_secondaryPhoneController.value),
     'department': _departmentCtrl.text.trim().isEmpty
         ? null
         : _departmentCtrl.text.trim(),
@@ -131,6 +142,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         : int.tryParse(_vacationDaysPerYearCtrl.text.trim()),
     'employeeRole': _employeeRole,
     'templateId': _templateId,
+    'startingBalanceField': _startingBalanceCtrl.text.trim(),
   };
 
   Map<String, dynamic> get _initialValues {
@@ -160,6 +172,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         'vacationDaysPerYear': null,
         'employeeRole': 'employee',
         'templateId': widget.initialTemplateId,
+        'startingBalanceField': '',
       };
     }
     return {
@@ -185,7 +198,21 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       'vacationDaysPerYear': e.vacationDaysPerYear,
       'employeeRole': e.employeeRole,
       'templateId': widget.initialTemplateId,
+      'startingBalanceField': _canonicalStartingBalanceInput(
+        e.startingBalanceTenths,
+      ),
     };
+  }
+
+  String _canonicalStartingBalanceInput(int? tenths) {
+    if (tenths == null) return '';
+    return formatStartingBalanceTenthsForDisplay(tenths);
+  }
+
+  int? _startingBalanceTenthsForSave() {
+    final t = _startingBalanceCtrl.text.trim();
+    if (t.isEmpty) return null;
+    return parseStartingBalanceTenths(t);
   }
 
   bool _fieldEqual(dynamic c, dynamic i) {
@@ -212,7 +239,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     if (_codeCtrl.text.trim().isEmpty) return false;
     if (_firstNameCtrl.text.trim().isEmpty) return false;
     if (_lastNameCtrl.text.trim().isEmpty) return false;
-    if (_templateId == null) return false;
     if (_codeError != null) return false;
     if (_useNfc && _accessTokenCtrl.text.trim().isEmpty) return false;
     final vd = _vacationDaysPerYearCtrl.text.trim();
@@ -221,13 +247,46 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       if (v == null || v < 0) return false;
     }
     final em = _emailCtrl.text.trim();
-    if (em.isNotEmpty && !em.contains('@')) return false;
+    if (em.isNotEmpty && !isWellFormedEmployeeEmail(em)) return false;
+    if (!isPhoneFieldAcceptable(_phoneController.value)) return false;
+    if (!isPhoneFieldAcceptable(_secondaryPhoneController.value)) return false;
     if (_hireDate != null &&
         _terminationDate != null &&
         _terminationDate! < _hireDate!) {
       return false;
     }
+    final sbRaw = _startingBalanceCtrl.text.trim();
+    if (sbRaw.isNotEmpty &&
+        !isStartingBalanceInputIncompleteForErrorDisplay(sbRaw) &&
+        parseStartingBalanceTenths(sbRaw) == null) {
+      return false;
+    }
     return true;
+  }
+
+  String? _startingBalanceFieldError(AppLocalizations l10n) {
+    final t = _startingBalanceCtrl.text.trim();
+    if (t.isEmpty) return null;
+    if (isStartingBalanceInputIncompleteForErrorDisplay(t)) return null;
+    if (parseStartingBalanceTenths(t) == null) {
+      return l10n.employeeStartingBalanceInvalid;
+    }
+    return null;
+  }
+
+  String? _vacationDaysFieldError(AppLocalizations l10n) {
+    final vd = _vacationDaysPerYearCtrl.text.trim();
+    if (vd.isEmpty) return null;
+    final v = int.tryParse(vd);
+    if (v == null || v < 0) return l10n.employeeVacationDaysPerYearInvalid;
+    return null;
+  }
+
+  String? _validateEmployeeEmail(String? value, AppLocalizations l10n) {
+    final s = (value ?? '').trim();
+    if (s.isEmpty) return null;
+    if (!isWellFormedEmployeeEmail(s)) return l10n.employeeEmailInvalid;
+    return null;
   }
 
   String? get _terminationDateError {
@@ -252,17 +311,18 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _accessTokenCtrl = TextEditingController(text: e?.accessToken ?? '');
     _accessNoteCtrl = TextEditingController(text: e?.accessNote ?? '');
     _emailCtrl = TextEditingController(text: e?.email ?? '');
-    _phoneCtrl = TextEditingController(text: e?.phone ?? '');
     _departmentCtrl = TextEditingController(text: e?.department ?? '');
     _jobTitleCtrl = TextEditingController(text: e?.jobTitle ?? '');
     _internalCommentCtrl = TextEditingController(
       text: e?.internalComment ?? '',
     );
-    _secondaryPhoneCtrl = TextEditingController(text: e?.secondaryPhone ?? '');
     _vacationDaysPerYearCtrl = TextEditingController(
       text: e?.vacationDaysPerYear != null
           ? e!.vacationDaysPerYear.toString()
           : '',
+    );
+    _startingBalanceCtrl = TextEditingController(
+      text: _canonicalStartingBalanceInput(e?.startingBalanceTenths),
     );
     _status = e?.status ?? EmployeeStatus.active;
     _terminationDate = e?.terminationDate;
@@ -283,12 +343,58 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _accessTokenCtrl.addListener(() => setState(() {}));
     _accessNoteCtrl.addListener(() => setState(() {}));
     _emailCtrl.addListener(() => setState(() {}));
-    _phoneCtrl.addListener(() => setState(() {}));
     _departmentCtrl.addListener(() => setState(() {}));
     _jobTitleCtrl.addListener(() => setState(() {}));
     _internalCommentCtrl.addListener(() => setState(() {}));
-    _secondaryPhoneCtrl.addListener(() => setState(() {}));
     _vacationDaysPerYearCtrl.addListener(() => setState(() {}));
+    _startingBalanceCtrl.addListener(() => setState(() {}));
+
+    ref.listenManual<AsyncValue<String?>>(localeOverrideLanguageCodeProvider, (
+      prev,
+      next,
+    ) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _syncPhoneCountryToLocaleIfSafe();
+      });
+    }, fireImmediately: false);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_phoneControllersInitialized) return;
+    _phoneControllersInitialized = true;
+    final e = widget.existing;
+    final iso = isoCodeForLocaleLanguage(
+      normalizeAppLanguageCode(Localizations.localeOf(context).languageCode),
+    );
+    _phoneController = PhoneController(
+      initialValue: phoneNumberFromDbString(e?.phone, defaultIso: iso),
+    );
+    _secondaryPhoneController = PhoneController(
+      initialValue: phoneNumberFromDbString(e?.secondaryPhone, defaultIso: iso),
+    );
+    _phoneController.addListener(() => setState(() {}));
+    _secondaryPhoneController.addListener(() => setState(() {}));
+  }
+
+  /// No-op until phone controllers exist; no [changeCountry] if either NSN non-empty.
+  void _syncPhoneCountryToLocaleIfSafe() {
+    if (!mounted) return;
+    if (!_phoneControllersInitialized) return;
+    final targetIso = isoCodeForLocaleLanguage(
+      normalizeAppLanguageCode(Localizations.localeOf(context).languageCode),
+    );
+    final p1 = _phoneController.value.nsn.trim();
+    final p2 = _secondaryPhoneController.value.nsn.trim();
+    if (p1.isNotEmpty || p2.isNotEmpty) return;
+    if (_phoneController.value.isoCode != targetIso) {
+      _phoneController.changeCountry(targetIso);
+    }
+    if (_secondaryPhoneController.value.isoCode != targetIso) {
+      _secondaryPhoneController.changeCountry(targetIso);
+    }
   }
 
   Future<void> _loadPinStatus() async {
@@ -310,12 +416,13 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
     _accessTokenCtrl.dispose();
     _accessNoteCtrl.dispose();
     _emailCtrl.dispose();
-    _phoneCtrl.dispose();
+    _phoneController.dispose();
     _departmentCtrl.dispose();
     _jobTitleCtrl.dispose();
     _internalCommentCtrl.dispose();
-    _secondaryPhoneCtrl.dispose();
+    _secondaryPhoneController.dispose();
     _vacationDaysPerYearCtrl.dispose();
+    _startingBalanceCtrl.dispose();
     super.dispose();
   }
 
@@ -427,8 +534,11 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
   }
 
   Future<bool> _save() async {
+    setState(() => _submitted = true);
+    if (!_employeeCardFormKey.currentState!.validate()) {
+      return false;
+    }
     if (!_isValid || !_isDirty) {
-      if (!_submitted) setState(() => _submitted = true);
       return false;
     }
     final l10n = AppLocalizations.of(context);
@@ -457,7 +567,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               : _accessNoteCtrl.text.trim(),
           employmentType: _employmentType,
           email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
+          phone: phoneNumberToDbString(_phoneController.value),
           department: _departmentCtrl.text.trim().isEmpty
               ? null
               : _departmentCtrl.text.trim(),
@@ -470,6 +580,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
           policyAcknowledged: _policyAcknowledged,
           policyAcknowledgedAt: _policyAcknowledgedAt,
           templateId: _templateId,
+          createdBy: 'admin',
+          startingBalanceTenths: _startingBalanceTenthsForSave(),
         );
       } else {
         await useCase.updateEmployeeFull(
@@ -494,10 +606,10 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
               : _accessNoteCtrl.text.trim(),
           employmentType: _employmentType,
           email: _emailCtrl.text.trim().isEmpty ? null : _emailCtrl.text.trim(),
-          phone: _phoneCtrl.text.trim().isEmpty ? null : _phoneCtrl.text.trim(),
-          secondaryPhone: _secondaryPhoneCtrl.text.trim().isEmpty
-              ? null
-              : _secondaryPhoneCtrl.text.trim(),
+          phone: phoneNumberToDbString(_phoneController.value),
+          secondaryPhone: phoneNumberToDbString(
+            _secondaryPhoneController.value,
+          ),
           department: _departmentCtrl.text.trim().isEmpty
               ? null
               : _departmentCtrl.text.trim(),
@@ -510,6 +622,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
           policyAcknowledged: _policyAcknowledged,
           policyAcknowledgedAt: _policyAcknowledgedAt,
           templateId: _templateId,
+          updatedBy: 'admin',
+          startingBalanceTenths: _startingBalanceTenthsForSave(),
         );
       }
       if (mounted) {
@@ -639,6 +753,14 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
           automaticallyImplyLeading: !widget.embedded,
           actions: [
             if (widget.existing != null)
+              Tooltip(
+                message: l10n.employeeMarkForRemovalTooltip,
+                child: IconButton(
+                  icon: const Icon(Symbols.person_off),
+                  onPressed: _markForRemoval,
+                ),
+              ),
+            if (widget.existing != null)
               TextButton(
                 onPressed: () async {
                   await exportEmployeeDataPdf(
@@ -649,7 +771,6 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                     ),
                     schedulesRepo: ref.read(schedulesRepoProvider),
                     employeeId: widget.existing!.id,
-                    templates: widget.templates,
                     showSnack: (msg) => showAppSnack(context, msg),
                     showErrorSnack: (msg, {bool isError = false}) =>
                         showAppSnack(context, msg, isError: isError),
@@ -669,17 +790,20 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         Expanded(
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                _buildGeneralTabContent(l10n),
-                const SizedBox(height: 12),
-                _buildContactTabContent(l10n),
-                const SizedBox(height: 12),
-                _buildTerminalAccessTabContent(l10n),
-                const SizedBox(height: 12),
-                _buildAdditionalTabContent(l10n),
-              ],
+            child: Form(
+              key: _employeeCardFormKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  _buildGeneralTabContent(l10n),
+                  const SizedBox(height: 12),
+                  _buildContactTabContent(l10n),
+                  const SizedBox(height: 12),
+                  _buildTerminalAccessTabContent(l10n),
+                  const SizedBox(height: 12),
+                  _buildAdditionalTabContent(l10n),
+                ],
+              ),
             ),
           ),
         ),
@@ -991,61 +1115,21 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: TextField(
-                      controller: _vacationDaysPerYearCtrl,
-                      onChanged: (_) => setState(() {}),
-                      decoration: InputDecoration(
-                        labelText: l10n.employeeVacationDaysPerYearLabel,
-                        border: const OutlineInputBorder(),
-                        hintText: l10n.commonNone,
-                        errorText:
-                            _submitted &&
-                                _vacationDaysPerYearCtrl.text
-                                    .trim()
-                                    .isNotEmpty &&
-                                (int.tryParse(
-                                          _vacationDaysPerYearCtrl.text.trim(),
-                                        ) ==
-                                        null ||
-                                    int.parse(
-                                          _vacationDaysPerYearCtrl.text.trim(),
-                                        ) <
-                                        0)
-                            ? l10n.employeeVacationDaysPerYearInvalid
-                            : null,
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  const Expanded(child: SizedBox()),
-                ],
-              ),
             ],
           ),
         ),
         const SizedBox(height: 12),
         _SectionCard(
-          title: l10n.employeeSectionSchedule,
-          icon: Symbols.schedule,
+          title: l10n.employeeSectionWorkSetup,
+          icon: Symbols.tune,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               DropdownButtonFormField<int?>(
                 initialValue: _templateId,
                 decoration: InputDecoration(
-                  labelText: l10n.employeeFieldLabelWithRequired(
-                    l10n.employeeSectionSchedule,
-                  ),
+                  labelText: l10n.employeeSectionSchedule,
                   border: const OutlineInputBorder(),
-                  errorText: _submitted && _templateId == null
-                      ? l10n.employeeScheduleRequired
-                      : null,
                   contentPadding: const EdgeInsets.symmetric(
                     horizontal: 12,
                     vertical: 12,
@@ -1054,11 +1138,61 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 items: [
                   DropdownMenuItem(value: null, child: Text(l10n.commonNone)),
                   ...widget.templates.map(
-                    (t) =>
-                        DropdownMenuItem<int>(value: t.id, child: Text(t.name)),
+                    (t) => DropdownMenuItem<int>(
+                      value: t.id,
+                      child: Text(
+                        l10n.employeeScheduleTemplateWithWeeklyHours(
+                          t.name,
+                          formatTemplateWeeklyHoursDisplay(
+                            t.weeklyTotalWorkMinutes,
+                            unitSuffix: l10n.weeklyHoursShortUnitSuffix,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
                 onChanged: (v) => setState(() => _templateId = v),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextField(
+                      controller: _startingBalanceCtrl,
+                      onChanged: (_) => setState(() {}),
+                      inputFormatters: const [StartingBalanceInputFormatter()],
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeStartingBalanceLabel,
+                        border: const OutlineInputBorder(),
+                        hintText: l10n.employeeStartingBalanceHint,
+                        errorText: _startingBalanceFieldError(l10n),
+                      ),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                        signed: true,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextField(
+                      controller: _vacationDaysPerYearCtrl,
+                      onChanged: (_) => setState(() {}),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        LengthLimitingTextInputFormatter(3),
+                      ],
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeVacationDaysPerYearLabel,
+                        border: const OutlineInputBorder(),
+                        errorText: _vacationDaysFieldError(l10n),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -1075,40 +1209,81 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         _SectionCard(
           title: l10n.employeeSectionContact,
           icon: Symbols.contact_phone,
-          child: Row(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: TextField(
-                  controller: _emailCtrl,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.employeeEmail,
-                    border: const OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
+              TextFormField(
+                controller: _emailCtrl,
+                autofillHints: const [AutofillHints.email],
+                keyboardType: TextInputType.emailAddress,
+                autovalidateMode: _submitted
+                    ? AutovalidateMode.onUserInteraction
+                    : AutovalidateMode.disabled,
+                validator: (value) => _validateEmployeeEmail(value, l10n),
+                onChanged: (_) => setState(() {}),
+                decoration: InputDecoration(
+                  labelText: l10n.employeeEmail,
+                  hintText: l10n.employeeEmailHint,
+                  border: const OutlineInputBorder(),
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _phoneCtrl,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.employeePhone,
-                    border: const OutlineInputBorder(),
+              const SizedBox(height: 8),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: PhoneFormField(
+                      controller: _phoneController,
+                      countrySelectorNavigator:
+                          const CountrySelectorNavigator.dialog(),
+                      countryButtonStyle: const CountryButtonStyle(
+                        flagSize: 16,
+                      ),
+                      autovalidateMode: _submitted
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                      validator: PhoneValidator.compose([
+                        PhoneValidator.valid(context),
+                      ]),
+                      autofillHints: const [AutofillHints.telephoneNumber],
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeePhone,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: TextField(
-                  controller: _secondaryPhoneCtrl,
-                  onChanged: (_) => setState(() {}),
-                  decoration: InputDecoration(
-                    labelText: l10n.employeeSecondaryPhoneLabel,
-                    border: const OutlineInputBorder(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: PhoneFormField(
+                      controller: _secondaryPhoneController,
+                      countrySelectorNavigator:
+                          const CountrySelectorNavigator.dialog(),
+                      countryButtonStyle: const CountryButtonStyle(
+                        flagSize: 16,
+                      ),
+                      autovalidateMode: _submitted
+                          ? AutovalidateMode.onUserInteraction
+                          : AutovalidateMode.disabled,
+                      validator: PhoneValidator.compose([
+                        PhoneValidator.valid(context),
+                      ]),
+                      onChanged: (_) => setState(() {}),
+                      decoration: InputDecoration(
+                        labelText: l10n.employeeSecondaryPhoneLabel,
+                        border: const OutlineInputBorder(),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
@@ -1351,6 +1526,45 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       ),
     );
     if (success == true && mounted) _loadPinStatus();
+  }
+
+  Future<void> _markForRemoval() async {
+    if (widget.existing == null) return;
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(l10n.employeeMarkForRemovalConfirmTitle),
+        content: Text(l10n.employeeMarkForRemovalConfirmMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: Text(l10n.commonCancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: Text(l10n.employeeMarkForRemovalConfirm),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    try {
+      await ref
+          .read(employeesAdminUseCaseProvider)
+          .markEmployeeForDeletion(widget.existing!.id);
+      if (!mounted) return;
+      if (widget.embedded) {
+        widget.onSaved?.call(null);
+      } else {
+        Navigator.of(context).pop(false);
+      }
+      showAppSnack(context, l10n.employeeMarkForRemovalSuccess);
+    } catch (e) {
+      if (mounted) {
+        showAppSnack(context, l10n.commonErrorOccurred, isError: true);
+      }
+    }
   }
 
   Future<void> _resetPin() async {

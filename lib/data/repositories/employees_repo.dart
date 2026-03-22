@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import '../../core/employee_pin_status.dart';
 import '../../domain/entities/employee_details.dart';
 import '../../domain/entities/employee_info.dart';
+import '../../domain/entities/employee_starting_balance_snapshot.dart';
 import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/employees_repo_port.dart';
 import '../db/app_db.dart';
@@ -79,10 +80,12 @@ class EmployeesRepo implements IEmployeesRepo {
   }
 
   Stream<List<Employee>> watchAllEmployees() {
-    return (_db.select(_db.employees)..orderBy([
-          (e) => OrderingTerm.asc(e.lastName),
-          (e) => OrderingTerm.asc(e.firstName),
-        ]))
+    return (_db.select(_db.employees)
+          ..where((e) => e.deletedAt.isNull())
+          ..orderBy([
+            (e) => OrderingTerm.asc(e.lastName),
+            (e) => OrderingTerm.asc(e.firstName),
+          ]))
         .watch();
   }
 
@@ -309,7 +312,7 @@ class EmployeesRepo implements IEmployeesRepo {
   Future<EmployeeInfo?> getEmployee(int id) async {
     final row = await (_db.select(
       _db.employees,
-    )..where((e) => e.id.equals(id))).getSingleOrNull();
+    )..where((e) => e.id.equals(id) & e.deletedAt.isNull())).getSingleOrNull();
     if (row == null) return null;
     return EmployeeInfo(
       id: row.id,
@@ -322,10 +325,30 @@ class EmployeesRepo implements IEmployeesRepo {
   }
 
   @override
+  Future<Map<int, EmployeeStartingBalanceSnapshot>> getStartingBalanceSnapshots(
+    Iterable<int> employeeIds,
+  ) async {
+    final ids = employeeIds.toSet().toList();
+    if (ids.isEmpty) return {};
+    return guardRepoCall(() async {
+      final rows = await (_db.select(
+        _db.employees,
+      )..where((e) => e.id.isIn(ids))).get();
+      return {
+        for (final r in rows)
+          r.id: EmployeeStartingBalanceSnapshot(
+            tenths: r.startingBalanceTenths,
+            updatedAtUtcMs: r.startingBalanceUpdatedAt,
+          ),
+      };
+    });
+  }
+
+  @override
   Future<EmployeeDetails?> getEmployeeDetails(int id) async {
     final row = await (_db.select(
       _db.employees,
-    )..where((e) => e.id.equals(id))).getSingleOrNull();
+    )..where((e) => e.id.equals(id) & e.deletedAt.isNull())).getSingleOrNull();
     if (row == null) return null;
     final assignment =
         await (_db.select(_db.employeeScheduleAssignments)
@@ -358,6 +381,9 @@ class EmployeesRepo implements IEmployeesRepo {
       templateId: assignment?.templateId,
       createdAt: row.createdAt,
       updatedAt: row.updatedAt,
+      startingBalanceTenths: row.startingBalanceTenths,
+      startingBalanceUpdatedAt: row.startingBalanceUpdatedAt,
+      startingBalanceUpdatedBy: row.startingBalanceUpdatedBy,
     );
   }
 
@@ -392,6 +418,7 @@ class EmployeesRepo implements IEmployeesRepo {
     int? policyAcknowledgedAt,
     required int? templateId,
     String? createdBy,
+    int? startingBalanceTenths,
   }) async {
     return guardRepoCall(() async {
       return _db.transaction(() async {
@@ -425,6 +452,15 @@ class EmployeesRepo implements IEmployeesRepo {
                 updatedAt: Value(now),
                 createdBy: Value(createdBy),
                 updatedBy: Value(createdBy),
+                startingBalanceTenths: startingBalanceTenths != null
+                    ? Value(startingBalanceTenths)
+                    : const Value.absent(),
+                startingBalanceUpdatedAt: startingBalanceTenths != null
+                    ? Value(now)
+                    : const Value.absent(),
+                startingBalanceUpdatedBy: startingBalanceTenths != null
+                    ? Value(createdBy)
+                    : const Value.absent(),
               ),
             );
         if (templateId != null) {
@@ -470,10 +506,15 @@ class EmployeesRepo implements IEmployeesRepo {
     int? policyAcknowledgedAt,
     int? templateId,
     String? updatedBy,
+    int? startingBalanceTenths,
   }) async {
     return guardRepoCall(() async {
       final now = UtcClock.nowMs();
       await _db.transaction(() async {
+        final existing = await getEmployeeRaw(id);
+        final sbChanged =
+            existing == null ||
+            existing.startingBalanceTenths != startingBalanceTenths;
         await (_db.update(_db.employees)..where((e) => e.id.equals(id))).write(
           EmployeesCompanion(
             code: Value(code.trim().toUpperCase()),
@@ -499,6 +540,15 @@ class EmployeesRepo implements IEmployeesRepo {
             policyAcknowledgedAt: Value(policyAcknowledgedAt),
             updatedAt: Value(now),
             updatedBy: Value(updatedBy),
+            startingBalanceTenths: sbChanged
+                ? Value(startingBalanceTenths)
+                : const Value.absent(),
+            startingBalanceUpdatedAt: sbChanged
+                ? Value(startingBalanceTenths == null ? null : now)
+                : const Value.absent(),
+            startingBalanceUpdatedBy: sbChanged
+                ? Value(startingBalanceTenths == null ? null : updatedBy)
+                : const Value.absent(),
           ),
         );
         if (templateId == null) {
@@ -564,6 +614,22 @@ class EmployeesRepo implements IEmployeesRepo {
       await (_db.delete(
         _db.employeeAuths,
       )..where((a) => a.employeeId.equals(employeeId))).go();
+    });
+  }
+
+  @override
+  Future<void> markEmployeeForDeletion(int id) async {
+    return guardRepoCall(() async {
+      final now = UtcClock.nowMs();
+      await _db.transaction(() async {
+        await (_db.update(_db.employees)..where((e) => e.id.equals(id))).write(
+          EmployeesCompanion(
+            deletedAt: Value(now),
+            status: const Value('archived'),
+            updatedAt: Value(now),
+          ),
+        );
+      });
     });
   }
 }

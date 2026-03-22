@@ -1,8 +1,12 @@
 /// Display for template-derived weekly work totals (planned minutes Mon–Sun).
 ///
-/// Rules: one decimal place of hours, half-up (0.1 h = 6 min), ASCII `.` only,
-/// no unit suffix. [null] → em dash (U+2014), same placeholder as roster PDF cells.
-String formatTemplateWeeklyHoursDisplay(int? totalMinutes) {
+/// Rules: always one decimal place of hours, half-up (0.1 h = 6 min), ASCII `.`
+/// only, then [unitSuffix] (e.g. localized `" h"` or `" ч"`). [null] → em dash
+/// (U+2014), same placeholder as roster PDF cells when no template.
+String formatTemplateWeeklyHoursDisplay(
+  int? totalMinutes, {
+  required String unitSuffix,
+}) {
   if (totalMinutes == null) {
     return '\u2014';
   }
@@ -12,8 +16,5 @@ String formatTemplateWeeklyHoursDisplay(int? totalMinutes) {
   final tenths = (totalMinutes * 10 + 30) ~/ 60;
   final w = tenths ~/ 10;
   final f = tenths % 10;
-  if (f == 0) {
-    return '$w';
-  }
-  return '$w.$f';
+  return '$w.$f$unitSuffix';
 }

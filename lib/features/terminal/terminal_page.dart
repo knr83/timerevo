@@ -22,6 +22,7 @@ import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
 import '../../common/widgets/app_snack.dart';
 import '../../core/domain_errors.dart';
+import '../../core/starting_balance_period.dart';
 import '../../core/tracking_start_range_clamp.dart';
 import '../../core/diagnostic_log.dart';
 import '../../core/employee_pin_status.dart';
@@ -1112,6 +1113,17 @@ Future<void> _handleMyPdf(
   final employeeName = EmployeeDisplayName.of(
     EmployeeDisplay(firstName: employee.firstName, lastName: employee.lastName),
   );
+  final details = await ref
+      .read(employeesAdminUseCaseProvider)
+      .getEmployeeDetails(employee.id);
+  final sbMs = startingBalanceMsForPeriod(
+    tenths: details?.startingBalanceTenths,
+    trackingStartYmd: ymd,
+    balanceUpdatedAtUtcMs: details?.startingBalanceUpdatedAt,
+    fromUtcMs: clamped.fromUtcMs,
+    toUtcMs: clamped.toUtcMs,
+  );
+  if (!context.mounted) return;
   await exportEmployeeDailyPdf(
     context,
     dayReportUseCase: ref.read(employeeDayReportUseCaseProvider),
@@ -1120,6 +1132,7 @@ Future<void> _handleMyPdf(
     fromUtcMs: clamped.fromUtcMs,
     toUtcMs: clamped.toUtcMs,
     sortColumnName: null,
+    periodStartingBalanceMs: sbMs,
     showSnack: (msg) => showAppSnack(context, msg),
     showErrorSnack: (msg, {bool isError = false}) =>
         showAppSnack(context, msg, isError: isError),

@@ -571,7 +571,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeWeeklyHours => 'Weekly hours';
 
   @override
+  String get weeklyHoursShortUnitSuffix => ' h';
+
+  @override
   String get employeeEmail => 'Email';
+
+  @override
+  String get employeeEmailHint => 'name@example.com';
+
+  @override
+  String get employeeEmailInvalid => 'Enter a valid email address.';
 
   @override
   String get employeePhone => 'Phone';
@@ -700,7 +709,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get employeeSectionSchedule => 'Schedule';
 
   @override
+  String get employeeSectionWorkSetup => 'Work setup';
+
+  @override
+  String get employeeStartingBalanceLabel => 'Starting balance (hours)';
+
+  @override
+  String get employeeStartingBalanceHint =>
+      'Hours with one decimal. Leave empty if none.';
+
+  @override
+  String get employeeStartingBalanceInvalid =>
+      'Enter a valid hours value (one decimal).';
+
+  @override
   String get employeeScheduleRequired => 'Schedule is required.';
+
+  @override
+  String employeeScheduleTemplateWithWeeklyHours(String name, String hours) {
+    return '$name ($hours)';
+  }
 
   @override
   String get employeeSectionPolicy => 'Policy & Compliance';
@@ -731,6 +759,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get employeeDataPdfExported => 'Employee data exported.';
+
+  @override
+  String get employeeMarkForRemovalTooltip =>
+      'Mark for removal from active lists';
+
+  @override
+  String get employeeMarkForRemovalConfirmTitle =>
+      'Mark for removal from active lists?';
+
+  @override
+  String get employeeMarkForRemovalConfirmMessage =>
+      'The employee will be archived and hidden from active lists and reports. Historical data (sessions, absences) remains available.';
+
+  @override
+  String get employeeMarkForRemovalConfirm => 'Confirm';
+
+  @override
+  String get employeeMarkForRemovalSuccess =>
+      'Employee removed from active lists.';
 
   @override
   String employeeDataPdfFailed(String error) {
@@ -1337,6 +1384,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get journalSaved => 'Saved.';
 
   @override
+  String get sessionsCancelConfirmTitle => 'Cancel this work session?';
+
+  @override
+  String get sessionsCancelConfirmBody =>
+      'The session will be excluded from totals and reports. It will remain visible in the journal table.';
+
+  @override
+  String get sessionsCancelWorkSession => 'Cancel session';
+
+  @override
+  String get sessionsCancelSuccess => 'Session canceled.';
+
+  @override
+  String get sessionStatusCanceled => 'Canceled';
+
+  @override
+  String get sessionsEditDisabledCanceled =>
+      'Editing is disabled for canceled sessions';
+
+  @override
+  String get sessionsEditCanceledError => 'Canceled sessions cannot be edited.';
+
+  @override
+  String get sessionsCancelNotClosedError =>
+      'Only closed sessions can be canceled.';
+
+  @override
+  String get sessionsCancelAlreadyCanceledError =>
+      'This session is already canceled.';
+
+  @override
+  String get sessionsCancelNotFoundError => 'Session not found.';
+
+  @override
   String get journalViewTable => 'Table';
 
   @override
@@ -1478,6 +1559,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsPdfTitle => 'Time report';
+
+  @override
+  String get reportsPdfStartingBalance => 'Starting balance';
 
   @override
   String reportsPdfPeriod(String from, String to) {

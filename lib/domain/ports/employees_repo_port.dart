@@ -1,12 +1,18 @@
 import '../../core/employee_pin_status.dart';
 import '../entities/employee_details.dart';
 import '../entities/employee_info.dart';
+import '../entities/employee_starting_balance_snapshot.dart';
 import '../entities/employee_status.dart';
 
 /// Port for employee data access. Use cases depend on this; data layer implements.
 abstract interface class IEmployeesRepo {
   Future<EmployeeInfo?> getEmployee(int id);
   Future<EmployeeDetails?> getEmployeeDetails(int id);
+
+  /// Starting-balance fields for report period enrichment (batched).
+  Future<Map<int, EmployeeStartingBalanceSnapshot>> getStartingBalanceSnapshots(
+    Iterable<int> employeeIds,
+  );
 
   /// Stream of active employees (status == active), sorted by lastName, firstName.
   Stream<List<EmployeeInfo>> streamActiveEmployees();
@@ -52,6 +58,7 @@ abstract interface class IEmployeesRepo {
     int? policyAcknowledgedAt,
     required int? templateId,
     String? createdBy,
+    int? startingBalanceTenths,
   });
 
   Future<void> updateEmployeeFull({
@@ -79,8 +86,12 @@ abstract interface class IEmployeesRepo {
     int? policyAcknowledgedAt,
     int? templateId,
     String? updatedBy,
+    int? startingBalanceTenths,
   });
 
   Future<void> setEmployeePin({required int employeeId, required String pin});
   Future<void> resetEmployeePin(int employeeId);
+
+  /// Soft-deletes the employee: sets deleted_at and status=archived in one transaction.
+  Future<void> markEmployeeForDeletion(int id);
 }

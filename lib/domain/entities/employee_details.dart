@@ -28,6 +28,9 @@ class EmployeeDetails {
     this.templateId,
     required this.createdAt,
     this.updatedAt,
+    this.startingBalanceTenths,
+    this.startingBalanceUpdatedAt,
+    this.startingBalanceUpdatedBy,
   });
 
   final int id;
@@ -55,4 +58,9 @@ class EmployeeDetails {
   final int? templateId;
   final int createdAt;
   final int? updatedAt;
+
+  /// Null unset; 0 explicit zero. Tenths of one hour (xx.x × 10).
+  final int? startingBalanceTenths;
+  final int? startingBalanceUpdatedAt;
+  final String? startingBalanceUpdatedBy;
 }

@@ -231,7 +231,10 @@
   "employeeAccessTokenRequiredWhenNfc": "Обязательно при включённом NFC.",
   "employeeEmploymentType": "Тип занятости",
   "employeeWeeklyHours": "Часов в неделю",
+  "weeklyHoursShortUnitSuffix": " ч",
   "employeeEmail": "E-mail",
+  "employeeEmailHint": "name@example.com",
+  "employeeEmailInvalid": "Введите корректный адрес электронной почты.",
   "employeePhone": "Телефон",
   "employeeDepartment": "Отдел",
   "employeeJobTitle": "Должность",
@@ -291,7 +294,18 @@
   "employeeSectionContact": "Контакт",
   "employeeSectionAccess": "Доступ к терминалу",
   "employeeSectionSchedule": "Расписание",
+  "employeeSectionWorkSetup": "Рабочие настройки",
+  "employeeStartingBalanceLabel": "Начальный баланс (часы)",
+  "employeeStartingBalanceHint": "Часы с одним знаком после запятой. Оставьте пустым, если нет.",
+  "employeeStartingBalanceInvalid": "Введите корректные часы (один знак после запятой).",
   "employeeScheduleRequired": "Укажите расписание.",
+  "employeeScheduleTemplateWithWeeklyHours": "{name} ({hours})",
+  "@employeeScheduleTemplateWithWeeklyHours": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "hours": { "type": "String" }
+    }
+  },
   "employeeSectionPolicy": "Политика и соответствие",
   "employeeSectionAudit": "Запись",
   "employeeTabGeneral": "Общие",
@@ -302,6 +316,11 @@
   "employeeDataPdfSectionEmployeeInfo": "Информация о сотруднике",
   "employeeExportEmployeeData": "Экспорт данных сотрудника",
   "employeeDataPdfExported": "Данные сотрудника экспортированы.",
+  "employeeMarkForRemovalTooltip": "Исключить из активных списков",
+  "employeeMarkForRemovalConfirmTitle": "Исключить из активных списков?",
+  "employeeMarkForRemovalConfirmMessage": "Сотрудник будет архивирован и скрыт из активных списков и отчётов. Исторические данные (смены, отсутствия) остаются доступными.",
+  "employeeMarkForRemovalConfirm": "Подтвердить",
+  "employeeMarkForRemovalSuccess": "Сотрудник исключён из активных списков.",
   "employeeDataPdfFailed": "Не удалось экспортировать: {error}",
   "@employeeDataPdfFailed": {
     "placeholders": {
@@ -538,6 +557,16 @@
   "journalErrorOutsideEmployment": "Даты сессии должны попадать в период занятости сотрудника.",
   "journalUpdateReasonHint": "Обязательно при изменении времени начала или конца",
   "journalSaved": "Сохранено.",
+  "sessionsCancelConfirmTitle": "Отменить эту рабочую сессию?",
+  "sessionsCancelConfirmBody": "Сессия будет исключена из сумм и отчётов, но останется видимой в таблице журнала.",
+  "sessionsCancelWorkSession": "Отменить сессию",
+  "sessionsCancelSuccess": "Сессия отменена.",
+  "sessionStatusCanceled": "Отменена",
+  "sessionsEditDisabledCanceled": "Редактирование недоступно для отменённых сессий",
+  "sessionsEditCanceledError": "Отменённые сессии нельзя редактировать.",
+  "sessionsCancelNotClosedError": "Отменять можно только закрытые сессии.",
+  "sessionsCancelAlreadyCanceledError": "Эта сессия уже отменена.",
+  "sessionsCancelNotFoundError": "Сессия не найдена.",
   "journalViewTable": "Таблица",
   "journalViewTimeline": "Временная шкала",
   "journalViewDetailed": "По интервалам",
@@ -589,6 +618,7 @@
   "reportsDetailsClose": "Закрыть",
   "reportsTableDate": "Дата",
   "reportsPdfTitle": "Отчёт по времени",
+  "reportsPdfStartingBalance": "Начальный баланс",
   "reportsPdfPeriod": "Период: {from} — {to}",
   "@reportsPdfPeriod": {
     "placeholders": {

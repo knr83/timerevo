@@ -77,6 +77,17 @@ class $EmployeesTable extends Employees
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<int> deletedAt = GeneratedColumn<int>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _vacationDaysPerYearMeta =
       const VerificationMeta('vacationDaysPerYear');
   @override
@@ -290,6 +301,38 @@ class $EmployeesTable extends Employees
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _startingBalanceTenthsMeta =
+      const VerificationMeta('startingBalanceTenths');
+  @override
+  late final GeneratedColumn<int> startingBalanceTenths = GeneratedColumn<int>(
+    'starting_balance_tenths',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _startingBalanceUpdatedAtMeta =
+      const VerificationMeta('startingBalanceUpdatedAt');
+  @override
+  late final GeneratedColumn<int> startingBalanceUpdatedAt =
+      GeneratedColumn<int>(
+        'starting_balance_updated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _startingBalanceUpdatedByMeta =
+      const VerificationMeta('startingBalanceUpdatedBy');
+  @override
+  late final GeneratedColumn<String> startingBalanceUpdatedBy =
+      GeneratedColumn<String>(
+        'starting_balance_updated_by',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -298,6 +341,7 @@ class $EmployeesTable extends Employees
     lastName,
     status,
     terminationDate,
+    deletedAt,
     vacationDaysPerYear,
     secondaryPhone,
     hireDate,
@@ -318,6 +362,9 @@ class $EmployeesTable extends Employees
     updatedAt,
     createdBy,
     updatedBy,
+    startingBalanceTenths,
+    startingBalanceUpdatedAt,
+    startingBalanceUpdatedBy,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -371,6 +418,12 @@ class $EmployeesTable extends Employees
           data['termination_date']!,
           _terminationDateMeta,
         ),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
       );
     }
     if (data.containsKey('vacation_days_per_year')) {
@@ -519,6 +572,33 @@ class $EmployeesTable extends Employees
         updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
       );
     }
+    if (data.containsKey('starting_balance_tenths')) {
+      context.handle(
+        _startingBalanceTenthsMeta,
+        startingBalanceTenths.isAcceptableOrUnknown(
+          data['starting_balance_tenths']!,
+          _startingBalanceTenthsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('starting_balance_updated_at')) {
+      context.handle(
+        _startingBalanceUpdatedAtMeta,
+        startingBalanceUpdatedAt.isAcceptableOrUnknown(
+          data['starting_balance_updated_at']!,
+          _startingBalanceUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('starting_balance_updated_by')) {
+      context.handle(
+        _startingBalanceUpdatedByMeta,
+        startingBalanceUpdatedBy.isAcceptableOrUnknown(
+          data['starting_balance_updated_by']!,
+          _startingBalanceUpdatedByMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -551,6 +631,10 @@ class $EmployeesTable extends Employees
       terminationDate: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
         data['${effectivePrefix}termination_date'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}deleted_at'],
       ),
       vacationDaysPerYear: attachedDatabase.typeMapping.read(
         DriftSqlType.int,
@@ -632,6 +716,18 @@ class $EmployeesTable extends Employees
         DriftSqlType.string,
         data['${effectivePrefix}updated_by'],
       ),
+      startingBalanceTenths: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}starting_balance_tenths'],
+      ),
+      startingBalanceUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}starting_balance_updated_at'],
+      ),
+      startingBalanceUpdatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}starting_balance_updated_by'],
+      ),
     );
   }
 
@@ -648,6 +744,7 @@ class Employee extends DataClass implements Insertable<Employee> {
   final String lastName;
   final String status;
   final int? terminationDate;
+  final int? deletedAt;
   final int? vacationDaysPerYear;
   final String? secondaryPhone;
   final int? hireDate;
@@ -668,6 +765,9 @@ class Employee extends DataClass implements Insertable<Employee> {
   final int? updatedAt;
   final String? createdBy;
   final String? updatedBy;
+  final int? startingBalanceTenths;
+  final int? startingBalanceUpdatedAt;
+  final String? startingBalanceUpdatedBy;
   const Employee({
     required this.id,
     required this.code,
@@ -675,6 +775,7 @@ class Employee extends DataClass implements Insertable<Employee> {
     required this.lastName,
     required this.status,
     this.terminationDate,
+    this.deletedAt,
     this.vacationDaysPerYear,
     this.secondaryPhone,
     this.hireDate,
@@ -695,6 +796,9 @@ class Employee extends DataClass implements Insertable<Employee> {
     this.updatedAt,
     this.createdBy,
     this.updatedBy,
+    this.startingBalanceTenths,
+    this.startingBalanceUpdatedAt,
+    this.startingBalanceUpdatedBy,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -706,6 +810,9 @@ class Employee extends DataClass implements Insertable<Employee> {
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || terminationDate != null) {
       map['termination_date'] = Variable<int>(terminationDate);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<int>(deletedAt);
     }
     if (!nullToAbsent || vacationDaysPerYear != null) {
       map['vacation_days_per_year'] = Variable<int>(vacationDaysPerYear);
@@ -757,6 +864,19 @@ class Employee extends DataClass implements Insertable<Employee> {
     if (!nullToAbsent || updatedBy != null) {
       map['updated_by'] = Variable<String>(updatedBy);
     }
+    if (!nullToAbsent || startingBalanceTenths != null) {
+      map['starting_balance_tenths'] = Variable<int>(startingBalanceTenths);
+    }
+    if (!nullToAbsent || startingBalanceUpdatedAt != null) {
+      map['starting_balance_updated_at'] = Variable<int>(
+        startingBalanceUpdatedAt,
+      );
+    }
+    if (!nullToAbsent || startingBalanceUpdatedBy != null) {
+      map['starting_balance_updated_by'] = Variable<String>(
+        startingBalanceUpdatedBy,
+      );
+    }
     return map;
   }
 
@@ -770,6 +890,9 @@ class Employee extends DataClass implements Insertable<Employee> {
       terminationDate: terminationDate == null && nullToAbsent
           ? const Value.absent()
           : Value(terminationDate),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
       vacationDaysPerYear: vacationDaysPerYear == null && nullToAbsent
           ? const Value.absent()
           : Value(vacationDaysPerYear),
@@ -820,6 +943,15 @@ class Employee extends DataClass implements Insertable<Employee> {
       updatedBy: updatedBy == null && nullToAbsent
           ? const Value.absent()
           : Value(updatedBy),
+      startingBalanceTenths: startingBalanceTenths == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startingBalanceTenths),
+      startingBalanceUpdatedAt: startingBalanceUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startingBalanceUpdatedAt),
+      startingBalanceUpdatedBy: startingBalanceUpdatedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(startingBalanceUpdatedBy),
     );
   }
 
@@ -835,6 +967,7 @@ class Employee extends DataClass implements Insertable<Employee> {
       lastName: serializer.fromJson<String>(json['lastName']),
       status: serializer.fromJson<String>(json['status']),
       terminationDate: serializer.fromJson<int?>(json['terminationDate']),
+      deletedAt: serializer.fromJson<int?>(json['deletedAt']),
       vacationDaysPerYear: serializer.fromJson<int?>(
         json['vacationDaysPerYear'],
       ),
@@ -859,6 +992,15 @@ class Employee extends DataClass implements Insertable<Employee> {
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       createdBy: serializer.fromJson<String?>(json['createdBy']),
       updatedBy: serializer.fromJson<String?>(json['updatedBy']),
+      startingBalanceTenths: serializer.fromJson<int?>(
+        json['startingBalanceTenths'],
+      ),
+      startingBalanceUpdatedAt: serializer.fromJson<int?>(
+        json['startingBalanceUpdatedAt'],
+      ),
+      startingBalanceUpdatedBy: serializer.fromJson<String?>(
+        json['startingBalanceUpdatedBy'],
+      ),
     );
   }
   @override
@@ -871,6 +1013,7 @@ class Employee extends DataClass implements Insertable<Employee> {
       'lastName': serializer.toJson<String>(lastName),
       'status': serializer.toJson<String>(status),
       'terminationDate': serializer.toJson<int?>(terminationDate),
+      'deletedAt': serializer.toJson<int?>(deletedAt),
       'vacationDaysPerYear': serializer.toJson<int?>(vacationDaysPerYear),
       'secondaryPhone': serializer.toJson<String?>(secondaryPhone),
       'hireDate': serializer.toJson<int?>(hireDate),
@@ -891,6 +1034,13 @@ class Employee extends DataClass implements Insertable<Employee> {
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'createdBy': serializer.toJson<String?>(createdBy),
       'updatedBy': serializer.toJson<String?>(updatedBy),
+      'startingBalanceTenths': serializer.toJson<int?>(startingBalanceTenths),
+      'startingBalanceUpdatedAt': serializer.toJson<int?>(
+        startingBalanceUpdatedAt,
+      ),
+      'startingBalanceUpdatedBy': serializer.toJson<String?>(
+        startingBalanceUpdatedBy,
+      ),
     };
   }
 
@@ -901,6 +1051,7 @@ class Employee extends DataClass implements Insertable<Employee> {
     String? lastName,
     String? status,
     Value<int?> terminationDate = const Value.absent(),
+    Value<int?> deletedAt = const Value.absent(),
     Value<int?> vacationDaysPerYear = const Value.absent(),
     Value<String?> secondaryPhone = const Value.absent(),
     Value<int?> hireDate = const Value.absent(),
@@ -921,6 +1072,9 @@ class Employee extends DataClass implements Insertable<Employee> {
     Value<int?> updatedAt = const Value.absent(),
     Value<String?> createdBy = const Value.absent(),
     Value<String?> updatedBy = const Value.absent(),
+    Value<int?> startingBalanceTenths = const Value.absent(),
+    Value<int?> startingBalanceUpdatedAt = const Value.absent(),
+    Value<String?> startingBalanceUpdatedBy = const Value.absent(),
   }) => Employee(
     id: id ?? this.id,
     code: code ?? this.code,
@@ -930,6 +1084,7 @@ class Employee extends DataClass implements Insertable<Employee> {
     terminationDate: terminationDate.present
         ? terminationDate.value
         : this.terminationDate,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     vacationDaysPerYear: vacationDaysPerYear.present
         ? vacationDaysPerYear.value
         : this.vacationDaysPerYear,
@@ -960,6 +1115,15 @@ class Employee extends DataClass implements Insertable<Employee> {
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     createdBy: createdBy.present ? createdBy.value : this.createdBy,
     updatedBy: updatedBy.present ? updatedBy.value : this.updatedBy,
+    startingBalanceTenths: startingBalanceTenths.present
+        ? startingBalanceTenths.value
+        : this.startingBalanceTenths,
+    startingBalanceUpdatedAt: startingBalanceUpdatedAt.present
+        ? startingBalanceUpdatedAt.value
+        : this.startingBalanceUpdatedAt,
+    startingBalanceUpdatedBy: startingBalanceUpdatedBy.present
+        ? startingBalanceUpdatedBy.value
+        : this.startingBalanceUpdatedBy,
   );
   Employee copyWithCompanion(EmployeesCompanion data) {
     return Employee(
@@ -971,6 +1135,7 @@ class Employee extends DataClass implements Insertable<Employee> {
       terminationDate: data.terminationDate.present
           ? data.terminationDate.value
           : this.terminationDate,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       vacationDaysPerYear: data.vacationDaysPerYear.present
           ? data.vacationDaysPerYear.value
           : this.vacationDaysPerYear,
@@ -1011,6 +1176,15 @@ class Employee extends DataClass implements Insertable<Employee> {
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
       createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
       updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      startingBalanceTenths: data.startingBalanceTenths.present
+          ? data.startingBalanceTenths.value
+          : this.startingBalanceTenths,
+      startingBalanceUpdatedAt: data.startingBalanceUpdatedAt.present
+          ? data.startingBalanceUpdatedAt.value
+          : this.startingBalanceUpdatedAt,
+      startingBalanceUpdatedBy: data.startingBalanceUpdatedBy.present
+          ? data.startingBalanceUpdatedBy.value
+          : this.startingBalanceUpdatedBy,
     );
   }
 
@@ -1023,6 +1197,7 @@ class Employee extends DataClass implements Insertable<Employee> {
           ..write('lastName: $lastName, ')
           ..write('status: $status, ')
           ..write('terminationDate: $terminationDate, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('vacationDaysPerYear: $vacationDaysPerYear, ')
           ..write('secondaryPhone: $secondaryPhone, ')
           ..write('hireDate: $hireDate, ')
@@ -1042,7 +1217,10 @@ class Employee extends DataClass implements Insertable<Employee> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('createdBy: $createdBy, ')
-          ..write('updatedBy: $updatedBy')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('startingBalanceTenths: $startingBalanceTenths, ')
+          ..write('startingBalanceUpdatedAt: $startingBalanceUpdatedAt, ')
+          ..write('startingBalanceUpdatedBy: $startingBalanceUpdatedBy')
           ..write(')'))
         .toString();
   }
@@ -1055,6 +1233,7 @@ class Employee extends DataClass implements Insertable<Employee> {
     lastName,
     status,
     terminationDate,
+    deletedAt,
     vacationDaysPerYear,
     secondaryPhone,
     hireDate,
@@ -1075,6 +1254,9 @@ class Employee extends DataClass implements Insertable<Employee> {
     updatedAt,
     createdBy,
     updatedBy,
+    startingBalanceTenths,
+    startingBalanceUpdatedAt,
+    startingBalanceUpdatedBy,
   ]);
   @override
   bool operator ==(Object other) =>
@@ -1086,6 +1268,7 @@ class Employee extends DataClass implements Insertable<Employee> {
           other.lastName == this.lastName &&
           other.status == this.status &&
           other.terminationDate == this.terminationDate &&
+          other.deletedAt == this.deletedAt &&
           other.vacationDaysPerYear == this.vacationDaysPerYear &&
           other.secondaryPhone == this.secondaryPhone &&
           other.hireDate == this.hireDate &&
@@ -1105,7 +1288,10 @@ class Employee extends DataClass implements Insertable<Employee> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.createdBy == this.createdBy &&
-          other.updatedBy == this.updatedBy);
+          other.updatedBy == this.updatedBy &&
+          other.startingBalanceTenths == this.startingBalanceTenths &&
+          other.startingBalanceUpdatedAt == this.startingBalanceUpdatedAt &&
+          other.startingBalanceUpdatedBy == this.startingBalanceUpdatedBy);
 }
 
 class EmployeesCompanion extends UpdateCompanion<Employee> {
@@ -1115,6 +1301,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
   final Value<String> lastName;
   final Value<String> status;
   final Value<int?> terminationDate;
+  final Value<int?> deletedAt;
   final Value<int?> vacationDaysPerYear;
   final Value<String?> secondaryPhone;
   final Value<int?> hireDate;
@@ -1135,6 +1322,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
   final Value<int?> updatedAt;
   final Value<String?> createdBy;
   final Value<String?> updatedBy;
+  final Value<int?> startingBalanceTenths;
+  final Value<int?> startingBalanceUpdatedAt;
+  final Value<String?> startingBalanceUpdatedBy;
   const EmployeesCompanion({
     this.id = const Value.absent(),
     this.code = const Value.absent(),
@@ -1142,6 +1332,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.lastName = const Value.absent(),
     this.status = const Value.absent(),
     this.terminationDate = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.vacationDaysPerYear = const Value.absent(),
     this.secondaryPhone = const Value.absent(),
     this.hireDate = const Value.absent(),
@@ -1162,6 +1353,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.updatedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.updatedBy = const Value.absent(),
+    this.startingBalanceTenths = const Value.absent(),
+    this.startingBalanceUpdatedAt = const Value.absent(),
+    this.startingBalanceUpdatedBy = const Value.absent(),
   });
   EmployeesCompanion.insert({
     this.id = const Value.absent(),
@@ -1170,6 +1364,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     required String lastName,
     this.status = const Value.absent(),
     this.terminationDate = const Value.absent(),
+    this.deletedAt = const Value.absent(),
     this.vacationDaysPerYear = const Value.absent(),
     this.secondaryPhone = const Value.absent(),
     this.hireDate = const Value.absent(),
@@ -1190,6 +1385,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     this.updatedAt = const Value.absent(),
     this.createdBy = const Value.absent(),
     this.updatedBy = const Value.absent(),
+    this.startingBalanceTenths = const Value.absent(),
+    this.startingBalanceUpdatedAt = const Value.absent(),
+    this.startingBalanceUpdatedBy = const Value.absent(),
   }) : code = Value(code),
        firstName = Value(firstName),
        lastName = Value(lastName),
@@ -1201,6 +1399,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Expression<String>? lastName,
     Expression<String>? status,
     Expression<int>? terminationDate,
+    Expression<int>? deletedAt,
     Expression<int>? vacationDaysPerYear,
     Expression<String>? secondaryPhone,
     Expression<int>? hireDate,
@@ -1221,6 +1420,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Expression<int>? updatedAt,
     Expression<String>? createdBy,
     Expression<String>? updatedBy,
+    Expression<int>? startingBalanceTenths,
+    Expression<int>? startingBalanceUpdatedAt,
+    Expression<String>? startingBalanceUpdatedBy,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1229,6 +1431,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       if (lastName != null) 'last_name': lastName,
       if (status != null) 'status': status,
       if (terminationDate != null) 'termination_date': terminationDate,
+      if (deletedAt != null) 'deleted_at': deletedAt,
       if (vacationDaysPerYear != null)
         'vacation_days_per_year': vacationDaysPerYear,
       if (secondaryPhone != null) 'secondary_phone': secondaryPhone,
@@ -1251,6 +1454,12 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (createdBy != null) 'created_by': createdBy,
       if (updatedBy != null) 'updated_by': updatedBy,
+      if (startingBalanceTenths != null)
+        'starting_balance_tenths': startingBalanceTenths,
+      if (startingBalanceUpdatedAt != null)
+        'starting_balance_updated_at': startingBalanceUpdatedAt,
+      if (startingBalanceUpdatedBy != null)
+        'starting_balance_updated_by': startingBalanceUpdatedBy,
     });
   }
 
@@ -1261,6 +1470,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Value<String>? lastName,
     Value<String>? status,
     Value<int?>? terminationDate,
+    Value<int?>? deletedAt,
     Value<int?>? vacationDaysPerYear,
     Value<String?>? secondaryPhone,
     Value<int?>? hireDate,
@@ -1281,6 +1491,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     Value<int?>? updatedAt,
     Value<String?>? createdBy,
     Value<String?>? updatedBy,
+    Value<int?>? startingBalanceTenths,
+    Value<int?>? startingBalanceUpdatedAt,
+    Value<String?>? startingBalanceUpdatedBy,
   }) {
     return EmployeesCompanion(
       id: id ?? this.id,
@@ -1289,6 +1502,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       lastName: lastName ?? this.lastName,
       status: status ?? this.status,
       terminationDate: terminationDate ?? this.terminationDate,
+      deletedAt: deletedAt ?? this.deletedAt,
       vacationDaysPerYear: vacationDaysPerYear ?? this.vacationDaysPerYear,
       secondaryPhone: secondaryPhone ?? this.secondaryPhone,
       hireDate: hireDate ?? this.hireDate,
@@ -1309,6 +1523,12 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
       updatedAt: updatedAt ?? this.updatedAt,
       createdBy: createdBy ?? this.createdBy,
       updatedBy: updatedBy ?? this.updatedBy,
+      startingBalanceTenths:
+          startingBalanceTenths ?? this.startingBalanceTenths,
+      startingBalanceUpdatedAt:
+          startingBalanceUpdatedAt ?? this.startingBalanceUpdatedAt,
+      startingBalanceUpdatedBy:
+          startingBalanceUpdatedBy ?? this.startingBalanceUpdatedBy,
     );
   }
 
@@ -1332,6 +1552,9 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     }
     if (terminationDate.present) {
       map['termination_date'] = Variable<int>(terminationDate.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<int>(deletedAt.value);
     }
     if (vacationDaysPerYear.present) {
       map['vacation_days_per_year'] = Variable<int>(vacationDaysPerYear.value);
@@ -1393,6 +1616,21 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
     if (updatedBy.present) {
       map['updated_by'] = Variable<String>(updatedBy.value);
     }
+    if (startingBalanceTenths.present) {
+      map['starting_balance_tenths'] = Variable<int>(
+        startingBalanceTenths.value,
+      );
+    }
+    if (startingBalanceUpdatedAt.present) {
+      map['starting_balance_updated_at'] = Variable<int>(
+        startingBalanceUpdatedAt.value,
+      );
+    }
+    if (startingBalanceUpdatedBy.present) {
+      map['starting_balance_updated_by'] = Variable<String>(
+        startingBalanceUpdatedBy.value,
+      );
+    }
     return map;
   }
 
@@ -1405,6 +1643,7 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
           ..write('lastName: $lastName, ')
           ..write('status: $status, ')
           ..write('terminationDate: $terminationDate, ')
+          ..write('deletedAt: $deletedAt, ')
           ..write('vacationDaysPerYear: $vacationDaysPerYear, ')
           ..write('secondaryPhone: $secondaryPhone, ')
           ..write('hireDate: $hireDate, ')
@@ -1424,7 +1663,10 @@ class EmployeesCompanion extends UpdateCompanion<Employee> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('createdBy: $createdBy, ')
-          ..write('updatedBy: $updatedBy')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('startingBalanceTenths: $startingBalanceTenths, ')
+          ..write('startingBalanceUpdatedAt: $startingBalanceUpdatedAt, ')
+          ..write('startingBalanceUpdatedBy: $startingBalanceUpdatedBy')
           ..write(')'))
         .toString();
   }
@@ -2653,6 +2895,17 @@ class $WorkSessionsTable extends WorkSessions
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _canceledAtMeta = const VerificationMeta(
+    'canceledAt',
+  );
+  @override
+  late final GeneratedColumn<int> canceledAt = GeneratedColumn<int>(
+    'canceled_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2668,6 +2921,7 @@ class $WorkSessionsTable extends WorkSessions
     updatedAt,
     updatedBy,
     updateReason,
+    canceledAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2769,6 +3023,12 @@ class $WorkSessionsTable extends WorkSessions
         ),
       );
     }
+    if (data.containsKey('canceled_at')) {
+      context.handle(
+        _canceledAtMeta,
+        canceledAt.isAcceptableOrUnknown(data['canceled_at']!, _canceledAtMeta),
+      );
+    }
     return context;
   }
 
@@ -2830,6 +3090,10 @@ class $WorkSessionsTable extends WorkSessions
         DriftSqlType.string,
         data['${effectivePrefix}update_reason'],
       ),
+      canceledAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}canceled_at'],
+      ),
     );
   }
 
@@ -2853,6 +3117,9 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
   final int? updatedAt;
   final String? updatedBy;
   final String? updateReason;
+
+  /// UTC ms when the session was canceled (excluded from totals). Null = active.
+  final int? canceledAt;
   const WorkSession({
     required this.id,
     required this.employeeId,
@@ -2867,6 +3134,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
     this.updatedAt,
     this.updatedBy,
     this.updateReason,
+    this.canceledAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2898,6 +3166,9 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
     if (!nullToAbsent || updateReason != null) {
       map['update_reason'] = Variable<String>(updateReason);
     }
+    if (!nullToAbsent || canceledAt != null) {
+      map['canceled_at'] = Variable<int>(canceledAt);
+    }
     return map;
   }
 
@@ -2928,6 +3199,9 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
       updateReason: updateReason == null && nullToAbsent
           ? const Value.absent()
           : Value(updateReason),
+      canceledAt: canceledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(canceledAt),
     );
   }
 
@@ -2950,6 +3224,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
       updatedAt: serializer.fromJson<int?>(json['updatedAt']),
       updatedBy: serializer.fromJson<String?>(json['updatedBy']),
       updateReason: serializer.fromJson<String?>(json['updateReason']),
+      canceledAt: serializer.fromJson<int?>(json['canceledAt']),
     );
   }
   @override
@@ -2969,6 +3244,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
       'updatedAt': serializer.toJson<int?>(updatedAt),
       'updatedBy': serializer.toJson<String?>(updatedBy),
       'updateReason': serializer.toJson<String?>(updateReason),
+      'canceledAt': serializer.toJson<int?>(canceledAt),
     };
   }
 
@@ -2986,6 +3262,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
     Value<int?> updatedAt = const Value.absent(),
     Value<String?> updatedBy = const Value.absent(),
     Value<String?> updateReason = const Value.absent(),
+    Value<int?> canceledAt = const Value.absent(),
   }) => WorkSession(
     id: id ?? this.id,
     employeeId: employeeId ?? this.employeeId,
@@ -3000,6 +3277,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
     updatedAt: updatedAt.present ? updatedAt.value : this.updatedAt,
     updatedBy: updatedBy.present ? updatedBy.value : this.updatedBy,
     updateReason: updateReason.present ? updateReason.value : this.updateReason,
+    canceledAt: canceledAt.present ? canceledAt.value : this.canceledAt,
   );
   WorkSession copyWithCompanion(WorkSessionsCompanion data) {
     return WorkSession(
@@ -3020,6 +3298,9 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
       updateReason: data.updateReason.present
           ? data.updateReason.value
           : this.updateReason,
+      canceledAt: data.canceledAt.present
+          ? data.canceledAt.value
+          : this.canceledAt,
     );
   }
 
@@ -3038,7 +3319,8 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
           ..write('createdBy: $createdBy, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('updatedBy: $updatedBy, ')
-          ..write('updateReason: $updateReason')
+          ..write('updateReason: $updateReason, ')
+          ..write('canceledAt: $canceledAt')
           ..write(')'))
         .toString();
   }
@@ -3058,6 +3340,7 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
     updatedAt,
     updatedBy,
     updateReason,
+    canceledAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -3075,7 +3358,8 @@ class WorkSession extends DataClass implements Insertable<WorkSession> {
           other.createdBy == this.createdBy &&
           other.updatedAt == this.updatedAt &&
           other.updatedBy == this.updatedBy &&
-          other.updateReason == this.updateReason);
+          other.updateReason == this.updateReason &&
+          other.canceledAt == this.canceledAt);
 }
 
 class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
@@ -3092,6 +3376,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
   final Value<int?> updatedAt;
   final Value<String?> updatedBy;
   final Value<String?> updateReason;
+  final Value<int?> canceledAt;
   const WorkSessionsCompanion({
     this.id = const Value.absent(),
     this.employeeId = const Value.absent(),
@@ -3106,6 +3391,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
     this.updatedAt = const Value.absent(),
     this.updatedBy = const Value.absent(),
     this.updateReason = const Value.absent(),
+    this.canceledAt = const Value.absent(),
   });
   WorkSessionsCompanion.insert({
     this.id = const Value.absent(),
@@ -3121,6 +3407,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
     this.updatedAt = const Value.absent(),
     this.updatedBy = const Value.absent(),
     this.updateReason = const Value.absent(),
+    this.canceledAt = const Value.absent(),
   }) : employeeId = Value(employeeId),
        startTs = Value(startTs),
        status = Value(status),
@@ -3140,6 +3427,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
     Expression<int>? updatedAt,
     Expression<String>? updatedBy,
     Expression<String>? updateReason,
+    Expression<int>? canceledAt,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3155,6 +3443,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (updatedBy != null) 'updated_by': updatedBy,
       if (updateReason != null) 'update_reason': updateReason,
+      if (canceledAt != null) 'canceled_at': canceledAt,
     });
   }
 
@@ -3172,6 +3461,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
     Value<int?>? updatedAt,
     Value<String?>? updatedBy,
     Value<String?>? updateReason,
+    Value<int?>? canceledAt,
   }) {
     return WorkSessionsCompanion(
       id: id ?? this.id,
@@ -3187,6 +3477,7 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
       updatedAt: updatedAt ?? this.updatedAt,
       updatedBy: updatedBy ?? this.updatedBy,
       updateReason: updateReason ?? this.updateReason,
+      canceledAt: canceledAt ?? this.canceledAt,
     );
   }
 
@@ -3232,6 +3523,9 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
     if (updateReason.present) {
       map['update_reason'] = Variable<String>(updateReason.value);
     }
+    if (canceledAt.present) {
+      map['canceled_at'] = Variable<int>(canceledAt.value);
+    }
     return map;
   }
 
@@ -3250,7 +3544,8 @@ class WorkSessionsCompanion extends UpdateCompanion<WorkSession> {
           ..write('createdBy: $createdBy, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('updatedBy: $updatedBy, ')
-          ..write('updateReason: $updateReason')
+          ..write('updateReason: $updateReason, ')
+          ..write('canceledAt: $canceledAt')
           ..write(')'))
         .toString();
   }
@@ -5490,6 +5785,7 @@ typedef $$EmployeesTableCreateCompanionBuilder =
       required String lastName,
       Value<String> status,
       Value<int?> terminationDate,
+      Value<int?> deletedAt,
       Value<int?> vacationDaysPerYear,
       Value<String?> secondaryPhone,
       Value<int?> hireDate,
@@ -5510,6 +5806,9 @@ typedef $$EmployeesTableCreateCompanionBuilder =
       Value<int?> updatedAt,
       Value<String?> createdBy,
       Value<String?> updatedBy,
+      Value<int?> startingBalanceTenths,
+      Value<int?> startingBalanceUpdatedAt,
+      Value<String?> startingBalanceUpdatedBy,
     });
 typedef $$EmployeesTableUpdateCompanionBuilder =
     EmployeesCompanion Function({
@@ -5519,6 +5818,7 @@ typedef $$EmployeesTableUpdateCompanionBuilder =
       Value<String> lastName,
       Value<String> status,
       Value<int?> terminationDate,
+      Value<int?> deletedAt,
       Value<int?> vacationDaysPerYear,
       Value<String?> secondaryPhone,
       Value<int?> hireDate,
@@ -5539,6 +5839,9 @@ typedef $$EmployeesTableUpdateCompanionBuilder =
       Value<int?> updatedAt,
       Value<String?> createdBy,
       Value<String?> updatedBy,
+      Value<int?> startingBalanceTenths,
+      Value<int?> startingBalanceUpdatedAt,
+      Value<String?> startingBalanceUpdatedBy,
     });
 
 final class $$EmployeesTableReferences
@@ -5655,6 +5958,11 @@ class $$EmployeesTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<int> get vacationDaysPerYear => $composableBuilder(
     column: $table.vacationDaysPerYear,
     builder: (column) => ColumnFilters(column),
@@ -5752,6 +6060,21 @@ class $$EmployeesTableFilterComposer
 
   ColumnFilters<String> get updatedBy => $composableBuilder(
     column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startingBalanceTenths => $composableBuilder(
+    column: $table.startingBalanceTenths,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get startingBalanceUpdatedAt => $composableBuilder(
+    column: $table.startingBalanceUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get startingBalanceUpdatedBy => $composableBuilder(
+    column: $table.startingBalanceUpdatedBy,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -5874,6 +6197,11 @@ class $$EmployeesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<int> get vacationDaysPerYear => $composableBuilder(
     column: $table.vacationDaysPerYear,
     builder: (column) => ColumnOrderings(column),
@@ -5973,6 +6301,21 @@ class $$EmployeesTableOrderingComposer
     column: $table.updatedBy,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get startingBalanceTenths => $composableBuilder(
+    column: $table.startingBalanceTenths,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get startingBalanceUpdatedAt => $composableBuilder(
+    column: $table.startingBalanceUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get startingBalanceUpdatedBy => $composableBuilder(
+    column: $table.startingBalanceUpdatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$EmployeesTableAnnotationComposer
@@ -6003,6 +6346,9 @@ class $$EmployeesTableAnnotationComposer
     column: $table.terminationDate,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
 
   GeneratedColumn<int> get vacationDaysPerYear => $composableBuilder(
     column: $table.vacationDaysPerYear,
@@ -6083,6 +6429,21 @@ class $$EmployeesTableAnnotationComposer
 
   GeneratedColumn<String> get updatedBy =>
       $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<int> get startingBalanceTenths => $composableBuilder(
+    column: $table.startingBalanceTenths,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get startingBalanceUpdatedAt => $composableBuilder(
+    column: $table.startingBalanceUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get startingBalanceUpdatedBy => $composableBuilder(
+    column: $table.startingBalanceUpdatedBy,
+    builder: (column) => column,
+  );
 
   Expression<T> employeeAuthsRefs<T extends Object>(
     Expression<T> Function($$EmployeeAuthsTableAnnotationComposer a) f,
@@ -6202,6 +6563,7 @@ class $$EmployeesTableTableManager
                 Value<String> lastName = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<int?> terminationDate = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
                 Value<int?> vacationDaysPerYear = const Value.absent(),
                 Value<String?> secondaryPhone = const Value.absent(),
                 Value<int?> hireDate = const Value.absent(),
@@ -6222,6 +6584,9 @@ class $$EmployeesTableTableManager
                 Value<int?> updatedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<String?> updatedBy = const Value.absent(),
+                Value<int?> startingBalanceTenths = const Value.absent(),
+                Value<int?> startingBalanceUpdatedAt = const Value.absent(),
+                Value<String?> startingBalanceUpdatedBy = const Value.absent(),
               }) => EmployeesCompanion(
                 id: id,
                 code: code,
@@ -6229,6 +6594,7 @@ class $$EmployeesTableTableManager
                 lastName: lastName,
                 status: status,
                 terminationDate: terminationDate,
+                deletedAt: deletedAt,
                 vacationDaysPerYear: vacationDaysPerYear,
                 secondaryPhone: secondaryPhone,
                 hireDate: hireDate,
@@ -6249,6 +6615,9 @@ class $$EmployeesTableTableManager
                 updatedAt: updatedAt,
                 createdBy: createdBy,
                 updatedBy: updatedBy,
+                startingBalanceTenths: startingBalanceTenths,
+                startingBalanceUpdatedAt: startingBalanceUpdatedAt,
+                startingBalanceUpdatedBy: startingBalanceUpdatedBy,
               ),
           createCompanionCallback:
               ({
@@ -6258,6 +6627,7 @@ class $$EmployeesTableTableManager
                 required String lastName,
                 Value<String> status = const Value.absent(),
                 Value<int?> terminationDate = const Value.absent(),
+                Value<int?> deletedAt = const Value.absent(),
                 Value<int?> vacationDaysPerYear = const Value.absent(),
                 Value<String?> secondaryPhone = const Value.absent(),
                 Value<int?> hireDate = const Value.absent(),
@@ -6278,6 +6648,9 @@ class $$EmployeesTableTableManager
                 Value<int?> updatedAt = const Value.absent(),
                 Value<String?> createdBy = const Value.absent(),
                 Value<String?> updatedBy = const Value.absent(),
+                Value<int?> startingBalanceTenths = const Value.absent(),
+                Value<int?> startingBalanceUpdatedAt = const Value.absent(),
+                Value<String?> startingBalanceUpdatedBy = const Value.absent(),
               }) => EmployeesCompanion.insert(
                 id: id,
                 code: code,
@@ -6285,6 +6658,7 @@ class $$EmployeesTableTableManager
                 lastName: lastName,
                 status: status,
                 terminationDate: terminationDate,
+                deletedAt: deletedAt,
                 vacationDaysPerYear: vacationDaysPerYear,
                 secondaryPhone: secondaryPhone,
                 hireDate: hireDate,
@@ -6305,6 +6679,9 @@ class $$EmployeesTableTableManager
                 updatedAt: updatedAt,
                 createdBy: createdBy,
                 updatedBy: updatedBy,
+                startingBalanceTenths: startingBalanceTenths,
+                startingBalanceUpdatedAt: startingBalanceUpdatedAt,
+                startingBalanceUpdatedBy: startingBalanceUpdatedBy,
               ),
           withReferenceMapper: (p0) => p0
               .map(
@@ -7233,6 +7610,7 @@ typedef $$WorkSessionsTableCreateCompanionBuilder =
       Value<int?> updatedAt,
       Value<String?> updatedBy,
       Value<String?> updateReason,
+      Value<int?> canceledAt,
     });
 typedef $$WorkSessionsTableUpdateCompanionBuilder =
     WorkSessionsCompanion Function({
@@ -7249,6 +7627,7 @@ typedef $$WorkSessionsTableUpdateCompanionBuilder =
       Value<int?> updatedAt,
       Value<String?> updatedBy,
       Value<String?> updateReason,
+      Value<int?> canceledAt,
     });
 
 final class $$WorkSessionsTableReferences
@@ -7354,6 +7733,11 @@ class $$WorkSessionsTableFilterComposer
 
   ColumnFilters<String> get updateReason => $composableBuilder(
     column: $table.updateReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get canceledAt => $composableBuilder(
+    column: $table.canceledAt,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7468,6 +7852,11 @@ class $$WorkSessionsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get canceledAt => $composableBuilder(
+    column: $table.canceledAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$EmployeesTableOrderingComposer get employeeId {
     final $$EmployeesTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -7559,6 +7948,11 @@ class $$WorkSessionsTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<int> get canceledAt => $composableBuilder(
+    column: $table.canceledAt,
+    builder: (column) => column,
+  );
+
   $$EmployeesTableAnnotationComposer get employeeId {
     final $$EmployeesTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -7647,6 +8041,7 @@ class $$WorkSessionsTableTableManager
                 Value<int?> updatedAt = const Value.absent(),
                 Value<String?> updatedBy = const Value.absent(),
                 Value<String?> updateReason = const Value.absent(),
+                Value<int?> canceledAt = const Value.absent(),
               }) => WorkSessionsCompanion(
                 id: id,
                 employeeId: employeeId,
@@ -7661,6 +8056,7 @@ class $$WorkSessionsTableTableManager
                 updatedAt: updatedAt,
                 updatedBy: updatedBy,
                 updateReason: updateReason,
+                canceledAt: canceledAt,
               ),
           createCompanionCallback:
               ({
@@ -7677,6 +8073,7 @@ class $$WorkSessionsTableTableManager
                 Value<int?> updatedAt = const Value.absent(),
                 Value<String?> updatedBy = const Value.absent(),
                 Value<String?> updateReason = const Value.absent(),
+                Value<int?> canceledAt = const Value.absent(),
               }) => WorkSessionsCompanion.insert(
                 id: id,
                 employeeId: employeeId,
@@ -7691,6 +8088,7 @@ class $$WorkSessionsTableTableManager
                 updatedAt: updatedAt,
                 updatedBy: updatedBy,
                 updateReason: updateReason,
+                canceledAt: canceledAt,
               ),
           withReferenceMapper: (p0) => p0
               .map(

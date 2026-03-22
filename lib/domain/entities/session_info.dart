@@ -6,6 +6,7 @@ class SessionInfo {
     this.endTs,
     required this.status,
     this.note,
+    this.canceledAt,
   });
 
   final int id;
@@ -13,4 +14,7 @@ class SessionInfo {
   final int? endTs;
   final String status;
   final String? note;
+
+  /// UTC ms when canceled; excluded from totals. Null if not canceled.
+  final int? canceledAt;
 }

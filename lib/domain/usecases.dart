@@ -5,6 +5,7 @@ import '../core/domain_errors.dart';
 import '../core/journal_interval_projection.dart';
 import '../core/employee_pin_status.dart';
 import '../core/pin_validation.dart';
+import '../core/starting_balance_period.dart';
 import '../common/utils/date_utils.dart';
 import 'attendance_interval_resolver.dart';
 import 'entities/absence_with_employee_info.dart';
@@ -122,9 +123,10 @@ class ClockInUseCase {
 }
 
 class ClockOutUseCase {
-  ClockOutUseCase(this._sessionsRepo, this._schedulesRepo);
+  ClockOutUseCase(this._sessionsRepo, this._schedulesRepo, this._employeesRepo);
   final ISessionsRepo _sessionsRepo;
   final ISchedulesRepo _schedulesRepo;
+  final IEmployeesRepo _employeesRepo;
 
   Future<ClockActionResult> call(
     int employeeId, {
@@ -132,6 +134,10 @@ class ClockOutUseCase {
     required AttendanceMode attendanceMode,
     required int toleranceMinutes,
   }) async {
+    final emp = await _employeesRepo.getEmployee(employeeId);
+    if (emp == null) {
+      return const ClockError(ClockErrorKind.employeeInactive);
+    }
     final open = await _sessionsRepo.getOpenSessionInfoForEmployee(employeeId);
     if (open == null) {
       return const ClockError(ClockErrorKind.noOpenSession);
@@ -218,10 +224,12 @@ class WatchSessionsUseCase {
     required int employeeId,
     required int fromUtcMs,
     required int toUtcMs,
+    bool includeCanceled = false,
   }) => _repo.streamSessions(
     employeeId: employeeId,
     fromUtcMs: fromUtcMs,
     toUtcMs: toUtcMs,
+    includeCanceled: includeCanceled,
   );
 
   Stream<List<SessionInfo>> streamSessionsForEmployeeOnDate(
@@ -233,10 +241,12 @@ class WatchSessionsUseCase {
     int? employeeId,
     int? fromUtcMs,
     int? toUtcMs,
+    bool includeCanceled = false,
   }) => _repo.streamSessionsWithEmployee(
     employeeId: employeeId,
     fromUtcMs: fromUtcMs,
     toUtcMs: toUtcMs,
+    includeCanceled: includeCanceled,
   );
 
   Stream<List<SessionWithEmployeeInfo>> streamOpenSessionsWithEmployee() =>
@@ -262,14 +272,17 @@ class EmployeeReportWithNormUseCase {
     this._sessionsRepo,
     this._schedulesRepo,
     this._absencesRepo,
+    this._employeesRepo,
   );
   final ISessionsRepo _sessionsRepo;
   final ISchedulesRepo _schedulesRepo;
   final IAbsencesRepo _absencesRepo;
+  final IEmployeesRepo _employeesRepo;
 
   Stream<List<EmployeeReportRowInfo>> streamEmployeeReportWithNorm({
     int? fromUtcMs,
     int? toUtcMs,
+    String? trackingStartYmd,
   }) async* {
     await for (final rows in _sessionsRepo.streamEmployeeReport(
       fromUtcMs: fromUtcMs,
@@ -279,7 +292,12 @@ class EmployeeReportWithNormUseCase {
         yield rows;
         continue;
       }
-      final enriched = await _enrichWithNorm(rows, fromUtcMs, toUtcMs);
+      final enriched = await _enrichWithNorm(
+        rows,
+        fromUtcMs,
+        toUtcMs,
+        trackingStartYmd,
+      );
       yield enriched;
     }
   }
@@ -288,6 +306,7 @@ class EmployeeReportWithNormUseCase {
     List<EmployeeReportRowInfo> rows,
     int fromUtcMs,
     int toUtcMs,
+    String? trackingStartYmd,
   ) async {
     final fromLocal = DateTime.fromMillisecondsSinceEpoch(
       fromUtcMs,
@@ -329,6 +348,10 @@ class EmployeeReportWithNormUseCase {
       absenceCoveredYmd[r.employeeId] = set;
     }
 
+    final startingSnapshots = await _employeesRepo.getStartingBalanceSnapshots(
+      rows.map((r) => r.employeeId),
+    );
+
     // Schedule cache: (employeeId, dateYmd) -> ResolvedSchedule
     final scheduleCache = <String, ResolvedSchedule>{};
 
@@ -363,7 +386,15 @@ class EmployeeReportWithNormUseCase {
         normMs += dayMin * 60 * 1000; // minutes to ms
         d = d.add(const Duration(days: 1));
       }
-      final deltaMs = r.totalMs - normMs;
+      var deltaMs = r.totalMs - normMs;
+      final snap = startingSnapshots[r.employeeId];
+      deltaMs += startingBalanceMsForPeriod(
+        tenths: snap?.tenths,
+        trackingStartYmd: trackingStartYmd,
+        balanceUpdatedAtUtcMs: snap?.updatedAtUtcMs,
+        fromUtcMs: fromUtcMs,
+        toUtcMs: toUtcMs,
+      );
       result.add(
         EmployeeReportRowInfo(
           employeeId: r.employeeId,
@@ -449,6 +480,7 @@ class EmployeeDayReportUseCase {
         workedByYmd[dateToYmd(d)] = 0;
       }
       for (final s in sessions) {
+        if (s.canceledAt != null) continue;
         if (s.endTs == null) continue;
         final startLocal = DateTime.fromMillisecondsSinceEpoch(
           s.startTs,
@@ -623,6 +655,7 @@ class JournalDayOverviewUseCase {
       final empId = sw.employee.id;
       if (!employeeIds.contains(empId)) continue;
       final s = sw.session;
+      if (s.canceledAt != null) continue;
       final startLocal = DateTime.fromMillisecondsSinceEpoch(
         s.startTs,
         isUtc: true,
@@ -882,6 +915,7 @@ class JournalIntervalOverviewUseCase {
         for (final sw in sessions) {
           if (sw.employee.id != emp.id) continue;
           final s = sw.session;
+          if (s.canceledAt != null) continue;
           final startLocal = DateTime.fromMillisecondsSinceEpoch(
             s.startTs,
             isUtc: true,
@@ -1055,6 +1089,18 @@ class UpdateSessionAsAdminUseCase {
   }
 }
 
+/// Admin use case: cancel a closed work session (excluded from totals; row stays in journal).
+class CancelWorkSessionAsAdminUseCase {
+  CancelWorkSessionAsAdminUseCase(this._sessionsRepo);
+  final ISessionsRepo _sessionsRepo;
+
+  Future<void> call({required int sessionId, String? updatedBy}) =>
+      _sessionsRepo.cancelSessionAsAdmin(
+        sessionId: sessionId,
+        updatedBy: updatedBy,
+      );
+}
+
 /// Admin use case for absence CRUD and status updates. Use from UI instead of repo.
 class AbsencesAdminUseCase {
   AbsencesAdminUseCase(this._repo);
@@ -1171,6 +1217,7 @@ class EmployeesAdminUseCase {
     int? policyAcknowledgedAt,
     required int? templateId,
     String? createdBy,
+    int? startingBalanceTenths,
   }) => _employeesRepo.createEmployeeFull(
     code: code,
     firstName: firstName,
@@ -1195,6 +1242,7 @@ class EmployeesAdminUseCase {
     policyAcknowledgedAt: policyAcknowledgedAt,
     templateId: templateId,
     createdBy: createdBy,
+    startingBalanceTenths: startingBalanceTenths,
   );
 
   Future<void> updateEmployeeFull({
@@ -1222,6 +1270,7 @@ class EmployeesAdminUseCase {
     int? policyAcknowledgedAt,
     int? templateId,
     String? updatedBy,
+    int? startingBalanceTenths,
   }) => _employeesRepo.updateEmployeeFull(
     id: id,
     code: code,
@@ -1247,6 +1296,7 @@ class EmployeesAdminUseCase {
     policyAcknowledgedAt: policyAcknowledgedAt,
     templateId: templateId,
     updatedBy: updatedBy,
+    startingBalanceTenths: startingBalanceTenths,
   );
 
   Future<EmployeePinStatus> getPinStatus(int employeeId) =>
@@ -1257,6 +1307,9 @@ class EmployeesAdminUseCase {
 
   Future<void> resetEmployeePin(int employeeId) =>
       _employeesRepo.resetEmployeePin(employeeId);
+
+  Future<void> markEmployeeForDeletion(int id) =>
+      _employeesRepo.markEmployeeForDeletion(id);
 
   Future<int?> getAssignmentTemplateId(int employeeId) =>
       _schedulesRepo.getAssignmentTemplateId(employeeId);

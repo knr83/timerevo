@@ -27,6 +27,7 @@ final clockOutUseCaseProvider = Provider<ClockOutUseCase>((ref) {
   return ClockOutUseCase(
     ref.watch(sessionsRepoProvider),
     ref.watch(schedulesRepoProvider),
+    ref.watch(employeesRepoProvider),
   );
 });
 
@@ -57,6 +58,7 @@ final employeeReportWithNormUseCaseProvider =
         ref.watch(sessionsRepoProvider),
         ref.watch(schedulesRepoProvider),
         ref.watch(absencesRepoProvider),
+        ref.watch(employeesRepoProvider),
       );
     });
 
@@ -167,6 +169,7 @@ final watchReportWithNormProvider = StreamProvider<List<EmployeeReportRowInfo>>(
         .streamEmployeeReportWithNorm(
           fromUtcMs: r.fromUtcMs,
           toUtcMs: r.toUtcMs,
+          trackingStartYmd: ymd,
         );
   },
 );

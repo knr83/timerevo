@@ -576,7 +576,17 @@ class AppLocalizationsDe extends AppLocalizations {
   String get employeeWeeklyHours => 'Wochenstunden';
 
   @override
+  String get weeklyHoursShortUnitSuffix => ' h';
+
+  @override
   String get employeeEmail => 'E-Mail';
+
+  @override
+  String get employeeEmailHint => 'name@example.com';
+
+  @override
+  String get employeeEmailInvalid =>
+      'Geben Sie eine gültige E-Mail-Adresse ein.';
 
   @override
   String get employeePhone => 'Telefon';
@@ -705,7 +715,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get employeeSectionSchedule => 'Plan';
 
   @override
+  String get employeeSectionWorkSetup => 'Arbeitszeit-Setup';
+
+  @override
+  String get employeeStartingBalanceLabel => 'Anfangssaldo (Stunden)';
+
+  @override
+  String get employeeStartingBalanceHint =>
+      'Stunden mit einer Dezimalstelle. Leer lassen wenn keiner.';
+
+  @override
+  String get employeeStartingBalanceInvalid =>
+      'Bitte gültige Stunden eingeben (eine Dezimalstelle).';
+
+  @override
   String get employeeScheduleRequired => 'Plan ist erforderlich.';
+
+  @override
+  String employeeScheduleTemplateWithWeeklyHours(String name, String hours) {
+    return '$name ($hours)';
+  }
 
   @override
   String get employeeSectionPolicy => 'Richtlinie & Compliance';
@@ -736,6 +765,24 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get employeeDataPdfExported => 'Mitarbeiterdaten exportiert.';
+
+  @override
+  String get employeeMarkForRemovalTooltip => 'Aus aktiven Listen entfernen';
+
+  @override
+  String get employeeMarkForRemovalConfirmTitle =>
+      'Aus aktiven Listen entfernen?';
+
+  @override
+  String get employeeMarkForRemovalConfirmMessage =>
+      'Der Mitarbeiter wird archiviert und aus aktiven Listen und Berichten ausgeblendet. Historische Daten (Schichten, Abwesenheiten) bleiben verfügbar.';
+
+  @override
+  String get employeeMarkForRemovalConfirm => 'Bestätigen';
+
+  @override
+  String get employeeMarkForRemovalSuccess =>
+      'Mitarbeiter aus aktiven Listen entfernt.';
 
   @override
   String employeeDataPdfFailed(String error) {
@@ -1349,6 +1396,41 @@ class AppLocalizationsDe extends AppLocalizations {
   String get journalSaved => 'Gespeichert.';
 
   @override
+  String get sessionsCancelConfirmTitle => 'Diese Arbeitssitzung stornieren?';
+
+  @override
+  String get sessionsCancelConfirmBody =>
+      'Die Sitzung wird aus Summen und Berichten ausgeschlossen. Sie bleibt in der Journal-Tabelle sichtbar.';
+
+  @override
+  String get sessionsCancelWorkSession => 'Sitzung stornieren';
+
+  @override
+  String get sessionsCancelSuccess => 'Sitzung storniert.';
+
+  @override
+  String get sessionStatusCanceled => 'Storniert';
+
+  @override
+  String get sessionsEditDisabledCanceled =>
+      'Bearbeitung ist für stornierte Sitzungen deaktiviert';
+
+  @override
+  String get sessionsEditCanceledError =>
+      'Stornierte Sitzungen können nicht bearbeitet werden.';
+
+  @override
+  String get sessionsCancelNotClosedError =>
+      'Nur geschlossene Sitzungen können storniert werden.';
+
+  @override
+  String get sessionsCancelAlreadyCanceledError =>
+      'Diese Sitzung ist bereits storniert.';
+
+  @override
+  String get sessionsCancelNotFoundError => 'Sitzung nicht gefunden.';
+
+  @override
   String get journalViewTable => 'Tabelle';
 
   @override
@@ -1491,6 +1573,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reportsPdfTitle => 'Arbeitszeitbericht';
+
+  @override
+  String get reportsPdfStartingBalance => 'Anfangssaldo';
 
   @override
   String reportsPdfPeriod(String from, String to) {

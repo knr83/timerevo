@@ -572,7 +572,17 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeWeeklyHours => 'Часов в неделю';
 
   @override
+  String get weeklyHoursShortUnitSuffix => ' ч';
+
+  @override
   String get employeeEmail => 'E-mail';
+
+  @override
+  String get employeeEmailHint => 'name@example.com';
+
+  @override
+  String get employeeEmailInvalid =>
+      'Введите корректный адрес электронной почты.';
 
   @override
   String get employeePhone => 'Телефон';
@@ -701,7 +711,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get employeeSectionSchedule => 'Расписание';
 
   @override
+  String get employeeSectionWorkSetup => 'Рабочие настройки';
+
+  @override
+  String get employeeStartingBalanceLabel => 'Начальный баланс (часы)';
+
+  @override
+  String get employeeStartingBalanceHint =>
+      'Часы с одним знаком после запятой. Оставьте пустым, если нет.';
+
+  @override
+  String get employeeStartingBalanceInvalid =>
+      'Введите корректные часы (один знак после запятой).';
+
+  @override
   String get employeeScheduleRequired => 'Укажите расписание.';
+
+  @override
+  String employeeScheduleTemplateWithWeeklyHours(String name, String hours) {
+    return '$name ($hours)';
+  }
 
   @override
   String get employeeSectionPolicy => 'Политика и соответствие';
@@ -732,6 +761,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get employeeDataPdfExported => 'Данные сотрудника экспортированы.';
+
+  @override
+  String get employeeMarkForRemovalTooltip => 'Исключить из активных списков';
+
+  @override
+  String get employeeMarkForRemovalConfirmTitle =>
+      'Исключить из активных списков?';
+
+  @override
+  String get employeeMarkForRemovalConfirmMessage =>
+      'Сотрудник будет архивирован и скрыт из активных списков и отчётов. Исторические данные (смены, отсутствия) остаются доступными.';
+
+  @override
+  String get employeeMarkForRemovalConfirm => 'Подтвердить';
+
+  @override
+  String get employeeMarkForRemovalSuccess =>
+      'Сотрудник исключён из активных списков.';
 
   @override
   String employeeDataPdfFailed(String error) {
@@ -1344,6 +1391,40 @@ class AppLocalizationsRu extends AppLocalizations {
   String get journalSaved => 'Сохранено.';
 
   @override
+  String get sessionsCancelConfirmTitle => 'Отменить эту рабочую сессию?';
+
+  @override
+  String get sessionsCancelConfirmBody =>
+      'Сессия будет исключена из сумм и отчётов, но останется видимой в таблице журнала.';
+
+  @override
+  String get sessionsCancelWorkSession => 'Отменить сессию';
+
+  @override
+  String get sessionsCancelSuccess => 'Сессия отменена.';
+
+  @override
+  String get sessionStatusCanceled => 'Отменена';
+
+  @override
+  String get sessionsEditDisabledCanceled =>
+      'Редактирование недоступно для отменённых сессий';
+
+  @override
+  String get sessionsEditCanceledError =>
+      'Отменённые сессии нельзя редактировать.';
+
+  @override
+  String get sessionsCancelNotClosedError =>
+      'Отменять можно только закрытые сессии.';
+
+  @override
+  String get sessionsCancelAlreadyCanceledError => 'Эта сессия уже отменена.';
+
+  @override
+  String get sessionsCancelNotFoundError => 'Сессия не найдена.';
+
+  @override
   String get journalViewTable => 'Таблица';
 
   @override
@@ -1484,6 +1565,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reportsPdfTitle => 'Отчёт по времени';
+
+  @override
+  String get reportsPdfStartingBalance => 'Начальный баланс';
 
   @override
   String reportsPdfPeriod(String from, String to) {

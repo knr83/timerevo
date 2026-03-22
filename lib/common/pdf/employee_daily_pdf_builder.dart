@@ -18,6 +18,7 @@ class EmployeeDailyPdfLabels {
     required this.totalLabel,
     required this.noSchedule,
     required this.footerPage,
+    this.startingBalanceRowLabel,
   });
 
   final String title;
@@ -31,6 +32,9 @@ class EmployeeDailyPdfLabels {
   final String totalLabel;
   final String noSchedule;
   final String Function(int current, int total) footerPage;
+
+  /// When set and [periodStartingBalanceMs] != 0, a second summary row is shown.
+  final String? startingBalanceRowLabel;
 }
 
 const pw.TextStyle _contextLineStyle = pw.TextStyle(
@@ -57,10 +61,12 @@ Future<pw.Document> buildEmployeeDailyPdf({
   required EmployeeDailyPdfLabels labels,
   required List<EmployeeDayReportRow> dayRows,
   required String Function(int ms) formatDuration,
+  int periodStartingBalanceMs = 0,
 }) async {
   final totalMs = dayRows.fold<int>(0, (s, r) => s + r.workedMs);
   final normMs = dayRows.fold<int>(0, (s, r) => s + r.normMs);
-  final deltaMs = dayRows.fold<int>(0, (s, r) => s + r.deltaMs);
+  final sumDayDeltaMs = dayRows.fold<int>(0, (s, r) => s + r.deltaMs);
+  final periodBalanceMs = sumDayDeltaMs + periodStartingBalanceMs;
   final anyDayHasSchedule = dayRows.any((r) => r.hasSchedule);
 
   final generatedAt = DateTime.now().toLocal();
@@ -97,29 +103,59 @@ Future<pw.Document> buildEmployeeDailyPdf({
                 color: PdfColors.grey100,
                 border: pw.Border.all(color: PdfColors.grey300, width: 0.5),
               ),
-              child: pw.Row(
-                mainAxisAlignment: pw.MainAxisAlignment.start,
+              child: pw.Column(
+                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                mainAxisSize: pw.MainAxisSize.min,
                 children: [
-                  pw.Text(labels.workedColumn, style: _tableHeaderStyle),
-                  pw.SizedBox(width: 16),
-                  pw.Text(formatDuration(totalMs), style: _tableCellStyle),
-                  pw.SizedBox(width: 24),
-                  pw.Text(labels.plannedColumn, style: _tableHeaderStyle),
-                  pw.SizedBox(width: 16),
-                  pw.Text(
-                    anyDayHasSchedule
-                        ? formatDuration(normMs)
-                        : labels.noSchedule,
-                    style: _tableCellStyle,
+                  pw.Row(
+                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                    children: [
+                      pw.Text(labels.workedColumn, style: _tableHeaderStyle),
+                      pw.SizedBox(width: 16),
+                      pw.Text(formatDuration(totalMs), style: _tableCellStyle),
+                      pw.SizedBox(width: 24),
+                      pw.Text(labels.plannedColumn, style: _tableHeaderStyle),
+                      pw.SizedBox(width: 16),
+                      pw.Text(
+                        anyDayHasSchedule
+                            ? formatDuration(normMs)
+                            : labels.noSchedule,
+                        style: _tableCellStyle,
+                      ),
+                      pw.SizedBox(width: 24),
+                      pw.Text(labels.balanceColumn, style: _tableHeaderStyle),
+                      pw.SizedBox(width: 16),
+                      pdfPrintFormBalanceText(
+                        ms: periodBalanceMs,
+                        absHmDuration: formatDuration(periodBalanceMs.abs()),
+                        baseStyle: _tableCellStyle,
+                      ),
+                    ],
                   ),
-                  pw.SizedBox(width: 24),
-                  pw.Text(labels.balanceColumn, style: _tableHeaderStyle),
-                  pw.SizedBox(width: 16),
-                  pdfPrintFormBalanceText(
-                    ms: deltaMs,
-                    absHmDuration: formatDuration(deltaMs.abs()),
-                    baseStyle: _tableCellStyle,
-                  ),
+                  if (periodStartingBalanceMs != 0 &&
+                      labels.startingBalanceRowLabel != null) ...[
+                    pw.SizedBox(height: 6),
+                    pw.Row(
+                      mainAxisAlignment: pw.MainAxisAlignment.start,
+                      children: [
+                        pw.SizedBox(
+                          width: 200,
+                          child: pw.Text(
+                            labels.startingBalanceRowLabel!,
+                            style: _tableCellStyle,
+                          ),
+                        ),
+                        pw.Spacer(),
+                        pdfPrintFormBalanceText(
+                          ms: periodStartingBalanceMs,
+                          absHmDuration: formatDuration(
+                            periodStartingBalanceMs.abs(),
+                          ),
+                          baseStyle: _tableCellStyle,
+                        ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -256,8 +292,8 @@ Future<pw.Document> buildEmployeeDailyPdf({
                   child: pw.Align(
                     alignment: pw.Alignment.centerRight,
                     child: pdfPrintFormBalanceText(
-                      ms: deltaMs,
-                      absHmDuration: formatDuration(deltaMs.abs()),
+                      ms: periodBalanceMs,
+                      absHmDuration: formatDuration(periodBalanceMs.abs()),
                       baseStyle: _tableHeaderStyle,
                     ),
                   ),

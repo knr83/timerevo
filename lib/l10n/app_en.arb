@@ -266,7 +266,10 @@
   "employeeAccessTokenRequiredWhenNfc": "Required when NFC enabled.",
   "employeeEmploymentType": "Employment type",
   "employeeWeeklyHours": "Weekly hours",
+  "weeklyHoursShortUnitSuffix": " h",
   "employeeEmail": "Email",
+  "employeeEmailHint": "name@example.com",
+  "employeeEmailInvalid": "Enter a valid email address.",
   "employeePhone": "Phone",
   "employeeDepartment": "Department",
   "employeeJobTitle": "Job title",
@@ -326,7 +329,18 @@
   "employeeSectionContact": "Contact",
   "employeeSectionAccess": "Terminal Access",
   "employeeSectionSchedule": "Schedule",
+  "employeeSectionWorkSetup": "Work setup",
+  "employeeStartingBalanceLabel": "Starting balance (hours)",
+  "employeeStartingBalanceHint": "Hours with one decimal. Leave empty if none.",
+  "employeeStartingBalanceInvalid": "Enter a valid hours value (one decimal).",
   "employeeScheduleRequired": "Schedule is required.",
+  "employeeScheduleTemplateWithWeeklyHours": "{name} ({hours})",
+  "@employeeScheduleTemplateWithWeeklyHours": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "hours": { "type": "String" }
+    }
+  },
   "employeeSectionPolicy": "Policy & Compliance",
   "employeeSectionAudit": "Record",
   "employeeTabGeneral": "General",
@@ -337,6 +351,11 @@
   "employeeDataPdfSectionEmployeeInfo": "Employee Information",
   "employeeExportEmployeeData": "Export employee data",
   "employeeDataPdfExported": "Employee data exported.",
+  "employeeMarkForRemovalTooltip": "Mark for removal from active lists",
+  "employeeMarkForRemovalConfirmTitle": "Mark for removal from active lists?",
+  "employeeMarkForRemovalConfirmMessage": "The employee will be archived and hidden from active lists and reports. Historical data (sessions, absences) remains available.",
+  "employeeMarkForRemovalConfirm": "Confirm",
+  "employeeMarkForRemovalSuccess": "Employee removed from active lists.",
   "employeeDataPdfFailed": "Failed to export employee data: {error}",
   "@employeeDataPdfFailed": {
     "placeholders": {
@@ -623,6 +642,16 @@
   "journalErrorOutsideEmployment": "Session dates must fall within the employee's employment period.",
   "journalUpdateReasonHint": "Required when changing start or end time",
   "journalSaved": "Saved.",
+  "sessionsCancelConfirmTitle": "Cancel this work session?",
+  "sessionsCancelConfirmBody": "The session will be excluded from totals and reports. It will remain visible in the journal table.",
+  "sessionsCancelWorkSession": "Cancel session",
+  "sessionsCancelSuccess": "Session canceled.",
+  "sessionStatusCanceled": "Canceled",
+  "sessionsEditDisabledCanceled": "Editing is disabled for canceled sessions",
+  "sessionsEditCanceledError": "Canceled sessions cannot be edited.",
+  "sessionsCancelNotClosedError": "Only closed sessions can be canceled.",
+  "sessionsCancelAlreadyCanceledError": "This session is already canceled.",
+  "sessionsCancelNotFoundError": "Session not found.",
   "journalViewTable": "Table",
   "journalViewTimeline": "Timeline",
   "journalViewDetailed": "Detailed",
@@ -685,6 +714,7 @@
   "reportsDetailsClose": "Close",
   "reportsTableDate": "Date",
   "reportsPdfTitle": "Time report",
+  "reportsPdfStartingBalance": "Starting balance",
   "reportsPdfPeriod": "Period: {from} — {to}",
   "@reportsPdfPeriod": {
     "placeholders": {

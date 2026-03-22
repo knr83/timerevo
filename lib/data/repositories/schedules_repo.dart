@@ -51,21 +51,57 @@ class SchedulesRepo implements ISchedulesRepo {
     return q.watch();
   }
 
-  /// Stream of schedule templates as domain types (id, name only).
+  /// Stream of schedule templates as domain types (id, name, weekly totals).
+  ///
+  /// Watches templates, days, and intervals so weekly minutes refresh when
+  /// intervals change (not only when template metadata changes).
   Stream<List<ScheduleTemplateInfo>> streamTemplateInfos({
     bool onlyActive = true,
   }) {
-    return watchTemplates(onlyActive: onlyActive).map(
-      (list) => list
-          .map(
-            (t) => ScheduleTemplateInfo(
-              id: t.id,
-              name: t.name,
-              isActive: t.isActive == 1,
-            ),
-          )
-          .toList(),
-    );
+    final activeFilter = onlyActive ? 'AND t.is_active = 1' : '';
+    return _db
+        .customSelect(
+          '''
+SELECT
+  t.id AS template_id,
+  t.name AS template_name,
+  t.is_active AS is_active,
+  COALESCE(SUM(
+    CASE
+      WHEN d.is_day_off = 0 AND i.end_min > i.start_min
+      THEN (i.end_min - i.start_min)
+      ELSE 0
+    END
+  ), 0) AS weekly_total_work_minutes
+FROM shift_schedule_templates t
+LEFT JOIN shift_schedule_template_days d ON d.template_id = t.id
+LEFT JOIN shift_schedule_template_intervals i
+  ON i.template_day_id = d.id AND i.end_min > i.start_min
+WHERE 1 = 1 $activeFilter
+GROUP BY t.id, t.name, t.is_active
+ORDER BY t.name ASC
+''',
+          readsFrom: {
+            _db.shiftScheduleTemplates,
+            _db.shiftScheduleTemplateDays,
+            _db.shiftScheduleTemplateIntervals,
+          },
+        )
+        .watch()
+        .map(
+          (rows) => rows
+              .map(
+                (r) => ScheduleTemplateInfo(
+                  id: r.read<int>('template_id'),
+                  name: r.read<String>('template_name'),
+                  isActive: r.read<int>('is_active') == 1,
+                  weeklyTotalWorkMinutes: r.read<int>(
+                    'weekly_total_work_minutes',
+                  ),
+                ),
+              )
+              .toList(),
+        );
   }
 
   /// One-shot: get assigned template ID for employee, or null.

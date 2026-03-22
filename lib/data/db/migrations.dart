@@ -430,6 +430,41 @@ FROM employees;
         });
       }
 
+      if (from < 12) {
+        try {
+          await db.customStatement(
+            'ALTER TABLE employees ADD COLUMN deleted_at INTEGER;',
+          );
+        } catch (_) {
+          // Column may already exist on partial migration.
+        }
+      }
+
+      if (from < 13) {
+        try {
+          await db.customStatement(
+            'ALTER TABLE work_sessions ADD COLUMN canceled_at INTEGER;',
+          );
+        } catch (_) {
+          // Column may already exist on partial migration.
+        }
+      }
+
+      if (from < 14) {
+        const cols = [
+          'ALTER TABLE employees ADD COLUMN starting_balance_tenths INTEGER;',
+          'ALTER TABLE employees ADD COLUMN starting_balance_updated_at INTEGER;',
+          'ALTER TABLE employees ADD COLUMN starting_balance_updated_by TEXT;',
+        ];
+        for (final sql in cols) {
+          try {
+            await db.customStatement(sql);
+          } catch (_) {
+            // Column may already exist on partial migration.
+          }
+        }
+      }
+
       await createIndexesAndConstraints(db);
     },
   );

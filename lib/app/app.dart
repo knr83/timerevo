@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:phone_form_field/phone_form_field.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -38,7 +39,10 @@ class App extends ConsumerWidget {
       highContrastTheme: themeConfig.highContrastTheme,
       highContrastDarkTheme: themeConfig.highContrastDarkTheme,
       themeMode: themeConfig.themeMode,
-      localizationsDelegates: AppLocalizations.localizationsDelegates,
+      localizationsDelegates: [
+        ...AppLocalizations.localizationsDelegates,
+        ...PhoneFieldLocalization.delegates,
+      ],
       supportedLocales: const [Locale('de'), Locale('ru'), Locale('en')],
       locale: overrideCode == null ? null : Locale(overrideCode),
       localeResolutionCallback: (locale, supportedLocales) {

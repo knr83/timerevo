@@ -31,6 +31,7 @@ Future<void> exportEmployeeDailyPdf(
   required int fromUtcMs,
   required int toUtcMs,
   String? sortColumnName,
+  int periodStartingBalanceMs = 0,
   required void Function(String message) showSnack,
   required void Function(String message, {bool isError}) showErrorSnack,
 }) async {
@@ -78,12 +79,16 @@ Future<void> exportEmployeeDailyPdf(
       totalLabel: l10n.reportsTableTotal,
       noSchedule: l10n.reportsPlannedNoSchedule,
       footerPage: l10n.reportsPdfFooterPage,
+      startingBalanceRowLabel: periodStartingBalanceMs != 0
+          ? l10n.reportsPdfStartingBalance
+          : null,
     );
     final pdf = await buildEmployeeDailyPdf(
       theme: theme,
       labels: labels,
       dayRows: dayRows,
       formatDuration: (ms) => _formatDurationMs(ms, l10n),
+      periodStartingBalanceMs: periodStartingBalanceMs,
     );
     final bytes = await pdf.save();
     await File(saveLocation.path).writeAsBytes(bytes);

@@ -51,7 +51,10 @@ Future<void> exportScheduleRosterPdf(
   try {
     final data = await ref.read(scheduleRosterPdfDataUseCaseProvider).build();
     final tableRows = data.rows.map((r) {
-      final wh = formatTemplateWeeklyHoursDisplay(r.weeklyTotalWorkMinutes);
+      final wh = formatTemplateWeeklyHoursDisplay(
+        r.weeklyTotalWorkMinutes,
+        unitSuffix: l10n.weeklyHoursShortUnitSuffix,
+      );
       return ScheduleRosterPdfTableRow(
         employee: r.employeeDisplayName,
         weekdayCells: List<String>.from(r.weekdayCells),

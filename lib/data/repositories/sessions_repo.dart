@@ -93,6 +93,7 @@ class SessionsRepo implements ISessionsRepo {
     endTs: w.endTs,
     status: w.status,
     note: w.note,
+    canceledAt: w.canceledAt,
   );
 
   static EmployeeInfo _toEmployeeInfo(Employee e) => EmployeeInfo(
@@ -132,11 +133,13 @@ class SessionsRepo implements ISessionsRepo {
     required int employeeId,
     required int fromUtcMs,
     required int toUtcMs,
+    bool includeCanceled = false,
   }) {
     return watchSessions(
       employeeId: employeeId,
       fromUtcMs: fromUtcMs,
       toUtcMs: toUtcMs,
+      includeCanceled: includeCanceled,
     ).map((list) => list.map(_toSessionInfo).toList());
   }
 
@@ -169,11 +172,13 @@ class SessionsRepo implements ISessionsRepo {
     int? employeeId,
     int? fromUtcMs,
     int? toUtcMs,
+    bool includeCanceled = false,
   }) {
     return watchSessionsWithEmployee(
       employeeId: employeeId,
       fromUtcMs: fromUtcMs,
       toUtcMs: toUtcMs,
+      includeCanceled: includeCanceled,
     ).map((list) => list.map(_toSessionWithEmployeeInfo).toList());
   }
 
@@ -345,6 +350,7 @@ class SessionsRepo implements ISessionsRepo {
     int? employeeId,
     int? fromUtcMs,
     int? toUtcMs,
+    bool includeCanceled = false,
   }) {
     final q = _db.select(_db.workSessions);
     if (employeeId != null) {
@@ -356,6 +362,9 @@ class SessionsRepo implements ISessionsRepo {
     if (toUtcMs != null) {
       q.where((s) => s.startTs.isSmallerOrEqualValue(toUtcMs));
     }
+    if (!includeCanceled) {
+      q.where((s) => s.canceledAt.isNull());
+    }
     q.orderBy([(s) => OrderingTerm.desc(s.startTs)]);
     return q.watch();
   }
@@ -364,6 +373,7 @@ class SessionsRepo implements ISessionsRepo {
     int? employeeId,
     int? fromUtcMs,
     int? toUtcMs,
+    bool includeCanceled = false,
   }) {
     final ws = _db.workSessions;
     final e = _db.employees;
@@ -380,6 +390,9 @@ class SessionsRepo implements ISessionsRepo {
     }
     if (toUtcMs != null) {
       join.where(ws.startTs.isSmallerOrEqualValue(toUtcMs));
+    }
+    if (!includeCanceled) {
+      join.where(ws.canceledAt.isNull());
     }
 
     join.orderBy([OrderingTerm.desc(ws.startTs)]);
@@ -436,6 +449,7 @@ class SessionsRepo implements ISessionsRepo {
     if (fromUtcMs != null) {
       join.where(ws.startTs.isBiggerOrEqualValue(fromUtcMs));
     }
+    join.where(ws.canceledAt.isNull());
 
     join.orderBy([OrderingTerm.desc(ws.startTs)]);
     join.limit(limit);
@@ -470,6 +484,12 @@ class SessionsRepo implements ISessionsRepo {
     String? updatedBy,
   }) async {
     return guardRepoCall(() async {
+      final existing = await (_db.select(
+        _db.workSessions,
+      )..where((s) => s.id.equals(sessionId))).getSingleOrNull();
+      if (existing?.canceledAt != null) {
+        throw const DomainValidationException('sessionUpdateCanceled');
+      }
       if (endUtcMs != null) {
         if (endUtcMs <= startUtcMs) {
           throw const DomainValidationException(
@@ -500,6 +520,39 @@ class SessionsRepo implements ISessionsRepo {
           ),
         ),
       );
+    });
+  }
+
+  @override
+  Future<void> cancelSessionAsAdmin({
+    required int sessionId,
+    String? updatedBy,
+  }) async {
+    return guardRepoCall(() async {
+      await _db.transaction(() async {
+        final row = await (_db.select(
+          _db.workSessions,
+        )..where((s) => s.id.equals(sessionId))).getSingleOrNull();
+        if (row == null) {
+          throw const DomainValidationException('sessionCancelNotFound');
+        }
+        if (row.canceledAt != null) {
+          throw const DomainValidationException('sessionCancelAlreadyCanceled');
+        }
+        if (row.status != WorkSessionStatusDb.closed || row.endTs == null) {
+          throw const DomainValidationException('sessionCancelNotClosed');
+        }
+        final now = UtcClock.nowMs();
+        await (_db.update(
+          _db.workSessions,
+        )..where((s) => s.id.equals(sessionId))).write(
+          WorkSessionsCompanion(
+            updatedAt: Value(now),
+            updatedBy: Value(updatedBy),
+            canceledAt: Value(now),
+          ),
+        );
+      });
     });
   }
 
@@ -553,11 +606,12 @@ class SessionsRepo implements ISessionsRepo {
 SELECT
   e.id AS employee_id,
   (e.last_name || ' ' || e.first_name) AS employee_name,
-  COALESCE(SUM(CASE WHEN ws.end_ts IS NOT NULL THEN (ws.end_ts - ws.start_ts) ELSE 0 END), 0) AS total_ms,
-  COALESCE(SUM(CASE WHEN ws.end_ts IS NOT NULL THEN 1 ELSE 0 END), 0) AS closed_count
+  COALESCE(SUM(CASE WHEN ws.end_ts IS NOT NULL AND ws.canceled_at IS NULL THEN (ws.end_ts - ws.start_ts) ELSE 0 END), 0) AS total_ms,
+  COALESCE(SUM(CASE WHEN ws.end_ts IS NOT NULL AND ws.canceled_at IS NULL THEN 1 ELSE 0 END), 0) AS closed_count
 FROM employees e
 LEFT JOIN work_sessions ws
   ON ws.employee_id = e.id $onExtra
+WHERE e.deleted_at IS NULL
 GROUP BY e.id, e.first_name, e.last_name
 ORDER BY e.last_name ASC, e.first_name ASC;
 ''';

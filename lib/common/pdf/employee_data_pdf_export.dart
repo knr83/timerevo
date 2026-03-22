@@ -9,7 +9,6 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import '../../core/error_message_helper.dart';
 import '../../core/weekly_template_hours_display.dart';
 import '../../domain/entities/employee_status.dart';
-import '../../domain/entities/schedule_entities.dart';
 import '../../domain/ports/schedules_repo_port.dart';
 import '../../domain/schedule_weekly_work_minutes.dart';
 import '../../domain/usecases.dart';
@@ -50,7 +49,6 @@ Future<void> exportEmployeeDataPdf(
   required EmployeesAdminUseCase employeesAdminUseCase,
   required ISchedulesRepo schedulesRepo,
   required int employeeId,
-  required List<ScheduleTemplateInfo> templates,
   required void Function(String message) showSnack,
   required void Function(String message, {bool isError}) showErrorSnack,
 }) async {
@@ -84,19 +82,14 @@ Future<void> exportEmployeeDataPdf(
       return;
     }
 
-    final templateName = details.templateId != null
-        ? templates
-                  .where((t) => t.id == details.templateId)
-                  .firstOrNull
-                  ?.name ??
-              l10n.commonNone
-        : l10n.commonNone;
-
     String weeklyHoursDisplay = '\u2014';
     if (details.templateId != null) {
       final week = await schedulesRepo.getTemplateWeek(details.templateId!);
       final totalMin = scheduleTemplateWeekTotalWorkMinutes(week);
-      weeklyHoursDisplay = formatTemplateWeeklyHoursDisplay(totalMin);
+      weeklyHoursDisplay = formatTemplateWeeklyHoursDisplay(
+        totalMin,
+        unitSuffix: l10n.weeklyHoursShortUnitSuffix,
+      );
     }
 
     final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
@@ -124,7 +117,6 @@ Future<void> exportEmployeeDataPdf(
       vacationDaysPerYear: l10n.employeeVacationDaysPerYearLabel,
       department: l10n.employeeDepartment,
       jobTitle: l10n.employeeJobTitle,
-      schedule: l10n.employeeSectionSchedule,
       footerPage: l10n.reportsPdfFooterPage,
     );
 
@@ -132,7 +124,6 @@ Future<void> exportEmployeeDataPdf(
       theme: theme,
       labels: labels,
       details: details,
-      templateName: templateName == l10n.commonNone ? null : templateName,
       weeklyHoursDisplay: weeklyHoursDisplay,
       formatDate: _formatDate,
       statusLabel: _statusLabel(details.status, l10n),

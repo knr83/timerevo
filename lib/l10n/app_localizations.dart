@@ -1114,11 +1114,29 @@ abstract class AppLocalizations {
   /// **'Weekly hours'**
   String get employeeWeeklyHours;
 
+  /// No description provided for @weeklyHoursShortUnitSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **' h'**
+  String get weeklyHoursShortUnitSuffix;
+
   /// No description provided for @employeeEmail.
   ///
   /// In en, this message translates to:
   /// **'Email'**
   String get employeeEmail;
+
+  /// No description provided for @employeeEmailHint.
+  ///
+  /// In en, this message translates to:
+  /// **'name@example.com'**
+  String get employeeEmailHint;
+
+  /// No description provided for @employeeEmailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid email address.'**
+  String get employeeEmailInvalid;
 
   /// No description provided for @employeePhone.
   ///
@@ -1354,11 +1372,41 @@ abstract class AppLocalizations {
   /// **'Schedule'**
   String get employeeSectionSchedule;
 
+  /// No description provided for @employeeSectionWorkSetup.
+  ///
+  /// In en, this message translates to:
+  /// **'Work setup'**
+  String get employeeSectionWorkSetup;
+
+  /// No description provided for @employeeStartingBalanceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting balance (hours)'**
+  String get employeeStartingBalanceLabel;
+
+  /// No description provided for @employeeStartingBalanceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Hours with one decimal. Leave empty if none.'**
+  String get employeeStartingBalanceHint;
+
+  /// No description provided for @employeeStartingBalanceInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid hours value (one decimal).'**
+  String get employeeStartingBalanceInvalid;
+
   /// No description provided for @employeeScheduleRequired.
   ///
   /// In en, this message translates to:
   /// **'Schedule is required.'**
   String get employeeScheduleRequired;
+
+  /// No description provided for @employeeScheduleTemplateWithWeeklyHours.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} ({hours})'**
+  String employeeScheduleTemplateWithWeeklyHours(String name, String hours);
 
   /// No description provided for @employeeSectionPolicy.
   ///
@@ -1419,6 +1467,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Employee data exported.'**
   String get employeeDataPdfExported;
+
+  /// No description provided for @employeeMarkForRemovalTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark for removal from active lists'**
+  String get employeeMarkForRemovalTooltip;
+
+  /// No description provided for @employeeMarkForRemovalConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark for removal from active lists?'**
+  String get employeeMarkForRemovalConfirmTitle;
+
+  /// No description provided for @employeeMarkForRemovalConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The employee will be archived and hidden from active lists and reports. Historical data (sessions, absences) remains available.'**
+  String get employeeMarkForRemovalConfirmMessage;
+
+  /// No description provided for @employeeMarkForRemovalConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm'**
+  String get employeeMarkForRemovalConfirm;
+
+  /// No description provided for @employeeMarkForRemovalSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Employee removed from active lists.'**
+  String get employeeMarkForRemovalSuccess;
 
   /// No description provided for @employeeDataPdfFailed.
   ///
@@ -2506,6 +2584,66 @@ abstract class AppLocalizations {
   /// **'Saved.'**
   String get journalSaved;
 
+  /// No description provided for @sessionsCancelConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel this work session?'**
+  String get sessionsCancelConfirmTitle;
+
+  /// No description provided for @sessionsCancelConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The session will be excluded from totals and reports. It will remain visible in the journal table.'**
+  String get sessionsCancelConfirmBody;
+
+  /// No description provided for @sessionsCancelWorkSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel session'**
+  String get sessionsCancelWorkSession;
+
+  /// No description provided for @sessionsCancelSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Session canceled.'**
+  String get sessionsCancelSuccess;
+
+  /// No description provided for @sessionStatusCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled'**
+  String get sessionStatusCanceled;
+
+  /// No description provided for @sessionsEditDisabledCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing is disabled for canceled sessions'**
+  String get sessionsEditDisabledCanceled;
+
+  /// No description provided for @sessionsEditCanceledError.
+  ///
+  /// In en, this message translates to:
+  /// **'Canceled sessions cannot be edited.'**
+  String get sessionsEditCanceledError;
+
+  /// No description provided for @sessionsCancelNotClosedError.
+  ///
+  /// In en, this message translates to:
+  /// **'Only closed sessions can be canceled.'**
+  String get sessionsCancelNotClosedError;
+
+  /// No description provided for @sessionsCancelAlreadyCanceledError.
+  ///
+  /// In en, this message translates to:
+  /// **'This session is already canceled.'**
+  String get sessionsCancelAlreadyCanceledError;
+
+  /// No description provided for @sessionsCancelNotFoundError.
+  ///
+  /// In en, this message translates to:
+  /// **'Session not found.'**
+  String get sessionsCancelNotFoundError;
+
   /// No description provided for @journalViewTable.
   ///
   /// In en, this message translates to:
@@ -2775,6 +2913,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Time report'**
   String get reportsPdfTitle;
+
+  /// No description provided for @reportsPdfStartingBalance.
+  ///
+  /// In en, this message translates to:
+  /// **'Starting balance'**
+  String get reportsPdfStartingBalance;
 
   /// No description provided for @reportsPdfPeriod.
   ///

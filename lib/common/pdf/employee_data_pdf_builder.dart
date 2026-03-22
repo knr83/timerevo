@@ -24,7 +24,6 @@ class EmployeeDataPdfLabels {
     required this.vacationDaysPerYear,
     required this.department,
     required this.jobTitle,
-    required this.schedule,
     required this.footerPage,
   });
 
@@ -45,7 +44,6 @@ class EmployeeDataPdfLabels {
   final String vacationDaysPerYear;
   final String department;
   final String jobTitle;
-  final String schedule;
   final String Function(int current, int total) footerPage;
 }
 
@@ -71,9 +69,8 @@ Future<pw.Document> buildEmployeeDataPdf({
   required pw.ThemeData theme,
   required EmployeeDataPdfLabels labels,
   required EmployeeDetails details,
-  required String? templateName,
 
-  /// Display for “Weekly hours”: template-based total (same as schedule roster), or em dash if no template.
+  /// Display for “Weekly hours”: template-based total with unit (same as schedule roster), or em dash if no template.
   required String weeklyHoursDisplay,
   required String Function(DateTime dt) formatDate,
   required String statusLabel,
@@ -149,17 +146,10 @@ Future<pw.Document> buildEmployeeDataPdf({
           ),
           (labels.department, details.department ?? ''),
           (labels.jobTitle, details.jobTitle ?? ''),
-          (labels.schedule, templateName ?? _emptyPlaceholder),
         ];
-        final schedulePair = employmentFields.last;
-        final employmentMainFields = employmentFields.sublist(
-          0,
-          employmentFields.length - 1,
-        );
-        final employmentSection = _buildEmploymentSectionDense(
+        final employmentSection = _buildSectionDense(
           labels.sectionEmployment,
-          employmentMainFields,
-          schedulePair,
+          employmentFields,
         );
 
         return [
@@ -193,44 +183,6 @@ pw.Widget _labelValueCell((String, String) row) {
         flex: _valueFlexInCell,
         child: pw.Text(_value(row.$2), style: valueStyle),
       ),
-    ],
-  );
-}
-
-/// Employment section: paired rows, then Schedule alone in the left column only.
-pw.Widget _buildEmploymentSectionDense(
-  String sectionTitle,
-  List<(String, String)> rowsWithoutSchedule,
-  (String, String) scheduleRow,
-) {
-  final rowWidgets = _buildPairedRowWidgets(rowsWithoutSchedule);
-  rowWidgets.add(
-    pw.Padding(
-      padding: const pw.EdgeInsets.only(bottom: _rowSpacing),
-      child: pw.Row(
-        crossAxisAlignment: pw.CrossAxisAlignment.start,
-        children: [
-          pw.Expanded(child: _labelValueCell(scheduleRow)),
-          pw.SizedBox(width: 10),
-          pw.Expanded(child: pw.SizedBox()),
-        ],
-      ),
-    ),
-  );
-
-  return pw.Column(
-    crossAxisAlignment: pw.CrossAxisAlignment.start,
-    mainAxisSize: pw.MainAxisSize.min,
-    children: [
-      pw.Text(
-        sectionTitle,
-        style: pw.TextStyle(
-          fontWeight: pw.FontWeight.bold,
-          fontSize: _sectionTitleFontSize,
-        ),
-      ),
-      pw.SizedBox(height: 4),
-      ...rowWidgets,
     ],
   );
 }

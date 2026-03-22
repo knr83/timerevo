@@ -18,6 +18,8 @@ class Employees extends Table {
   IntColumn get terminationDate =>
       integer().named('termination_date').nullable()();
 
+  IntColumn get deletedAt => integer().named('deleted_at').nullable()();
+
   IntColumn get vacationDaysPerYear =>
       integer().named('vacation_days_per_year').nullable()();
 
@@ -64,6 +66,15 @@ class Employees extends Table {
   TextColumn get createdBy => text().named('created_by').nullable()();
 
   TextColumn get updatedBy => text().named('updated_by').nullable()();
+
+  IntColumn get startingBalanceTenths =>
+      integer().named('starting_balance_tenths').nullable()();
+
+  IntColumn get startingBalanceUpdatedAt =>
+      integer().named('starting_balance_updated_at').nullable()();
+
+  TextColumn get startingBalanceUpdatedBy =>
+      text().named('starting_balance_updated_by').nullable()();
 }
 
 class EmployeeAuths extends Table {
@@ -140,6 +151,9 @@ class WorkSessions extends Table {
   TextColumn get updatedBy => text().named('updated_by').nullable()();
 
   TextColumn get updateReason => text().named('update_reason').nullable()();
+
+  /// UTC ms when the session was canceled (excluded from totals). Null = active.
+  IntColumn get canceledAt => integer().named('canceled_at').nullable()();
 
   @override
   List<String> get customConstraints => [

@@ -39,10 +39,12 @@ abstract interface class ISessionsRepo {
   });
 
   /// Stream of sessions for employee in date range (for calendar).
+  /// When [includeCanceled] is false (default), canceled sessions are omitted.
   Stream<List<SessionInfo>> streamSessions({
     required int employeeId,
     required int fromUtcMs,
     required int toUtcMs,
+    bool includeCanceled = false,
   });
 
   /// Stream of sessions for employee on a single date (local calendar day).
@@ -52,10 +54,12 @@ abstract interface class ISessionsRepo {
   );
 
   /// Stream of sessions with employee info, optionally filtered.
+  /// When [includeCanceled] is false (default), canceled sessions are omitted.
   Stream<List<SessionWithEmployeeInfo>> streamSessionsWithEmployee({
     int? employeeId,
     int? fromUtcMs,
     int? toUtcMs,
+    bool includeCanceled = false,
   });
 
   /// Stream of open sessions (status=open, endTs null) with employee info.
@@ -84,6 +88,13 @@ abstract interface class ISessionsRepo {
     required int? endUtcMs,
     required String? note,
     required String updateReason,
+    String? updatedBy,
+  });
+
+  /// Marks a **closed** session as canceled (sets [canceledAt]). Rejects OPEN
+  /// sessions and already-canceled rows.
+  Future<void> cancelSessionAsAdmin({
+    required int sessionId,
     String? updatedBy,
   });
 }

@@ -231,7 +231,10 @@
   "employeeAccessTokenRequiredWhenNfc": "Erforderlich bei aktiviertem NFC.",
   "employeeEmploymentType": "Beschäftigungsart",
   "employeeWeeklyHours": "Wochenstunden",
+  "weeklyHoursShortUnitSuffix": " h",
   "employeeEmail": "E-Mail",
+  "employeeEmailHint": "name@example.com",
+  "employeeEmailInvalid": "Geben Sie eine gültige E-Mail-Adresse ein.",
   "employeePhone": "Telefon",
   "employeeDepartment": "Abteilung",
   "employeeJobTitle": "Tätigkeitsbezeichnung",
@@ -291,7 +294,18 @@
   "employeeSectionContact": "Kontakt",
   "employeeSectionAccess": "Terminal-Zugang",
   "employeeSectionSchedule": "Plan",
+  "employeeSectionWorkSetup": "Arbeitszeit-Setup",
+  "employeeStartingBalanceLabel": "Anfangssaldo (Stunden)",
+  "employeeStartingBalanceHint": "Stunden mit einer Dezimalstelle. Leer lassen wenn keiner.",
+  "employeeStartingBalanceInvalid": "Bitte gültige Stunden eingeben (eine Dezimalstelle).",
   "employeeScheduleRequired": "Plan ist erforderlich.",
+  "employeeScheduleTemplateWithWeeklyHours": "{name} ({hours})",
+  "@employeeScheduleTemplateWithWeeklyHours": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "hours": { "type": "String" }
+    }
+  },
   "employeeSectionPolicy": "Richtlinie & Compliance",
   "employeeSectionAudit": "Protokoll",
   "employeeTabGeneral": "Allgemein",
@@ -302,6 +316,11 @@
   "employeeDataPdfSectionEmployeeInfo": "Mitarbeiterinformationen",
   "employeeExportEmployeeData": "Mitarbeiterdaten exportieren",
   "employeeDataPdfExported": "Mitarbeiterdaten exportiert.",
+  "employeeMarkForRemovalTooltip": "Aus aktiven Listen entfernen",
+  "employeeMarkForRemovalConfirmTitle": "Aus aktiven Listen entfernen?",
+  "employeeMarkForRemovalConfirmMessage": "Der Mitarbeiter wird archiviert und aus aktiven Listen und Berichten ausgeblendet. Historische Daten (Schichten, Abwesenheiten) bleiben verfügbar.",
+  "employeeMarkForRemovalConfirm": "Bestätigen",
+  "employeeMarkForRemovalSuccess": "Mitarbeiter aus aktiven Listen entfernt.",
   "employeeDataPdfFailed": "Export fehlgeschlagen: {error}",
   "@employeeDataPdfFailed": {
     "placeholders": {
@@ -538,6 +557,16 @@
   "journalErrorOutsideEmployment": "Sitzungsdaten müssen in die Beschäftigungszeit des Mitarbeiters fallen.",
   "journalUpdateReasonHint": "Erforderlich bei Änderung von Start- oder Endzeit",
   "journalSaved": "Gespeichert.",
+  "sessionsCancelConfirmTitle": "Diese Arbeitssitzung stornieren?",
+  "sessionsCancelConfirmBody": "Die Sitzung wird aus Summen und Berichten ausgeschlossen. Sie bleibt in der Journal-Tabelle sichtbar.",
+  "sessionsCancelWorkSession": "Sitzung stornieren",
+  "sessionsCancelSuccess": "Sitzung storniert.",
+  "sessionStatusCanceled": "Storniert",
+  "sessionsEditDisabledCanceled": "Bearbeitung ist für stornierte Sitzungen deaktiviert",
+  "sessionsEditCanceledError": "Stornierte Sitzungen können nicht bearbeitet werden.",
+  "sessionsCancelNotClosedError": "Nur geschlossene Sitzungen können storniert werden.",
+  "sessionsCancelAlreadyCanceledError": "Diese Sitzung ist bereits storniert.",
+  "sessionsCancelNotFoundError": "Sitzung nicht gefunden.",
   "journalViewTable": "Tabelle",
   "journalViewTimeline": "Zeitleiste",
   "journalViewDetailed": "Detailliert",
@@ -589,6 +618,7 @@
   "reportsDetailsClose": "Schließen",
   "reportsTableDate": "Datum",
   "reportsPdfTitle": "Arbeitszeitbericht",
+  "reportsPdfStartingBalance": "Anfangssaldo",
   "reportsPdfPeriod": "Zeitraum: {from} — {to}",
   "@reportsPdfPeriod": {
     "placeholders": {

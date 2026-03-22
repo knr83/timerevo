@@ -28,7 +28,7 @@ The following paths/files were inspected to produce this guide (repo-specific, n
 
 - **DB technology**: Drift + SQLite via `drift`, `drift_flutter`, `sqlite3_flutter_libs`
 - **DB file**: Single file at `getApplicationSupportDirectory()/timerevo.sqlite`, opened via `LazyDatabase` + `NativeDatabase.createInBackground`
-- **Schema version**: 9 (defined in `app_db.dart`)
+- **Schema version**: 14 (defined in `app_db.dart`)
 - **Tables**: Core tables include Employees, EmployeeAuths, Users, Devices, WorkSessions, schedule templates, Absences, AppSettings (see lib/data/db/tables.dart for the full list).
 - **Migrations**: `buildMigrationStrategy()` in `migrations.dart` with onCreate and onUpgrade; indexes created in `createIndexesAndConstraints()`
 - **Repository pattern**: Port interfaces in `domain/ports/`, implementations in `data/repositories/`; `guardRepoCall` maps SqliteException/DataException to domain exceptions

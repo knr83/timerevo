@@ -617,8 +617,12 @@ class _WeekEditorContent extends ConsumerWidget {
     final templates = ref.read(watchScheduleTemplatesProvider(false)).value;
     final t = templates?.firstWhere(
       (x) => x.id == templateId,
-      orElse: () =>
-          ScheduleTemplateInfo(id: templateId, name: '', isActive: true),
+      orElse: () => ScheduleTemplateInfo(
+        id: templateId,
+        name: '',
+        isActive: true,
+        weeklyTotalWorkMinutes: 0,
+      ),
     );
     ref
         .read(scheduleDraftProvider.notifier)

@@ -189,7 +189,12 @@ final _journalProvider = StreamProvider<List<SessionWithEmployeeInfo>>((ref) {
   final (cf, ct) = _clampJournalRange(ymd, from, to);
   return ref
       .watch(watchSessionsUseCaseProvider)
-      .streamSessionsWithEmployee(employeeId: null, fromUtcMs: cf, toUtcMs: ct);
+      .streamSessionsWithEmployee(
+        employeeId: null,
+        fromUtcMs: cf,
+        toUtcMs: ct,
+        includeCanceled: true,
+      );
 });
 
 class SessionsPage extends ConsumerWidget {
@@ -697,6 +702,49 @@ bool _isNotClosed(SessionInfo s) {
   return startYmd.compareTo(todayYmd()) < 0;
 }
 
+Future<void> _confirmCancelJournalSession(
+  BuildContext context,
+  WidgetRef ref,
+  SessionWithEmployeeInfo row,
+) async {
+  final l10n = AppLocalizations.of(context);
+  final ok = await showDialog<bool>(
+    context: context,
+    builder: (ctx) => AlertDialog(
+      title: Text(l10n.sessionsCancelConfirmTitle),
+      content: Text(l10n.sessionsCancelConfirmBody),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(ctx).pop(false),
+          child: Text(l10n.commonCancel),
+        ),
+        FilledButton(
+          onPressed: () => Navigator.of(ctx).pop(true),
+          child: Text(l10n.sessionsCancelWorkSession),
+        ),
+      ],
+    ),
+  );
+  if (ok != true || !context.mounted) return;
+  try {
+    await ref
+        .read(cancelWorkSessionAsAdminUseCaseProvider)
+        .call(sessionId: row.session.id, updatedBy: 'admin');
+    if (context.mounted) {
+      showAppSnack(context, l10n.sessionsCancelSuccess);
+    }
+  } on DomainValidationException catch (e) {
+    if (!context.mounted) return;
+    final msg = switch (e.message) {
+      'sessionCancelNotClosed' => l10n.sessionsCancelNotClosedError,
+      'sessionCancelAlreadyCanceled' => l10n.sessionsCancelAlreadyCanceledError,
+      'sessionCancelNotFound' => l10n.sessionsCancelNotFoundError,
+      _ => errorMessageForUser(e, l10n.commonErrorOccurred),
+    };
+    showAppSnack(context, msg);
+  }
+}
+
 List<SessionWithEmployeeInfo> _applyClientFilters(
   List<SessionWithEmployeeInfo> rows,
   _JournalFilters filters,
@@ -863,8 +911,19 @@ class _JournalTable extends ConsumerWidget {
                       })();
                 final isOpen = s.status == 'OPEN';
                 final isNotClosed = isOpen && _isNotClosed(s);
+                final isCanceled = s.canceledAt != null;
+                final canCancel =
+                    !isCanceled && s.status == 'CLOSED' && s.endTs != null;
 
                 return DataRow(
+                  color: isCanceled
+                      ? WidgetStateProperty.resolveWith(
+                          (states) => Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest
+                              .withValues(alpha: 0.55),
+                        )
+                      : null,
                   cells: [
                     DataCell(Text(employeeName)),
                     DataCell(Center(child: Text(start))),
@@ -873,19 +932,25 @@ class _JournalTable extends ConsumerWidget {
                     DataCell(
                       Center(
                         child: Tooltip(
-                          message: isNotClosed
+                          message: isCanceled
+                              ? l10n.sessionStatusCanceled
+                              : isNotClosed
                               ? l10n.journalFilterStatusNotClosed
                               : isOpen
                               ? l10n.commonOngoing
                               : l10n.journalFilterStatusClosed,
                           child: Icon(
-                            isNotClosed
+                            isCanceled
+                                ? Symbols.not_interested
+                                : isNotClosed
                                 ? Symbols.warning_amber_rounded
                                 : isOpen
                                 ? Symbols.schedule
                                 : Symbols.check_circle,
                             size: 20,
-                            color: isNotClosed
+                            color: isCanceled
+                                ? Theme.of(context).colorScheme.outline
+                                : isNotClosed
                                 ? Theme.of(context).colorScheme.error
                                 : isOpen
                                 ? Theme.of(context).colorScheme.primary
@@ -898,15 +963,34 @@ class _JournalTable extends ConsumerWidget {
                     ),
                     DataCell(
                       Center(
-                        child: IconButton(
-                          icon: const Icon(Symbols.edit),
-                          tooltip: l10n.sessionsEdit,
-                          onPressed: () => _openEditDialog(
-                            context,
-                            ref,
-                            row,
-                            closeNowPreFill: false,
-                          ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            IconButton(
+                              icon: const Icon(Symbols.edit),
+                              tooltip: isCanceled
+                                  ? l10n.sessionsEditDisabledCanceled
+                                  : l10n.sessionsEdit,
+                              onPressed: isCanceled
+                                  ? null
+                                  : () => _openEditDialog(
+                                      context,
+                                      ref,
+                                      row,
+                                      closeNowPreFill: false,
+                                    ),
+                            ),
+                            if (canCancel)
+                              IconButton(
+                                icon: const Icon(Symbols.cancel),
+                                tooltip: l10n.sessionsCancelWorkSession,
+                                onPressed: () => _confirmCancelJournalSession(
+                                  context,
+                                  ref,
+                                  row,
+                                ),
+                              ),
+                          ],
                         ),
                       ),
                     ),
@@ -1212,6 +1296,8 @@ class _JournalTable extends ConsumerWidget {
                                 l10n.journalErrorCrossDay,
                               'journalErrorOutsideEmployment' =>
                                 l10n.journalErrorOutsideEmployment,
+                              'sessionUpdateCanceled' =>
+                                l10n.sessionsEditCanceledError,
                               _ => errorMessageForUser(
                                 e,
                                 l10n.commonErrorOccurred,

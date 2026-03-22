@@ -135,3 +135,8 @@ final updateSessionAsAdminUseCaseProvider =
         ref.watch(employeesRepoProvider),
       );
     });
+
+final cancelWorkSessionAsAdminUseCaseProvider =
+    Provider<CancelWorkSessionAsAdminUseCase>((ref) {
+      return CancelWorkSessionAsAdminUseCase(ref.watch(sessionsRepoProvider));
+    });

@@ -21,6 +21,7 @@ import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/error_message_helper.dart';
+import '../../../core/starting_balance_period.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_report_row_info.dart';
 
@@ -443,6 +444,20 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                         ref.read(trackingStartSettingsProvider),
                       ),
                     );
+                    final details = await ref
+                        .read(employeesAdminUseCaseProvider)
+                        .getEmployeeDetails(selectedId);
+                    final trackYmd = trackingStartYmdFromWatch(
+                      ref.read(trackingStartSettingsProvider),
+                    );
+                    final sbMs = startingBalanceMsForPeriod(
+                      tenths: details?.startingBalanceTenths,
+                      trackingStartYmd: trackYmd,
+                      balanceUpdatedAtUtcMs: details?.startingBalanceUpdatedAt,
+                      fromUtcMs: r.fromUtcMs,
+                      toUtcMs: r.toUtcMs,
+                    );
+                    if (!context.mounted) return;
                     await exportEmployeeDailyPdf(
                       context,
                       dayReportUseCase: ref.read(
@@ -455,6 +470,7 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                       sortColumnName: sortColumnIndex != null
                           ? _sortColumnName(l10n, sortColumnIndex)
                           : null,
+                      periodStartingBalanceMs: sbMs,
                       showSnack: (msg) => showAppSnack(context, msg),
                       showErrorSnack: (msg, {bool isError = false}) =>
                           showAppSnack(context, msg, isError: isError),
