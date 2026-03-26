@@ -12,6 +12,7 @@ import '../../../domain/entities/employee_info.dart';
 import '../../../domain/entities/employee_status.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../admin_providers.dart';
+import '../widgets/admin_page_chrome.dart';
 import 'employee_card_dialog.dart';
 
 /// Shared unsaved-changes flow for list navigation: dialog → optional save → apply transition.
@@ -163,7 +164,7 @@ class _EmployeesList extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
     return Padding(
-      padding: const EdgeInsets.all(12),
+      padding: AdminUi.pagePadding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

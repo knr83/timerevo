@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,12 +12,35 @@ import '../../../core/tracking_start_range_clamp.dart';
 import '../../../common/pdf/employee_daily_pdf_export.dart';
 import '../../../common/utils/duration_hm_format.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
+import '../widgets/admin_page_chrome.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/starting_balance_period.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_report_row_info.dart';
 import 'pdf/aggregate_reports_pdf_export.dart';
+
+/// Narrower than [AdminUi.maxContentWidth] so the Reports split feels tighter on wide desktops.
+const double _reportsMaxContentWidth = 1360;
+
+class _ReportsContentWidth extends StatelessWidget {
+  const _ReportsContentWidth({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final w = math.min(constraints.maxWidth, _reportsMaxContentWidth);
+        return Align(
+          alignment: Alignment.topLeft,
+          child: SizedBox(width: w, child: child),
+        );
+      },
+    );
+  }
+}
 
 String formatBalanceMs(int ms, AppLocalizations l10n) {
   final s = formatDurationHmFromMs(ms.abs(), l10n);
@@ -95,113 +120,126 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  l10n.reportsTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const Spacer(),
-                FilledButton.icon(
-                  onPressed: () async {
-                    if (rows.isEmpty) return;
-                    final range = reportClampedRange(
-                      filters,
-                      trackingStartYmdFromWatch(
-                        ref.read(trackingStartSettingsProvider),
-                      ),
-                    );
-                    await exportAggregateReportsPdf(
-                      context,
-                      fromUtcMs: range.fromUtcMs,
-                      toUtcMs: range.toUtcMs,
-                      employeeId: filters.employeeId,
-                      rows: rows,
-                      sortColumnIndex: _sortColumnIndex,
-                      sortAscending: _sortAscending,
-                    );
-                  },
-                  icon: const Icon(Symbols.download),
-                  label: Text(l10n.reportsExportPdf),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                DateRangeFilterBar(
-                  scope: filters.scope,
-                  fromUtcMs: r.fromUtcMs,
-                  toUtcMs: r.toUtcMs,
-                  availableScopes: const [
-                    DateRangeScope.day,
-                    DateRangeScope.week,
-                    DateRangeScope.month,
-                    DateRangeScope.interval,
-                  ],
-                  onChanged: (scope, from, to) {
-                    final ymd = trackingStartYmdFromWatch(
-                      ref.read(trackingStartSettingsProvider),
-                    );
-                    final c = clampUtcRangeToTrackingStart(
-                      fromUtcMs: from,
-                      toUtcMs: to,
-                      trackingStartYmd: ymd,
-                    );
-                    ref.read(reportFiltersProvider.notifier).state = (
-                      scope: scope,
-                      fromUtcMs: c.fromUtcMs,
-                      toUtcMs: c.toUtcMs,
-                      employeeId: filters.employeeId,
-                    );
-                  },
-                ),
-                _EmployeeFilterDropdown(filters: filters),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
+        padding: AdminUi.pagePadding,
+        child: _ReportsContentWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Expanded(
-                    child: rowsAsync.when(
-                      data: (_) {
-                        if (rows.isEmpty) {
-                          return Center(child: Text(l10n.reportsNoData));
-                        }
-                        return _ReportTable(
-                          rows: rows,
-                          sortColumnIndex: _sortColumnIndex,
-                          sortAscending: _sortAscending,
-                          onSort: (columnIndex, ascending) {
-                            setState(() {
-                              _sortColumnIndex = columnIndex;
-                              _sortAscending = ascending;
-                            });
-                          },
-                        );
-                      },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(
-                        child: Text(
-                          l10n.reportsFailedLoad(l10n.commonErrorOccurred),
+                  Flexible(
+                    child: Text(
+                      l10n.reportsTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  FilledButton.icon(
+                    onPressed: () async {
+                      if (rows.isEmpty) return;
+                      final range = reportClampedRange(
+                        filters,
+                        trackingStartYmdFromWatch(
+                          ref.read(trackingStartSettingsProvider),
+                        ),
+                      );
+                      await exportAggregateReportsPdf(
+                        context,
+                        fromUtcMs: range.fromUtcMs,
+                        toUtcMs: range.toUtcMs,
+                        employeeId: filters.employeeId,
+                        rows: rows,
+                        sortColumnIndex: _sortColumnIndex,
+                        sortAscending: _sortAscending,
+                      );
+                    },
+                    icon: const Icon(Symbols.download),
+                    label: Text(l10n.reportsExportPdf),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  DateRangeFilterBar(
+                    scope: filters.scope,
+                    fromUtcMs: r.fromUtcMs,
+                    toUtcMs: r.toUtcMs,
+                    availableScopes: const [
+                      DateRangeScope.day,
+                      DateRangeScope.week,
+                      DateRangeScope.month,
+                      DateRangeScope.interval,
+                    ],
+                    onChanged: (scope, from, to) {
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        trackingStartYmd: ymd,
+                      );
+                      ref.read(reportFiltersProvider.notifier).state = (
+                        scope: scope,
+                        fromUtcMs: c.fromUtcMs,
+                        toUtcMs: c.toUtcMs,
+                        employeeId: filters.employeeId,
+                      );
+                    },
+                  ),
+                  _EmployeeFilterDropdown(filters: filters),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      flex: selectedId != null ? 3 : 1,
+                      child: rowsAsync.when(
+                        data: (_) {
+                          if (rows.isEmpty) {
+                            return Center(child: Text(l10n.reportsNoData));
+                          }
+                          return _ReportTable(
+                            rows: rows,
+                            sortColumnIndex: _sortColumnIndex,
+                            sortAscending: _sortAscending,
+                            onSort: (columnIndex, ascending) {
+                              setState(() {
+                                _sortColumnIndex = columnIndex;
+                                _sortAscending = ascending;
+                              });
+                            },
+                          );
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Center(
+                          child: Text(
+                            l10n.reportsFailedLoad(l10n.commonErrorOccurred),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (selectedId != null)
-                    ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 380),
-                      child: IntrinsicWidth(
+                    if (selectedId != null) ...[
+                      VerticalDivider(
+                        width: 1,
+                        thickness: 1,
+                        color: Theme.of(context).colorScheme.outlineVariant,
+                      ),
+                      Expanded(
+                        flex: 2,
                         child: _ReportsDetailsDrawer(
                           selectedId: selectedId,
                           rows: rows,
@@ -209,18 +247,19 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                           sortAscending: _sortAscending,
                         ),
                       ),
-                    ),
-                ],
+                    ],
+                  ],
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              l10n.reportsOnlyClosedHint,
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
+              const SizedBox(height: 8),
+              Text(
+                l10n.reportsOnlyClosedHint,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -396,7 +435,6 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
         '';
 
     return Container(
-      margin: const EdgeInsets.only(left: 12),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLow,
         border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),

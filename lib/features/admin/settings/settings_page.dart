@@ -20,6 +20,7 @@ import '../../../app/backup_providers.dart';
 import '../../../app/diagnostic_export_providers.dart';
 import '../../../core/diagnostic_log.dart';
 import '../auth/change_pin_dialog.dart';
+import '../widgets/admin_page_chrome.dart';
 
 class _ToleranceField extends StatefulWidget {
   const _ToleranceField({
@@ -184,7 +185,7 @@ class SettingsPage extends ConsumerWidget {
 
     return Scaffold(
       body: ListView(
-        padding: const EdgeInsets.all(12),
+        padding: AdminUi.pagePadding,
         children: [
           Align(
             alignment: Alignment.centerLeft,

@@ -23,6 +23,7 @@ import '../../../core/journal_interval_projection.dart';
 import '../../../domain/entities/journal_day_overview_row.dart';
 import '../../../domain/entities/session_info.dart';
 import '../../../domain/entities/session_with_employee_info.dart';
+import '../widgets/admin_page_chrome.dart';
 import 'journal_timeline_grid.dart';
 
 enum _JournalStatusFilter { all, open, notClosed, closed }
@@ -227,245 +228,256 @@ class SessionsPage extends ConsumerWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  l10n.journalTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const SizedBox(width: 16),
-                SegmentedButton<JournalViewMode>(
-                  showSelectedIcon: true,
-                  segments: [
-                    ButtonSegment(
-                      value: JournalViewMode.table,
-                      label: Text(l10n.journalViewTable),
-                      icon: const Icon(Symbols.table_chart, size: 18),
+        padding: AdminUi.pagePadding,
+        child: AdminContentWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.journalTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    ButtonSegment(
-                      value: JournalViewMode.timeline,
-                      label: Text(l10n.journalViewTimeline),
-                      icon: const Icon(Symbols.timeline, size: 18),
-                    ),
-                    ButtonSegment(
-                      value: JournalViewMode.timelineDetailed,
-                      label: Text(l10n.journalViewDetailed),
-                      icon: const Icon(Symbols.schedule, size: 18),
-                    ),
-                  ],
-                  selected: {viewMode},
-                  onSelectionChanged: (s) {
-                    final newMode = s.first;
-                    if (newMode == JournalViewMode.timelineDetailed) {
-                      final today = reportPeriodToday();
-                      final ymd = trackingStartYmdFromWatch(
-                        ref.read(trackingStartSettingsProvider),
-                      );
-                      final c = clampUtcRangeToTrackingStart(
-                        fromUtcMs: today.fromUtcMs,
-                        toUtcMs: today.toUtcMs,
-                        trackingStartYmd: ymd,
-                      );
-                      ref.read(_journalFiltersProvider.notifier).state = ref
-                          .read(_journalFiltersProvider)
-                          .copyWith(
-                            fromUtcMs: c.fromUtcMs,
-                            toUtcMs: c.toUtcMs,
-                            detailedScope: _DetailedScope.day,
-                          );
-                    }
-                    ref.read(journalViewModeProvider.notifier).state = newMode;
-                  },
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                if (viewMode == JournalViewMode.timelineDetailed)
-                  DateRangeFilterBar(
-                    scope: _detailedScopeToDateRangeScope(
-                      filters.detailedScope,
-                    ),
-                    fromUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _detailedEffectiveRange(filters).$1,
-                      _detailedEffectiveRange(filters).$2,
-                    ).$1,
-                    toUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _detailedEffectiveRange(filters).$1,
-                      _detailedEffectiveRange(filters).$2,
-                    ).$2,
-                    availableScopes: const [
-                      DateRangeScope.day,
-                      DateRangeScope.week,
+                  ),
+                  const SizedBox(width: 16),
+                  SegmentedButton<JournalViewMode>(
+                    showSelectedIcon: true,
+                    segments: [
+                      ButtonSegment(
+                        value: JournalViewMode.table,
+                        label: Text(l10n.journalViewTable),
+                        icon: const Icon(Symbols.table_chart, size: 18),
+                      ),
+                      ButtonSegment(
+                        value: JournalViewMode.timeline,
+                        label: Text(l10n.journalViewTimeline),
+                        icon: const Icon(Symbols.timeline, size: 18),
+                      ),
+                      ButtonSegment(
+                        value: JournalViewMode.timelineDetailed,
+                        label: Text(l10n.journalViewDetailed),
+                        icon: const Icon(Symbols.schedule, size: 18),
+                      ),
                     ],
-                    onChanged: (scope, from, to) {
-                      final ymd = trackingStartYmdFromWatch(
-                        ref.read(trackingStartSettingsProvider),
-                      );
-                      final c = clampUtcRangeToTrackingStart(
-                        fromUtcMs: from,
-                        toUtcMs: to,
-                        trackingStartYmd: ymd,
-                      );
-                      ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(
-                        detailedScope: _dateRangeScopeToDetailedScope(scope),
-                        fromUtcMs: c.fromUtcMs,
-                        toUtcMs: c.toUtcMs,
-                      );
-                    },
-                  )
-                else if (viewMode == JournalViewMode.table)
-                  DateRangeFilterBar(
-                    scope: _tableScopeToDateRangeScope(filters.tableScope),
-                    fromUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _tableEffectiveRange(filters).$1,
-                      _tableEffectiveRange(filters).$2,
-                    ).$1,
-                    toUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _tableEffectiveRange(filters).$1,
-                      _tableEffectiveRange(filters).$2,
-                    ).$2,
-                    availableScopes: const [
-                      DateRangeScope.day,
-                      DateRangeScope.week,
-                      DateRangeScope.month,
-                      DateRangeScope.interval,
-                    ],
-                    onChanged: (scope, from, to) {
-                      final ymd = trackingStartYmdFromWatch(
-                        ref.read(trackingStartSettingsProvider),
-                      );
-                      final c = clampUtcRangeToTrackingStart(
-                        fromUtcMs: from,
-                        toUtcMs: to,
-                        trackingStartYmd: ymd,
-                      );
-                      ref.read(_journalFiltersProvider.notifier).state = filters
-                          .copyWith(
-                            tableScope: _dateRangeScopeToTableScope(scope),
-                            fromUtcMs: c.fromUtcMs,
-                            toUtcMs: c.toUtcMs,
-                          );
-                    },
-                  )
-                else
-                  DateRangeFilterBar(
-                    scope: _timelineScopeToDateRangeScope(
-                      filters.timelineScope,
-                    ),
-                    fromUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _timelineEffectiveRange(filters).$1,
-                      _timelineEffectiveRange(filters).$2,
-                    ).$1,
-                    toUtcMs: _clampJournalRange(
-                      trackingYmd,
-                      _timelineEffectiveRange(filters).$1,
-                      _timelineEffectiveRange(filters).$2,
-                    ).$2,
-                    availableScopes: const [
-                      DateRangeScope.week,
-                      DateRangeScope.month,
-                      DateRangeScope.interval,
-                    ],
-                    onChanged: (scope, from, to) {
-                      final ymd = trackingStartYmdFromWatch(
-                        ref.read(trackingStartSettingsProvider),
-                      );
-                      final c = clampUtcRangeToTrackingStart(
-                        fromUtcMs: from,
-                        toUtcMs: to,
-                        trackingStartYmd: ymd,
-                      );
-                      ref
-                          .read(_journalFiltersProvider.notifier)
-                          .state = filters.copyWith(
-                        timelineScope: _dateRangeScopeToTimelineScope(scope),
-                        fromUtcMs: c.fromUtcMs,
-                        toUtcMs: c.toUtcMs,
-                      );
+                    selected: {viewMode},
+                    onSelectionChanged: (s) {
+                      final newMode = s.first;
+                      if (newMode == JournalViewMode.timelineDetailed) {
+                        final today = reportPeriodToday();
+                        final ymd = trackingStartYmdFromWatch(
+                          ref.read(trackingStartSettingsProvider),
+                        );
+                        final c = clampUtcRangeToTrackingStart(
+                          fromUtcMs: today.fromUtcMs,
+                          toUtcMs: today.toUtcMs,
+                          trackingStartYmd: ymd,
+                        );
+                        ref.read(_journalFiltersProvider.notifier).state = ref
+                            .read(_journalFiltersProvider)
+                            .copyWith(
+                              fromUtcMs: c.fromUtcMs,
+                              toUtcMs: c.toUtcMs,
+                              detailedScope: _DetailedScope.day,
+                            );
+                      }
+                      ref.read(journalViewModeProvider.notifier).state =
+                          newMode;
                     },
                   ),
-                if (viewMode == JournalViewMode.table)
-                  DropdownMenu<_JournalStatusFilter>(
-                    label: Text(l10n.sessionsTableStatus),
-                    initialSelection: filters.statusFilter,
-                    dropdownMenuEntries: [
-                      DropdownMenuEntry(
-                        value: _JournalStatusFilter.all,
-                        label: l10n.journalFilterStatusAll,
+                ],
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  if (viewMode == JournalViewMode.timelineDetailed)
+                    DateRangeFilterBar(
+                      scope: _detailedScopeToDateRangeScope(
+                        filters.detailedScope,
                       ),
-                      DropdownMenuEntry(
-                        value: _JournalStatusFilter.open,
-                        label: l10n.journalFilterStatusOpen,
-                      ),
-                      DropdownMenuEntry(
-                        value: _JournalStatusFilter.notClosed,
-                        label: l10n.journalFilterStatusNotClosed,
-                      ),
-                      DropdownMenuEntry(
-                        value: _JournalStatusFilter.closed,
-                        label: l10n.journalFilterStatusClosed,
-                      ),
-                    ],
-                    onSelected: (v) =>
+                      fromUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _detailedEffectiveRange(filters).$1,
+                        _detailedEffectiveRange(filters).$2,
+                      ).$1,
+                      toUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _detailedEffectiveRange(filters).$1,
+                        _detailedEffectiveRange(filters).$2,
+                      ).$2,
+                      availableScopes: const [
+                        DateRangeScope.day,
+                        DateRangeScope.week,
+                      ],
+                      onChanged: (scope, from, to) {
+                        final ymd = trackingStartYmdFromWatch(
+                          ref.read(trackingStartSettingsProvider),
+                        );
+                        final c = clampUtcRangeToTrackingStart(
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                          trackingStartYmd: ymd,
+                        );
                         ref
                             .read(_journalFiltersProvider.notifier)
                             .state = filters.copyWith(
-                          statusFilter: v ?? filters.statusFilter,
-                        ),
-                  ),
-                SizedBox(
-                  width: 260,
-                  child: _JournalSearchField(
-                    initialQuery: filters.searchQuery,
-                    onChanged: (v) =>
-                        ref.read(_journalFiltersProvider.notifier).state =
-                            filters.copyWith(searchQuery: v),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: viewMode == JournalViewMode.timelineDetailed
-                  ? _JournalDetailedTimelineContent(l10n: l10n)
-                  : viewMode == JournalViewMode.timeline
-                  ? _JournalTimelineContent(l10n: l10n)
-                  : sessionsAsync.when(
-                      data: (rows) {
-                        final filtered = _applyClientFilters(rows, filters);
-                        if (filtered.isEmpty) {
-                          return Center(child: Text(l10n.sessionsNoSessions));
-                        }
-                        return _JournalTable(rows: filtered);
+                          detailedScope: _dateRangeScopeToDetailedScope(scope),
+                          fromUtcMs: c.fromUtcMs,
+                          toUtcMs: c.toUtcMs,
+                        );
                       },
-                      loading: () =>
-                          const Center(child: CircularProgressIndicator()),
-                      error: (e, _) => Center(
-                        child: Text(
-                          l10n.sessionsFailedLoadSessions(
-                            l10n.commonErrorOccurred,
+                    )
+                  else if (viewMode == JournalViewMode.table)
+                    DateRangeFilterBar(
+                      scope: _tableScopeToDateRangeScope(filters.tableScope),
+                      fromUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _tableEffectiveRange(filters).$1,
+                        _tableEffectiveRange(filters).$2,
+                      ).$1,
+                      toUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _tableEffectiveRange(filters).$1,
+                        _tableEffectiveRange(filters).$2,
+                      ).$2,
+                      availableScopes: const [
+                        DateRangeScope.day,
+                        DateRangeScope.week,
+                        DateRangeScope.month,
+                        DateRangeScope.interval,
+                      ],
+                      onChanged: (scope, from, to) {
+                        final ymd = trackingStartYmdFromWatch(
+                          ref.read(trackingStartSettingsProvider),
+                        );
+                        final c = clampUtcRangeToTrackingStart(
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                          trackingStartYmd: ymd,
+                        );
+                        ref
+                            .read(_journalFiltersProvider.notifier)
+                            .state = filters.copyWith(
+                          tableScope: _dateRangeScopeToTableScope(scope),
+                          fromUtcMs: c.fromUtcMs,
+                          toUtcMs: c.toUtcMs,
+                        );
+                      },
+                    )
+                  else
+                    DateRangeFilterBar(
+                      scope: _timelineScopeToDateRangeScope(
+                        filters.timelineScope,
+                      ),
+                      fromUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _timelineEffectiveRange(filters).$1,
+                        _timelineEffectiveRange(filters).$2,
+                      ).$1,
+                      toUtcMs: _clampJournalRange(
+                        trackingYmd,
+                        _timelineEffectiveRange(filters).$1,
+                        _timelineEffectiveRange(filters).$2,
+                      ).$2,
+                      availableScopes: const [
+                        DateRangeScope.week,
+                        DateRangeScope.month,
+                        DateRangeScope.interval,
+                      ],
+                      onChanged: (scope, from, to) {
+                        final ymd = trackingStartYmdFromWatch(
+                          ref.read(trackingStartSettingsProvider),
+                        );
+                        final c = clampUtcRangeToTrackingStart(
+                          fromUtcMs: from,
+                          toUtcMs: to,
+                          trackingStartYmd: ymd,
+                        );
+                        ref
+                            .read(_journalFiltersProvider.notifier)
+                            .state = filters.copyWith(
+                          timelineScope: _dateRangeScopeToTimelineScope(scope),
+                          fromUtcMs: c.fromUtcMs,
+                          toUtcMs: c.toUtcMs,
+                        );
+                      },
+                    ),
+                  if (viewMode == JournalViewMode.table)
+                    DropdownMenu<_JournalStatusFilter>(
+                      label: Text(l10n.sessionsTableStatus),
+                      initialSelection: filters.statusFilter,
+                      dropdownMenuEntries: [
+                        DropdownMenuEntry(
+                          value: _JournalStatusFilter.all,
+                          label: l10n.journalFilterStatusAll,
+                        ),
+                        DropdownMenuEntry(
+                          value: _JournalStatusFilter.open,
+                          label: l10n.journalFilterStatusOpen,
+                        ),
+                        DropdownMenuEntry(
+                          value: _JournalStatusFilter.notClosed,
+                          label: l10n.journalFilterStatusNotClosed,
+                        ),
+                        DropdownMenuEntry(
+                          value: _JournalStatusFilter.closed,
+                          label: l10n.journalFilterStatusClosed,
+                        ),
+                      ],
+                      onSelected: (v) =>
+                          ref
+                              .read(_journalFiltersProvider.notifier)
+                              .state = filters.copyWith(
+                            statusFilter: v ?? filters.statusFilter,
+                          ),
+                    ),
+                  SizedBox(
+                    width: 260,
+                    child: _JournalSearchField(
+                      initialQuery: filters.searchQuery,
+                      onChanged: (v) =>
+                          ref.read(_journalFiltersProvider.notifier).state =
+                              filters.copyWith(searchQuery: v),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              Expanded(
+                child: viewMode == JournalViewMode.timelineDetailed
+                    ? _JournalDetailedTimelineContent(l10n: l10n)
+                    : viewMode == JournalViewMode.timeline
+                    ? _JournalTimelineContent(l10n: l10n)
+                    : sessionsAsync.when(
+                        data: (rows) {
+                          final filtered = _applyClientFilters(rows, filters);
+                          if (filtered.isEmpty) {
+                            return Center(child: Text(l10n.sessionsNoSessions));
+                          }
+                          return _JournalTable(rows: filtered);
+                        },
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
+                        error: (e, _) => Center(
+                          child: Text(
+                            l10n.sessionsFailedLoadSessions(
+                              l10n.commonErrorOccurred,
+                            ),
                           ),
                         ),
                       ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
       ),
     );

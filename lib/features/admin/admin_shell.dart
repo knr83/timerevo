@@ -8,6 +8,7 @@ import '../../ui/legal/legal_doc_page.dart';
 import 'about/about_page.dart';
 import '../../app/auth/admin_auth_controller.dart';
 import 'admin_home.dart';
+import 'widgets/admin_page_chrome.dart';
 
 class AdminShell extends ConsumerWidget {
   const AdminShell({super.key});
@@ -49,13 +50,13 @@ class _AdminPinGateState extends ConsumerState<_AdminPinGate> {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 360),
           child: Padding(
-            padding: const EdgeInsets.all(12),
+            padding: AdminUi.pagePadding,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   l10n.adminEnterPinToContinue,
-                  style: const TextStyle(fontSize: 16),
+                  style: Theme.of(context).textTheme.bodyLarge,
                 ),
                 const SizedBox(height: 8),
                 TextField(

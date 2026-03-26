@@ -8,6 +8,7 @@ import '../../../app/absences_providers.dart';
 import '../../../app/tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../common/widgets/date_range_filter_bar.dart';
+import '../widgets/admin_page_chrome.dart';
 import '../../../app/usecase_providers.dart';
 import '../../../common/utils/absence_domain_messages.dart';
 import '../../../common/utils/effective_utc_range_for_date_scope.dart';
@@ -235,190 +236,208 @@ class AbsencesPage extends ConsumerWidget {
 
     return Scaffold(
       body: Padding(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Text(
-                  l10n.absencesTitle,
-                  style: Theme.of(context).textTheme.headlineSmall,
-                ),
-                const Spacer(),
-                FilledButton.icon(
-                  onPressed: employeesAsync.value?.isEmpty == true
-                      ? null
-                      : () =>
-                            _openAddDialog(context, ref, l10n, employeesAsync),
-                  icon: const Icon(Symbols.add),
-                  label: Text(l10n.absencesAdd),
-                ),
-              ],
-            ),
-            if (employeesAsync.value != null &&
-                employeesAsync.value!.isEmpty) ...[
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.errorContainer.withValues(alpha: 0.5),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Symbols.info,
-                      size: 20,
-                      color: Theme.of(context).colorScheme.error,
+        padding: AdminUi.pagePadding,
+        child: AdminContentWidth(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Flexible(
+                    child: Text(
+                      l10n.absencesTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        l10n.sessionsNoEmployeesAvailable,
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onErrorContainer,
-                          fontSize: 13,
+                  ),
+                  const SizedBox(width: 16),
+                  FilledButton.icon(
+                    onPressed: employeesAsync.value?.isEmpty == true
+                        ? null
+                        : () => _openAddDialog(
+                            context,
+                            ref,
+                            l10n,
+                            employeesAsync,
+                          ),
+                    icon: const Icon(Symbols.add),
+                    label: Text(l10n.absencesAdd),
+                  ),
+                ],
+              ),
+              if (employeesAsync.value != null &&
+                  employeesAsync.value!.isEmpty) ...[
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.errorContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Symbols.info,
+                        size: 20,
+                        color: Theme.of(context).colorScheme.error,
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.sessionsNoEmployeesAvailable,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onErrorContainer,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                DateRangeFilterBar(
-                  scope: filters.scope,
-                  fromUtcMs: absencesRange.fromUtcMs,
-                  toUtcMs: absencesRange.toUtcMs,
-                  availableScopes: const [
-                    DateRangeScope.day,
-                    DateRangeScope.week,
-                    DateRangeScope.month,
-                    DateRangeScope.interval,
-                  ],
-                  onChanged: (scope, from, to) {
-                    final ymd = trackingStartYmdFromWatch(
-                      ref.read(trackingStartSettingsProvider),
-                    );
-                    final c = clampUtcRangeToTrackingStart(
-                      fromUtcMs: from,
-                      toUtcMs: to,
-                      trackingStartYmd: ymd,
-                    );
-                    ref.read(_absencesFiltersProvider.notifier).state = filters
-                        .copyWith(
-                          scope: scope,
-                          fromUtcMs: c.fromUtcMs,
-                          toUtcMs: c.toUtcMs,
-                        );
-                  },
-                ),
-                employeesAsync.when(
-                  data: (employees) {
-                    return DropdownMenu<int?>(
-                      key: ValueKey('employee_${filters.employeeId}'),
-                      label: Text(l10n.absencesEmployee),
-                      initialSelection: filters.employeeId,
-                      dropdownMenuEntries: [
-                        DropdownMenuEntry(
-                          value: null,
-                          label: l10n.sessionsEmployeeAll,
-                        ),
-                        ...employees.map(
-                          (e) => DropdownMenuEntry(
-                            value: e.id,
-                            label: EmployeeDisplayName.of(
-                              EmployeeDisplay(
-                                firstName: e.firstName,
-                                lastName: e.lastName,
+              ],
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                children: [
+                  DateRangeFilterBar(
+                    scope: filters.scope,
+                    fromUtcMs: absencesRange.fromUtcMs,
+                    toUtcMs: absencesRange.toUtcMs,
+                    availableScopes: const [
+                      DateRangeScope.day,
+                      DateRangeScope.week,
+                      DateRangeScope.month,
+                      DateRangeScope.interval,
+                    ],
+                    onChanged: (scope, from, to) {
+                      final ymd = trackingStartYmdFromWatch(
+                        ref.read(trackingStartSettingsProvider),
+                      );
+                      final c = clampUtcRangeToTrackingStart(
+                        fromUtcMs: from,
+                        toUtcMs: to,
+                        trackingStartYmd: ymd,
+                      );
+                      ref
+                          .read(_absencesFiltersProvider.notifier)
+                          .state = filters.copyWith(
+                        scope: scope,
+                        fromUtcMs: c.fromUtcMs,
+                        toUtcMs: c.toUtcMs,
+                      );
+                    },
+                  ),
+                  employeesAsync.when(
+                    data: (employees) {
+                      return DropdownMenu<int?>(
+                        key: ValueKey('employee_${filters.employeeId}'),
+                        label: Text(l10n.absencesEmployee),
+                        initialSelection: filters.employeeId,
+                        dropdownMenuEntries: [
+                          DropdownMenuEntry(
+                            value: null,
+                            label: l10n.sessionsEmployeeAll,
+                          ),
+                          ...employees.map(
+                            (e) => DropdownMenuEntry(
+                              value: e.id,
+                              label: EmployeeDisplayName.of(
+                                EmployeeDisplay(
+                                  firstName: e.firstName,
+                                  lastName: e.lastName,
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ],
-                      onSelected: (v) =>
-                          ref.read(_absencesFiltersProvider.notifier).state =
-                              filters.copyWith(employeeId: v),
-                    );
-                  },
-                  loading: () => const SizedBox(width: 180, height: 56),
-                  error: (e, _) => Text(l10n.commonErrorOccurred),
-                ),
-                DropdownMenu<String?>(
-                  key: ValueKey('status_${filters.status}'),
-                  label: Text(l10n.absencesStatus),
-                  initialSelection: filters.status,
-                  dropdownMenuEntries: [
-                    DropdownMenuEntry(
-                      value: null,
-                      label: l10n.sessionsEmployeeAll,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'PENDING',
-                      label: l10n.absenceStatusPending,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'APPROVED',
-                      label: l10n.absenceStatusApproved,
-                    ),
-                    DropdownMenuEntry(
-                      value: 'REJECTED',
-                      label: l10n.absenceStatusRejected,
-                    ),
-                  ],
-                  onSelected: (v) =>
-                      ref.read(_absencesFiltersProvider.notifier).state =
-                          filters.copyWith(status: v),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Expanded(
-              child: absencesAsync.when(
-                data: (rows) {
-                  if (rows.isEmpty) {
-                    return Center(child: Text(l10n.absencesEmpty));
-                  }
-                  final sort = ref.watch(_absencesSortProvider);
-                  final employees = employeesAsync.value ?? [];
-                  final sortedRows = _sortAbsences(
-                    rows,
-                    sort.columnIndex,
-                    sort.ascending,
-                    l10n,
-                    (e) => EmployeeDisplayName.of(
-                      EmployeeDisplay(
-                        firstName: e.firstName,
-                        lastName: e.lastName,
-                      ),
-                    ),
-                  );
-                  return _AbsencesTable(
-                    rows: sortedRows,
-                    employees: employees,
-                    sortColumnIndex: sort.columnIndex,
-                    sortAscending: sort.ascending,
-                    onSort: (columnIndex, ascending) {
-                      ref.read(_absencesSortProvider.notifier).state = (
-                        columnIndex: columnIndex,
-                        ascending: ascending,
+                        ],
+                        onSelected: (v) =>
+                            ref.read(_absencesFiltersProvider.notifier).state =
+                                filters.copyWith(employeeId: v),
                       );
                     },
-                  );
-                },
-                loading: () => const Center(child: CircularProgressIndicator()),
-                error: (e, _) => Center(child: Text(l10n.commonErrorOccurred)),
+                    loading: () => const SizedBox(width: 180, height: 56),
+                    error: (e, _) => Text(l10n.commonErrorOccurred),
+                  ),
+                  DropdownMenu<String?>(
+                    key: ValueKey('status_${filters.status}'),
+                    label: Text(l10n.absencesStatus),
+                    initialSelection: filters.status,
+                    dropdownMenuEntries: [
+                      DropdownMenuEntry(
+                        value: null,
+                        label: l10n.sessionsEmployeeAll,
+                      ),
+                      DropdownMenuEntry(
+                        value: 'PENDING',
+                        label: l10n.absenceStatusPending,
+                      ),
+                      DropdownMenuEntry(
+                        value: 'APPROVED',
+                        label: l10n.absenceStatusApproved,
+                      ),
+                      DropdownMenuEntry(
+                        value: 'REJECTED',
+                        label: l10n.absenceStatusRejected,
+                      ),
+                    ],
+                    onSelected: (v) =>
+                        ref.read(_absencesFiltersProvider.notifier).state =
+                            filters.copyWith(status: v),
+                  ),
+                ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Expanded(
+                child: absencesAsync.when(
+                  data: (rows) {
+                    if (rows.isEmpty) {
+                      return Center(child: Text(l10n.absencesEmpty));
+                    }
+                    final sort = ref.watch(_absencesSortProvider);
+                    final employees = employeesAsync.value ?? [];
+                    final sortedRows = _sortAbsences(
+                      rows,
+                      sort.columnIndex,
+                      sort.ascending,
+                      l10n,
+                      (e) => EmployeeDisplayName.of(
+                        EmployeeDisplay(
+                          firstName: e.firstName,
+                          lastName: e.lastName,
+                        ),
+                      ),
+                    );
+                    return _AbsencesTable(
+                      rows: sortedRows,
+                      employees: employees,
+                      sortColumnIndex: sort.columnIndex,
+                      sortAscending: sort.ascending,
+                      onSort: (columnIndex, ascending) {
+                        ref.read(_absencesSortProvider.notifier).state = (
+                          columnIndex: columnIndex,
+                          ascending: ascending,
+                        );
+                      },
+                    );
+                  },
+                  loading: () =>
+                      const Center(child: CircularProgressIndicator()),
+                  error: (e, _) =>
+                      Center(child: Text(l10n.commonErrorOccurred)),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

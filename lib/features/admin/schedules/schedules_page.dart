@@ -9,6 +9,7 @@ import '../../../core/domain_errors.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../common/widgets/unsaved_changes_dialog.dart';
 import '../../../domain/entities/schedule_entities.dart';
+import '../widgets/admin_page_chrome.dart';
 import 'day_card.dart';
 import 'schedule_roster_pdf_export.dart';
 
@@ -152,27 +153,24 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    l10n.schedulesTitle,
-                    style: Theme.of(context).textTheme.headlineSmall,
-                  ),
-                ),
-                IconButton(
-                  tooltip: l10n.schedulesRosterPdfExportTooltip,
-                  icon: const Icon(Symbols.picture_as_pdf),
-                  onPressed: () => exportScheduleRosterPdf(context, ref),
-                ),
-              ],
+            padding: EdgeInsets.fromLTRB(
+              AdminUi.pagePadding.left,
+              AdminUi.pagePadding.top,
+              AdminUi.pagePadding.right,
+              0,
+            ),
+            child: AdminPageHeader(
+              title: l10n.schedulesTitle,
+              trailing: IconButton(
+                tooltip: l10n.schedulesRosterPdfExportTooltip,
+                icon: const Icon(Symbols.picture_as_pdf),
+                onPressed: () => exportScheduleRosterPdf(context, ref),
+              ),
             ),
           ),
-          const Divider(height: 1),
           Expanded(
             child: Padding(
-              padding: const EdgeInsets.all(12),
+              padding: AdminUi.pagePadding,
               child: templatesAsync.when(
                 data: (templates) {
                   final hasDraft = draftState != null;

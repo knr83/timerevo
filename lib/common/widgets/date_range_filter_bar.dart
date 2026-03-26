@@ -168,6 +168,7 @@ class DateRangeFilterBar extends StatelessWidget {
             children: [
               if (scope != DateRangeScope.interval)
                 IconButton.filledTonal(
+                  tooltip: l10n.journalNavPrev,
                   style: IconButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,
@@ -190,6 +191,7 @@ class DateRangeFilterBar extends StatelessWidget {
               ),
               if (scope != DateRangeScope.interval)
                 IconButton.filledTonal(
+                  tooltip: l10n.journalNavNext,
                   style: IconButton.styleFrom(
                     visualDensity: VisualDensity.compact,
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap,

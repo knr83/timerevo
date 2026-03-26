@@ -33,7 +33,7 @@ class AdminHome extends ConsumerWidget {
     };
 
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _AdminNavRail(
           selectedIndex: index,
@@ -98,7 +98,6 @@ class _AdminNavRail extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(minWidth: _railMinWidth),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               for (var i = 0; i < destinations.length; i++) ...[
@@ -111,6 +110,7 @@ class _AdminNavRail extends StatelessWidget {
                   selectedLabelStyle: selectedLabelStyle,
                 ),
               ],
+              const Spacer(),
             ],
           ),
         ),
