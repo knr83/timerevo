@@ -2,14 +2,12 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/usecase_providers.dart';
 import '../../../common/widgets/app_snack.dart';
-import '../../../core/error_message_helper.dart';
+import '../../../core/pdf/pdf_print_theme.dart';
 import '../../../core/pdf/schedule_roster_pdf_builder.dart';
 import '../../../core/weekly_template_hours_display.dart';
 
@@ -70,12 +68,7 @@ Future<void> exportScheduleRosterPdf(
       footerPage: l10n.reportsPdfFooterPage,
     );
 
-    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
-    final fontBoldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
-    final theme = pw.ThemeData.withFont(
-      base: pw.Font.ttf(fontData),
-      bold: pw.Font.ttf(fontBoldData),
-    );
+    final theme = await loadPdfPrintTheme();
 
     final pdf = await buildScheduleRosterPdf(
       theme: theme,
@@ -93,9 +86,7 @@ Future<void> exportScheduleRosterPdf(
     if (context.mounted) {
       showAppSnack(
         context,
-        l10n.schedulesRosterPdfFailed(
-          errorMessageForUser(e, l10n.commonErrorOccurred),
-        ),
+        l10n.schedulesRosterPdfFailed(l10n.commonErrorOccurred),
         isError: true,
       );
     }

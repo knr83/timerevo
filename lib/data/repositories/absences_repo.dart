@@ -5,10 +5,9 @@ import '../../common/utils/utc_clock.dart';
 import '../../core/domain_errors.dart';
 import '../../domain/entities/absence_info.dart';
 import '../../domain/entities/absence_with_employee_info.dart';
-import '../../domain/entities/employee_info.dart';
-import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/absences_repo_port.dart';
 import '../db/app_db.dart';
+import '../mappers/employee_info_from_drift.dart';
 import 'repo_guard.dart';
 
 class AbsenceWithEmployee {
@@ -51,22 +50,11 @@ class AbsencesRepo implements IAbsencesRepo {
     createdByEmployeeId: a.createdByEmployeeId,
   );
 
-  static EmployeeInfo _toEmployeeInfo(Employee e) => EmployeeInfo(
-    id: e.id,
-    firstName: e.firstName,
-    lastName: e.lastName,
-    status: employeeStatusFromString(e.status),
-    usePin: e.usePin == 1,
-    policyAcknowledged: e.policyAcknowledged == 1,
-    hireDate: e.hireDate,
-    terminationDate: e.terminationDate,
-  );
-
   static AbsenceWithEmployeeInfo _toAbsenceWithEmployeeInfo(
     AbsenceWithEmployee row,
   ) => AbsenceWithEmployeeInfo(
     absence: _toAbsenceInfo(row.absence),
-    employee: _toEmployeeInfo(row.employee),
+    employee: employeeInfoFromDrift(row.employee),
   );
 
   @override

@@ -68,6 +68,72 @@ void main() {
     });
   });
 
+  group('maybeClampCustomUtcRange', () {
+    test('returns null when either bound is null', () {
+      expect(
+        maybeClampCustomUtcRange(
+          fromUtcMs: null,
+          toUtcMs: 200,
+          trackingStartYmd: '2024-01-01',
+        ),
+        isNull,
+      );
+      expect(
+        maybeClampCustomUtcRange(
+          fromUtcMs: 100,
+          toUtcMs: null,
+          trackingStartYmd: '2024-01-01',
+        ),
+        isNull,
+      );
+    });
+
+    test('returns null when clamp equals inputs', () {
+      expect(
+        maybeClampCustomUtcRange(
+          fromUtcMs: 100,
+          toUtcMs: 200,
+          trackingStartYmd: null,
+        ),
+        isNull,
+      );
+    });
+  });
+
+  group('maybeClampUtcRangeIfUpdateNeeded', () {
+    test('returns null when clamped equals stored', () {
+      final bound = trackingStartLocalDayStartUtcMsFromYmd('2024-06-15');
+      final r = clampUtcRangeToTrackingStart(
+        fromUtcMs: bound - 1,
+        toUtcMs: bound + 100,
+        trackingStartYmd: '2024-06-15',
+      );
+      expect(
+        maybeClampUtcRangeIfUpdateNeeded(
+          resolvedFromUtcMs: bound - 1,
+          resolvedToUtcMs: bound + 100,
+          storedFromUtcMs: r.fromUtcMs,
+          storedToUtcMs: r.toUtcMs,
+          trackingStartYmd: '2024-06-15',
+        ),
+        isNull,
+      );
+    });
+
+    test('returns clamp when stored differs from clamped', () {
+      final bound = trackingStartLocalDayStartUtcMsFromYmd('2024-06-15');
+      final c = maybeClampUtcRangeIfUpdateNeeded(
+        resolvedFromUtcMs: bound - 1,
+        resolvedToUtcMs: bound + 100,
+        storedFromUtcMs: bound - 1,
+        storedToUtcMs: bound + 100,
+        trackingStartYmd: '2024-06-15',
+      );
+      expect(c, isNotNull);
+      expect(c!.fromUtcMs, bound);
+    });
+  });
+
   group('trackingStartLocalDayStartUtcMsFromYmd', () {
     test('parses YYYY-MM-DD', () {
       final ms = trackingStartLocalDayStartUtcMsFromYmd('2024-03-10');

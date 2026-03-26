@@ -6,10 +6,110 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/schedules_providers.dart';
 import '../../../app/usecase_providers.dart';
 import '../../../core/domain_errors.dart';
-import '../../../core/error_message_helper.dart';
+import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/unsaved_changes_dialog.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import 'day_card.dart';
 import 'schedule_roster_pdf_export.dart';
+
+Future<UnsavedChangesAction?> _showSchedulesUnsavedGuardDialog(
+  BuildContext context,
+) async {
+  final l10n = AppLocalizations.of(context);
+  return showUnsavedChangesDialog(
+    context,
+    title: l10n.schedulesUnsavedChangesTitle,
+    message: l10n.schedulesUnsavedChangesMessage,
+    discardLabel: l10n.schedulesDiscardChanges,
+  );
+}
+
+/// Persists the current schedule draft (create or update week). On failure,
+/// shows a themed error snack via [showAppSnack].
+Future<bool> _persistScheduleDraft(BuildContext context, WidgetRef ref) async {
+  final useCase = ref.read(schedulesTemplatesUseCaseProvider);
+  final draftState = ref.read(scheduleDraftProvider);
+  if (draftState == null) return true;
+
+  try {
+    if (draftState.source is ScheduleDraftSourceNewUnsaved) {
+      final id = await useCase.createTemplateWithWeek(
+        name: draftState.draft.name,
+        days: draftState.draft.days,
+      );
+      ref.read(scheduleDraftProvider.notifier).markSaved(draftState.draft.days);
+      ref.read(scheduleDraftProvider.notifier).setSourceExisting(id);
+    } else {
+      final src = draftState.source as ScheduleDraftSourceExisting;
+      await useCase.saveTemplateWeek(
+        templateId: src.templateId,
+        days: draftState.draft.days,
+      );
+      ref.read(scheduleDraftProvider.notifier).markSaved(draftState.draft.days);
+    }
+    return true;
+  } catch (e) {
+    if (!context.mounted) return false;
+    final l10n = AppLocalizations.of(context);
+    showAppSnack(
+      context,
+      l10n.schedulesSaveFailed(l10n.commonErrorOccurred),
+      isError: true,
+    );
+    return false;
+  }
+}
+
+/// Shows the schedules unsaved dialog and handles Cancel / Discard / Save.
+///
+/// Save always goes through [_persistScheduleDraft]. [onDiscard] and
+/// [onSaveSuccess] carry caller-specific side effects (e.g. [clear] vs
+/// [ScheduleDraftNotifier.resetToBase] on discard, or in-page navigation vs
+/// [Navigator.pop] on success).
+Future<void> _dispatchSchedulesUnsavedDialogAction({
+  required BuildContext context,
+  required WidgetRef ref,
+  required Future<void> Function() onDiscard,
+  required Future<void> Function() onSaveSuccess,
+}) async {
+  final action = await _showSchedulesUnsavedGuardDialog(context);
+  if (!context.mounted) return;
+  switch (action) {
+    case UnsavedChangesAction.cancel:
+    case null:
+      return;
+    case UnsavedChangesAction.discard:
+      await onDiscard();
+      return;
+    case UnsavedChangesAction.save:
+      final ok = await _persistScheduleDraft(context, ref);
+      if (context.mounted && ok) await onSaveSuccess();
+      return;
+  }
+}
+
+/// When the draft is not dirty, runs [onNotDirty]. Otherwise shows the unsaved
+/// dialog and runs [onDiscard] or persists then [onSaved] — same control flow
+/// as the previous inline implementations.
+Future<void> _runSchedulesUnsavedGuarded({
+  required BuildContext context,
+  required WidgetRef ref,
+  required Future<void> Function() onNotDirty,
+  required Future<void> Function() onDiscard,
+  required Future<void> Function() onSaved,
+}) async {
+  final dirty = ref.read(scheduleDraftDirtyProvider);
+  if (!dirty) {
+    await onNotDirty();
+    return;
+  }
+  await _dispatchSchedulesUnsavedDialogAction(
+    context: context,
+    ref: ref,
+    onDiscard: onDiscard,
+    onSaveSuccess: onSaved,
+  );
+}
 
 const _minCardWidth = 240.0;
 
@@ -36,18 +136,17 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
           if (context.mounted) Navigator.of(context).pop();
           return;
         }
-        final action = await _showUnsavedGuardDialog(context);
-        if (!context.mounted) return;
-        if (action == _GuardAction.cancel) return;
-        if (action == _GuardAction.discard) {
-          ref.read(scheduleDraftProvider.notifier).clear();
-          if (context.mounted) Navigator.of(context).pop();
-          return;
-        }
-        if (action == _GuardAction.save) {
-          final ok = await _performSave(ref);
-          if (context.mounted && ok) Navigator.of(context).pop();
-        }
+        await _dispatchSchedulesUnsavedDialogAction(
+          context: context,
+          ref: ref,
+          onDiscard: () async {
+            ref.read(scheduleDraftProvider.notifier).clear();
+            if (context.mounted) Navigator.of(context).pop();
+          },
+          onSaveSuccess: () async {
+            if (context.mounted) Navigator.of(context).pop();
+          },
+        );
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -113,9 +212,7 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
                   child: Text(
-                    l10n.schedulesFailedLoad(
-                      errorMessageForUser(e, l10n.commonErrorOccurred),
-                    ),
+                    l10n.schedulesFailedLoad(l10n.commonErrorOccurred),
                   ),
                 ),
               ),
@@ -125,77 +222,7 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
       ),
     );
   }
-
-  Future<_GuardAction?> _showUnsavedGuardDialog(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    return showDialog<_GuardAction>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.schedulesUnsavedChangesTitle),
-        content: Text(l10n.schedulesUnsavedChangesMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.cancel),
-            child: Text(l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.discard),
-            child: Text(l10n.schedulesDiscardChanges),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.save),
-            child: Text(l10n.commonSave),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Future<bool> _performSave(WidgetRef ref) async {
-    final useCase = ref.read(schedulesTemplatesUseCaseProvider);
-    final draftState = ref.read(scheduleDraftProvider);
-    if (draftState == null) return true;
-    final ctx = context;
-
-    try {
-      if (draftState.source is ScheduleDraftSourceNewUnsaved) {
-        final id = await useCase.createTemplateWithWeek(
-          name: draftState.draft.name,
-          days: draftState.draft.days,
-        );
-        ref
-            .read(scheduleDraftProvider.notifier)
-            .markSaved(draftState.draft.days);
-        ref.read(scheduleDraftProvider.notifier).setSourceExisting(id);
-      } else {
-        final src = draftState.source as ScheduleDraftSourceExisting;
-        await useCase.saveTemplateWeek(
-          templateId: src.templateId,
-          days: draftState.draft.days,
-        );
-        ref
-            .read(scheduleDraftProvider.notifier)
-            .markSaved(draftState.draft.days);
-      }
-      return true;
-    } catch (e) {
-      if (!ctx.mounted) return false;
-      final l10n = AppLocalizations.of(ctx);
-      ScaffoldMessenger.of(ctx).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.schedulesSaveFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred),
-            ),
-          ),
-        ),
-      );
-      return false;
-    }
-  }
 }
-
-enum _GuardAction { cancel, discard, save }
 
 class _RenameScheduleDialog extends ConsumerStatefulWidget {
   const _RenameScheduleDialog({
@@ -265,17 +292,11 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
     } catch (e) {
       if (mounted) {
         setState(() => _isSaving = false);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context).schedulesSaveFailed(
-                errorMessageForUser(
-                  e,
-                  AppLocalizations.of(context).commonErrorOccurred,
-                ),
-              ),
-            ),
-          ),
+        final l10n = AppLocalizations.of(context);
+        showAppSnack(
+          context,
+          l10n.schedulesSaveFailed(l10n.commonErrorOccurred),
+          isError: true,
         );
       }
     }
@@ -342,10 +363,7 @@ class _InitialTemplateLoader extends ConsumerWidget {
       error: (e, _) => Center(
         child: Text(
           AppLocalizations.of(context).schedulesFailedLoadTemplate(
-            errorMessageForUser(
-              e,
-              AppLocalizations.of(context).commonErrorOccurred,
-            ),
+            AppLocalizations.of(context).commonErrorOccurred,
           ),
         ),
       ),
@@ -448,43 +466,29 @@ class _WeekEditorContent extends ConsumerWidget {
     WidgetRef ref,
     int templateId,
   ) async {
-    final dirty = ref.read(scheduleDraftDirtyProvider);
-    if (!dirty) {
-      await _loadTemplate(context, ref, templateId);
-      return;
-    }
-    final action = await _showGuardDialog(context);
-    if (!context.mounted) return;
-    if (action == _GuardAction.cancel) return;
-    if (action == _GuardAction.discard) {
-      ref.read(scheduleDraftProvider.notifier).clear();
-      await _loadTemplate(context, ref, templateId);
-      return;
-    }
-    if (action == _GuardAction.save) {
-      final ok = await _save(context, ref);
-      if (context.mounted && ok) await _loadTemplate(context, ref, templateId);
-    }
+    await _runSchedulesUnsavedGuarded(
+      context: context,
+      ref: ref,
+      onNotDirty: () => _loadTemplate(context, ref, templateId),
+      onDiscard: () async {
+        ref.read(scheduleDraftProvider.notifier).clear();
+        await _loadTemplate(context, ref, templateId);
+      },
+      onSaved: () => _loadTemplate(context, ref, templateId),
+    );
   }
 
   Future<void> _onRename(BuildContext context, WidgetRef ref) async {
-    final dirty = ref.read(scheduleDraftDirtyProvider);
-    if (!dirty) {
-      await _showRenameScheduleDialog(context, ref);
-      return;
-    }
-    final action = await _showGuardDialog(context);
-    if (!context.mounted) return;
-    if (action == _GuardAction.cancel) return;
-    if (action == _GuardAction.discard) {
-      ref.read(scheduleDraftProvider.notifier).resetToBase();
-      if (context.mounted) await _showRenameScheduleDialog(context, ref);
-      return;
-    }
-    if (action == _GuardAction.save) {
-      final ok = await _save(context, ref);
-      if (context.mounted && ok) await _showRenameScheduleDialog(context, ref);
-    }
+    await _runSchedulesUnsavedGuarded(
+      context: context,
+      ref: ref,
+      onNotDirty: () => _showRenameScheduleDialog(context, ref),
+      onDiscard: () async {
+        ref.read(scheduleDraftProvider.notifier).resetToBase();
+        if (context.mounted) await _showRenameScheduleDialog(context, ref);
+      },
+      onSaved: () => _showRenameScheduleDialog(context, ref),
+    );
   }
 
   Future<void> _onDelete(BuildContext context, WidgetRef ref) async {
@@ -493,27 +497,18 @@ class _WeekEditorContent extends ConsumerWidget {
     if (existing == null) return;
     final templateId = existing.templateId;
 
-    final dirty = ref.read(scheduleDraftDirtyProvider);
-    if (!dirty) {
-      await _showDeleteConfirmDialog(context, ref, templateId);
-      return;
-    }
-    final action = await _showGuardDialog(context);
-    if (!context.mounted) return;
-    if (action == _GuardAction.cancel) return;
-    if (action == _GuardAction.discard) {
-      ref.read(scheduleDraftProvider.notifier).resetToBase();
-      if (context.mounted) {
-        await _showDeleteConfirmDialog(context, ref, templateId);
-      }
-      return;
-    }
-    if (action == _GuardAction.save) {
-      final ok = await _save(context, ref);
-      if (context.mounted && ok) {
-        await _showDeleteConfirmDialog(context, ref, templateId);
-      }
-    }
+    await _runSchedulesUnsavedGuarded(
+      context: context,
+      ref: ref,
+      onNotDirty: () => _showDeleteConfirmDialog(context, ref, templateId),
+      onDiscard: () async {
+        ref.read(scheduleDraftProvider.notifier).resetToBase();
+        if (context.mounted) {
+          await _showDeleteConfirmDialog(context, ref, templateId);
+        }
+      },
+      onSaved: () => _showDeleteConfirmDialog(context, ref, templateId),
+    );
   }
 
   Future<void> _showDeleteConfirmDialog(
@@ -594,14 +589,10 @@ class _WeekEditorContent extends ConsumerWidget {
       rethrow;
     } catch (e) {
       if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.schedulesDeleteFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred),
-            ),
-          ),
-        ),
+      showAppSnack(
+        context,
+        l10n.schedulesDeleteFailed(l10n.commonErrorOccurred),
+        isError: true,
       );
     }
   }
@@ -635,105 +626,33 @@ class _WeekEditorContent extends ConsumerWidget {
   }
 
   Future<void> _onNewSchedule(BuildContext context, WidgetRef ref) async {
-    final dirty = ref.read(scheduleDraftDirtyProvider);
     final existingNames = templates.map((t) => t.name).toList();
-    if (!dirty) {
-      ref
-          .read(scheduleDraftProvider.notifier)
-          .createNewDraft(existingNames: existingNames);
-      return;
-    }
-    final action = await _showGuardDialog(context);
-    if (!context.mounted) return;
-    if (action == _GuardAction.cancel) return;
-    if (action == _GuardAction.discard) {
-      ref.read(scheduleDraftProvider.notifier).clear();
-      ref
-          .read(scheduleDraftProvider.notifier)
-          .createNewDraft(existingNames: existingNames);
-      return;
-    }
-    if (action == _GuardAction.save) {
-      final ok = await _save(context, ref);
-      if (context.mounted && ok) {
+    await _runSchedulesUnsavedGuarded(
+      context: context,
+      ref: ref,
+      onNotDirty: () async {
+        ref
+            .read(scheduleDraftProvider.notifier)
+            .createNewDraft(existingNames: existingNames);
+      },
+      onDiscard: () async {
+        ref.read(scheduleDraftProvider.notifier).clear();
+        ref
+            .read(scheduleDraftProvider.notifier)
+            .createNewDraft(existingNames: existingNames);
+      },
+      onSaved: () async {
         final draft = ref.read(scheduleDraftProvider);
         final names = [...existingNames, if (draft != null) draft.draft.name];
         ref
             .read(scheduleDraftProvider.notifier)
             .createNewDraft(existingNames: names);
-      }
-    }
+      },
+    );
   }
 
   Future<void> _onSave(BuildContext context, WidgetRef ref) async {
-    await _save(context, ref);
-  }
-
-  Future<bool> _save(BuildContext context, WidgetRef ref) async {
-    final useCase = ref.read(schedulesTemplatesUseCaseProvider);
-    final draftState = ref.read(scheduleDraftProvider);
-    if (draftState == null) return true;
-
-    try {
-      if (draftState.source is ScheduleDraftSourceNewUnsaved) {
-        final id = await useCase.createTemplateWithWeek(
-          name: draftState.draft.name,
-          days: draftState.draft.days,
-        );
-        ref
-            .read(scheduleDraftProvider.notifier)
-            .markSaved(draftState.draft.days);
-        ref.read(scheduleDraftProvider.notifier).setSourceExisting(id);
-      } else {
-        final src = draftState.source as ScheduleDraftSourceExisting;
-        await useCase.saveTemplateWeek(
-          templateId: src.templateId,
-          days: draftState.draft.days,
-        );
-        ref
-            .read(scheduleDraftProvider.notifier)
-            .markSaved(draftState.draft.days);
-      }
-      return true;
-    } catch (e) {
-      if (!context.mounted) return false;
-      final l10n = AppLocalizations.of(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            l10n.schedulesSaveFailed(
-              errorMessageForUser(e, l10n.commonErrorOccurred),
-            ),
-          ),
-        ),
-      );
-      return false;
-    }
-  }
-
-  Future<_GuardAction?> _showGuardDialog(BuildContext context) async {
-    final l10n = AppLocalizations.of(context);
-    return showDialog<_GuardAction>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.schedulesUnsavedChangesTitle),
-        content: Text(l10n.schedulesUnsavedChangesMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.cancel),
-            child: Text(l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.discard),
-            child: Text(l10n.schedulesDiscardChanges),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(_GuardAction.save),
-            child: Text(l10n.commonSave),
-          ),
-        ],
-      ),
-    );
+    await _persistScheduleDraft(context, ref);
   }
 
   Future<void> _showRenameScheduleDialog(

@@ -7,12 +7,13 @@ import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../app/absences_providers.dart';
 import '../../app/sessions_providers.dart';
+import '../../common/utils/absence_domain_messages.dart';
 import '../../common/utils/date_utils.dart';
 import '../../common/utils/employee_display_name.dart';
+import '../../common/utils/terminal_session_duration_format.dart';
 import '../../common/utils/time_format.dart';
 import '../../common/widgets/app_snack.dart';
 import '../../core/domain_errors.dart';
-import '../../core/error_message_helper.dart';
 import '../../domain/entities/absence_info.dart';
 import '../../domain/entities/absence_with_employee_info.dart';
 import '../../domain/entities/employee_display.dart';
@@ -77,34 +78,6 @@ Widget _statusChip(String status, AppLocalizations l10n, BuildContext context) {
     padding: EdgeInsets.zero,
     materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
   );
-}
-
-String _resolveAbsenceError(String key, AppLocalizations l10n) {
-  return switch (key) {
-    'absenceErrorDeletePendingOnly' => l10n.absenceErrorDeletePendingOnly,
-    'absenceErrorEditPendingOnly' => l10n.absenceErrorEditPendingOnly,
-    'absenceErrorApproveRejectPendingOnly' =>
-      l10n.absenceErrorApproveRejectPendingOnly,
-    'absenceErrorRejectReasonRequired' => l10n.absenceErrorRejectReasonRequired,
-    'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
-    'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
-    _ => key,
-  };
-}
-
-int _minutesBetweenUtcMs(int startUtcMs, int endUtcMs) {
-  final startMin = (startUtcMs / 60000).floor();
-  final endMin = (endUtcMs / 60000).floor();
-  return (endMin - startMin).clamp(0, 999999);
-}
-
-String _formatDuration(AppLocalizations l10n, int totalMin) {
-  if (totalMin <= 0) return l10n.terminalDurationLessThanOneMin;
-  final h = totalMin ~/ 60;
-  final m = totalMin % 60;
-  if (h == 0) return l10n.terminalDurationMinutesOnly(m);
-  if (m == 0) return l10n.terminalDurationHoursOnly(h);
-  return l10n.durationHm(h, m);
 }
 
 final _calendarRangeAbsencesProvider =
@@ -623,9 +596,7 @@ class _DayDetailBlock extends ConsumerWidget {
             child: Padding(
               padding: const EdgeInsets.all(16),
               child: Text(
-                l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred),
-                ),
+                l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
               ),
             ),
           ),
@@ -645,9 +616,7 @@ class _DayDetailBlock extends ConsumerWidget {
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Text(
-            l10n.terminalFailedLoadEmployees(
-              errorMessageForUser(e, l10n.commonErrorOccurred),
-            ),
+            l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
           ),
         ),
       ),
@@ -722,7 +691,7 @@ class _DayDetailBlock extends ConsumerWidget {
       if (context.mounted) {
         showAppSnack(
           context,
-          _resolveAbsenceError(e.message, l10n),
+          absenceDomainMessageForKey(e.message, l10n),
           isError: true,
         );
       }
@@ -748,14 +717,14 @@ class _SessionRow extends StatelessWidget {
     final start = TimeFormat.formatTimeOnly(session.startTs);
     final String trailing;
     if (isOpen) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, nowMs),
+        minutesBetweenUtcMsClamp(session.startTs, nowMs),
       );
     } else if (session.endTs != null) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, session.endTs!),
+        minutesBetweenUtcMsClamp(session.startTs, session.endTs!),
       );
     } else {
       trailing = l10n.commonOngoing;

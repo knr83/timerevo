@@ -9,7 +9,8 @@ import '../../../app/tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../app/usecase_providers.dart';
-import '../../../common/utils/date_utils.dart';
+import '../../../common/utils/absence_domain_messages.dart';
+import '../../../common/utils/effective_utc_range_for_date_scope.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
 import '../../../core/domain_errors.dart';
@@ -62,19 +63,6 @@ Widget _statusChip(String status, AppLocalizations l10n, BuildContext context) {
   );
 }
 
-String _resolveAbsenceError(String key, AppLocalizations l10n) {
-  return switch (key) {
-    'absenceErrorDeletePendingOnly' => l10n.absenceErrorDeletePendingOnly,
-    'absenceErrorEditPendingOnly' => l10n.absenceErrorEditPendingOnly,
-    'absenceErrorApproveRejectPendingOnly' =>
-      l10n.absenceErrorApproveRejectPendingOnly,
-    'absenceErrorRejectReasonRequired' => l10n.absenceErrorRejectReasonRequired,
-    'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
-    'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
-    _ => key,
-  };
-}
-
 final _absencesFiltersProvider = StateProvider<_AbsencesFilters>(
   (ref) => _AbsencesFilters.initial(),
 );
@@ -121,15 +109,11 @@ class _AbsencesFilters {
   );
 
   ({int fromUtcMs, int toUtcMs}) get effectiveRange {
-    if (fromUtcMs != null && toUtcMs != null) {
-      return (fromUtcMs: fromUtcMs!, toUtcMs: toUtcMs!);
-    }
-    return switch (scope) {
-      DateRangeScope.day => reportPeriodToday(),
-      DateRangeScope.week => reportPeriodWeek(),
-      DateRangeScope.month => reportPeriodMonth(),
-      DateRangeScope.interval => reportPeriodMonth(),
-    };
+    return effectiveUtcRangeForDateScope(
+      scope: scope,
+      fromUtcMs: fromUtcMs,
+      toUtcMs: toUtcMs,
+    );
   }
 
   _AbsencesFilters copyWith({
@@ -236,13 +220,12 @@ class AbsencesPage extends ConsumerWidget {
     ref.listen(trackingStartSettingsProvider, (prev, next) {
       final ymd = trackingStartYmdFromWatch(next);
       final f = ref.read(_absencesFiltersProvider);
-      if (f.fromUtcMs == null || f.toUtcMs == null) return;
-      final c = clampUtcRangeToTrackingStart(
-        fromUtcMs: f.fromUtcMs!,
-        toUtcMs: f.toUtcMs!,
+      final c = maybeClampCustomUtcRange(
+        fromUtcMs: f.fromUtcMs,
+        toUtcMs: f.toUtcMs,
         trackingStartYmd: ymd,
       );
-      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+      if (c != null) {
         ref.read(_absencesFiltersProvider.notifier).state = f.copyWith(
           fromUtcMs: c.fromUtcMs,
           toUtcMs: c.toUtcMs,
@@ -656,7 +639,7 @@ class _AbsencesTable extends ConsumerWidget {
       if (context.mounted) {
         showAppSnack(
           context,
-          _resolveAbsenceError(e.message, l10n),
+          absenceDomainMessageForKey(e.message, l10n),
           isError: true,
         );
       }
@@ -699,7 +682,7 @@ class _AbsencesTable extends ConsumerWidget {
       if (context.mounted) {
         showAppSnack(
           context,
-          _resolveAbsenceError(e.message, l10n),
+          absenceDomainMessageForKey(e.message, l10n),
           isError: true,
         );
       }
@@ -775,7 +758,7 @@ class _AbsencesTable extends ConsumerWidget {
       if (context.mounted) {
         showAppSnack(
           context,
-          _resolveAbsenceError(e.message, l10n),
+          absenceDomainMessageForKey(e.message, l10n),
           isError: true,
         );
       }

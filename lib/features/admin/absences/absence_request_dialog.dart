@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/absences_providers.dart';
+import '../../../common/utils/absence_domain_messages.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../core/domain_errors.dart';
@@ -177,17 +178,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
       widget.onSaved?.call();
     } on DomainValidationException catch (e) {
       if (!mounted) return;
-      final msg = switch (e.message) {
-        'absenceErrorOverlap' => l10n.absenceErrorOverlap,
-        'absenceErrorDateRestrictionVacation' =>
-          l10n.absenceErrorDateRestrictionVacation,
-        'absenceErrorDateRestrictionSickLeave' =>
-          l10n.absenceErrorDateRestrictionSickLeave,
-        'absenceErrorOutsideEmployment' => l10n.absenceErrorOutsideEmployment,
-        'absenceErrorEditPendingOnly' => l10n.absenceErrorEditPendingOnly,
-        'absenceErrorDateOrder' => l10n.absenceErrorDateOrder,
-        _ => l10n.commonErrorOccurred,
-      };
+      final msg = absenceDomainMessageForKey(e.message, l10n);
       setState(() {
         _isSaving = false;
         _dateRangeError = msg;

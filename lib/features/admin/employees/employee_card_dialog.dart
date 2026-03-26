@@ -9,7 +9,6 @@ import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/locale/locale_settings_controller.dart';
 import '../../../app/usecase_providers.dart';
-import '../../../data/repositories/repo_providers.dart';
 import '../../../common/input/starting_balance_input_formatter.dart';
 import '../../../common/pdf/employee_data_pdf_export.dart';
 import '../../../common/utils/employee_display_name.dart';
@@ -20,18 +19,16 @@ import '../../../core/starting_balance_display.dart';
 import '../../../core/weekly_template_hours_display.dart';
 import '../../../core/config/data_retention_config.dart';
 import '../../../core/employee_pin_status.dart';
-import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_details.dart';
 import '../../../domain/entities/employee_status.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../../../ui/legal/legal_doc_page.dart';
 import '../admin_providers.dart';
+import '../../../common/widgets/unsaved_changes_dialog.dart';
 
 const _employmentTypes = ['full_time', 'part_time', 'minijob', 'custom'];
 const _roles = ['employee', 'manager'];
-
-enum _EmployeeGuardAction { cancel, discard, save }
 
 class EmployeeCardDialog extends ConsumerStatefulWidget {
   const EmployeeCardDialog({
@@ -640,12 +637,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         showAppSnack(
           context,
           widget.existing == null
-              ? l10n.employeeCreateFailed(
-                  errorMessageForUser(err, l10n.commonErrorOccurred),
-                )
-              : l10n.employeeUpdateFailed(
-                  errorMessageForUser(err, l10n.commonErrorOccurred),
-                ),
+              ? l10n.employeeCreateFailed(l10n.commonErrorOccurred)
+              : l10n.employeeUpdateFailed(l10n.commonErrorOccurred),
           isError: true,
         );
       }
@@ -660,37 +653,21 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
       return;
     }
     final l10n = AppLocalizations.of(context);
-    final action = await showDialog<_EmployeeGuardAction>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        title: Text(l10n.employeeUnsavedChangesTitle),
-        content: Text(l10n.employeeUnsavedChangesMessage),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(ctx).pop(_EmployeeGuardAction.cancel),
-            child: Text(l10n.commonCancel),
-          ),
-          TextButton(
-            onPressed: () =>
-                Navigator.of(ctx).pop(_EmployeeGuardAction.discard),
-            child: Text(l10n.employeeDiscardChanges),
-          ),
-          FilledButton(
-            onPressed: () => Navigator.of(ctx).pop(_EmployeeGuardAction.save),
-            child: Text(l10n.commonSave),
-          ),
-        ],
-      ),
+    final action = await showUnsavedChangesDialog(
+      context,
+      title: l10n.employeeUnsavedChangesTitle,
+      message: l10n.employeeUnsavedChangesMessage,
+      discardLabel: l10n.employeeDiscardChanges,
     );
     if (!mounted) return;
     switch (action) {
-      case _EmployeeGuardAction.save:
+      case UnsavedChangesAction.save:
         await _save();
         break;
-      case _EmployeeGuardAction.discard:
+      case UnsavedChangesAction.discard:
         Navigator.of(context).pop(false);
         break;
-      case _EmployeeGuardAction.cancel:
+      case UnsavedChangesAction.cancel:
       case null:
         break;
     }

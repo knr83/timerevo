@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../common/utils/date_utils.dart';
+import '../common/utils/effective_utc_range_for_date_scope.dart';
 import '../common/widgets/date_range_filter_bar.dart';
 import '../core/tracking_start_range_clamp.dart';
 import '../data/repositories/repo_providers.dart';
@@ -13,6 +14,9 @@ import '../domain/usecases.dart';
 import '../domain/usecases/schedule_roster_pdf_data_usecase.dart';
 import 'tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
+
+/// Re-export for UI that needs [schedulesRepoProvider] without importing `data/`.
+export '../data/repositories/repo_providers.dart' show schedulesRepoProvider;
 
 final clockInUseCaseProvider = Provider<ClockInUseCase>((ref) {
   return ClockInUseCase(
@@ -110,15 +114,11 @@ final reportFiltersProvider =
 ({int fromUtcMs, int toUtcMs}) reportEffectiveRange(
   ({DateRangeScope scope, int? fromUtcMs, int? toUtcMs, int? employeeId}) f,
 ) {
-  if (f.fromUtcMs != null && f.toUtcMs != null) {
-    return (fromUtcMs: f.fromUtcMs!, toUtcMs: f.toUtcMs!);
-  }
-  return switch (f.scope) {
-    DateRangeScope.day => reportPeriodToday(),
-    DateRangeScope.week => reportPeriodWeek(),
-    DateRangeScope.month => reportPeriodMonth(),
-    DateRangeScope.interval => reportPeriodMonth(),
-  };
+  return effectiveUtcRangeForDateScope(
+    scope: f.scope,
+    fromUtcMs: f.fromUtcMs,
+    toUtcMs: f.toUtcMs,
+  );
 }
 
 /// Effective report range with optional tracking-start lower bound ([toUtcMs] never changed).

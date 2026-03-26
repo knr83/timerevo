@@ -2,11 +2,9 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
-import '../../core/error_message_helper.dart';
+import '../../core/pdf/pdf_print_theme.dart';
 import '../../core/weekly_template_hours_display.dart';
 import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/schedules_repo_port.dart';
@@ -92,12 +90,7 @@ Future<void> exportEmployeeDataPdf(
       );
     }
 
-    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
-    final fontBoldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
-    final theme = pw.ThemeData.withFont(
-      base: pw.Font.ttf(fontData),
-      bold: pw.Font.ttf(fontBoldData),
-    );
+    final theme = await loadPdfPrintTheme();
 
     final labels = EmployeeDataPdfLabels(
       title: l10n.employeeDataPdfTitle,
@@ -139,9 +132,7 @@ Future<void> exportEmployeeDataPdf(
   } catch (e) {
     if (context.mounted) {
       showErrorSnack(
-        l10n.employeeDataPdfFailed(
-          errorMessageForUser(e, l10n.commonErrorOccurred),
-        ),
+        l10n.employeeDataPdfFailed(l10n.commonErrorOccurred),
         isError: true,
       );
     }

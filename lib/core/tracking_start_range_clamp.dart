@@ -16,6 +16,50 @@
   return (fromUtcMs: newFrom, toUtcMs: newTo);
 }
 
+/// After applying [clampUtcRangeToTrackingStart] to the resolved range, returns
+/// the clamped pair only if it differs from [storedFromUtcMs] / [storedToUtcMs].
+/// Returns null when filters do not need updating (same values after clamp).
+///
+/// Used when [trackingStartSettingsProvider] changes: callers pass the effective
+/// UTC range ([resolvedFromUtcMs], [resolvedToUtcMs]) and current filter fields
+/// as stored values (e.g. Reports may use [reportEffectiveRange] for resolved
+/// and raw filter fields for stored).
+({int fromUtcMs, int toUtcMs})? maybeClampUtcRangeIfUpdateNeeded({
+  required int resolvedFromUtcMs,
+  required int resolvedToUtcMs,
+  required int? storedFromUtcMs,
+  required int? storedToUtcMs,
+  required String? trackingStartYmd,
+}) {
+  final c = clampUtcRangeToTrackingStart(
+    fromUtcMs: resolvedFromUtcMs,
+    toUtcMs: resolvedToUtcMs,
+    trackingStartYmd: trackingStartYmd,
+  );
+  if (c.fromUtcMs == storedFromUtcMs && c.toUtcMs == storedToUtcMs) {
+    return null;
+  }
+  return c;
+}
+
+/// When both [fromUtcMs] and [toUtcMs] are non-null (custom interval selected),
+/// returns the clamped range if it differs from the inputs; otherwise null.
+/// Returns null if either bound is null (preset scope — no sync in listener).
+({int fromUtcMs, int toUtcMs})? maybeClampCustomUtcRange({
+  required int? fromUtcMs,
+  required int? toUtcMs,
+  required String? trackingStartYmd,
+}) {
+  if (fromUtcMs == null || toUtcMs == null) return null;
+  return maybeClampUtcRangeIfUpdateNeeded(
+    resolvedFromUtcMs: fromUtcMs,
+    resolvedToUtcMs: toUtcMs,
+    storedFromUtcMs: fromUtcMs,
+    storedToUtcMs: toUtcMs,
+    trackingStartYmd: trackingStartYmd,
+  );
+}
+
 /// Start of local calendar day for [ymd] (`YYYY-MM-DD`) as UTC epoch ms (DST-safe).
 int trackingStartLocalDayStartUtcMsFromYmd(String ymd) {
   final parts = ymd.split('-');

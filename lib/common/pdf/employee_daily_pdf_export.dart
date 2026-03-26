@@ -2,24 +2,16 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
-import '../../core/error_message_helper.dart';
+import '../../core/pdf/pdf_print_theme.dart';
+import '../utils/duration_hm_format.dart';
 import '../../domain/usecases.dart';
 import 'employee_daily_pdf_builder.dart';
 import 'time_report_pdf_suggested_filename.dart';
 
 String _formatDate(DateTime dt) {
   return '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}';
-}
-
-String _formatDurationMs(int ms, AppLocalizations l10n) {
-  final totalMinutes = (ms / 60000).floor();
-  final h = totalMinutes ~/ 60;
-  final m = totalMinutes % 60;
-  return l10n.durationHm(h, m);
 }
 
 /// Exports single-employee daily breakdown PDF. Call from admin drawer or terminal.
@@ -53,12 +45,7 @@ Future<void> exportEmployeeDailyPdf(
       fromUtcMs: fromUtcMs,
       toUtcMs: toUtcMs,
     );
-    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
-    final fontBoldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
-    final theme = pw.ThemeData.withFont(
-      base: pw.Font.ttf(fontData),
-      bold: pw.Font.ttf(fontBoldData),
-    );
+    final theme = await loadPdfPrintTheme();
     final fromStr = _formatDate(
       DateTime.fromMillisecondsSinceEpoch(fromUtcMs, isUtc: true).toLocal(),
     );
@@ -87,7 +74,7 @@ Future<void> exportEmployeeDailyPdf(
       theme: theme,
       labels: labels,
       dayRows: dayRows,
-      formatDuration: (ms) => _formatDurationMs(ms, l10n),
+      formatDuration: (ms) => formatDurationHmFromMs(ms, l10n),
       periodStartingBalanceMs: periodStartingBalanceMs,
     );
     final bytes = await pdf.save();
@@ -99,9 +86,7 @@ Future<void> exportEmployeeDailyPdf(
   } catch (e) {
     if (context.mounted) {
       showErrorSnack(
-        l10n.reportsFailedLoad(
-          errorMessageForUser(e, l10n.commonErrorOccurred),
-        ),
+        l10n.reportsFailedLoad(l10n.commonErrorOccurred),
         isError: true,
       );
     }

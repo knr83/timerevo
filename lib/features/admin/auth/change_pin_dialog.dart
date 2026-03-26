@@ -4,7 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/usecase_providers.dart';
 import '../../../core/domain_errors.dart';
-import '../../../core/error_message_helper.dart';
 import '../../../core/pin_validation.dart';
 
 class ChangePinDialog extends ConsumerStatefulWidget {
@@ -170,7 +169,7 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
         _error =
             e is DomainValidationException && e.message == 'invalid_pin_format'
             ? l10n.changePinInvalidFormat
-            : errorMessageForUser(e, l10n.commonErrorOccurred);
+            : l10n.commonErrorOccurred;
       });
     }
   }

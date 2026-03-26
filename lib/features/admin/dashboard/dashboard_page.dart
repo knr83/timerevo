@@ -7,27 +7,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/sessions_providers.dart';
 import '../../../common/utils/employee_display_name.dart';
+import '../../../common/utils/terminal_session_duration_format.dart';
 import '../../../common/utils/time_format.dart';
-import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_info.dart';
 import '../../../domain/entities/session_info.dart';
 import '../../../domain/entities/session_with_employee_info.dart';
-
-int _minutesBetweenUtcMs(int startUtcMs, int endUtcMs) {
-  final startMin = (startUtcMs / 60000).floor();
-  final endMin = (endUtcMs / 60000).floor();
-  return (endMin - startMin).clamp(0, 999999);
-}
-
-String _formatDuration(AppLocalizations l10n, int totalMin) {
-  if (totalMin <= 0) return l10n.terminalDurationLessThanOneMin;
-  final h = totalMin ~/ 60;
-  final m = totalMin % 60;
-  if (h == 0) return l10n.terminalDurationMinutesOnly(m);
-  if (m == 0) return l10n.terminalDurationHoursOnly(h);
-  return l10n.durationHm(h, m);
-}
 
 class _DashboardSessionRow extends StatelessWidget {
   const _DashboardSessionRow({
@@ -47,14 +32,14 @@ class _DashboardSessionRow extends StatelessWidget {
     final start = TimeFormat.formatTimeOnly(session.startTs);
     final String trailing;
     if (isOpen) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, nowMs),
+        minutesBetweenUtcMsClamp(session.startTs, nowMs),
       );
     } else if (session.endTs != null) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, session.endTs!),
+        minutesBetweenUtcMsClamp(session.startTs, session.endTs!),
       );
     } else {
       trailing = l10n.commonOngoing;
@@ -355,9 +340,7 @@ class _DashboardNowAtWorkState extends ConsumerState<_DashboardNowAtWork> {
                 ),
               ),
               error: (e, _) => Text(
-                l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred),
-                ),
+                l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
               ),
             ),
           ],
@@ -443,8 +426,8 @@ class _NowAtWorkRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final nowMs = DateTime.now().millisecondsSinceEpoch;
-    final totalMin = _minutesBetweenUtcMs(session.startTs, nowMs);
-    final durationStr = _formatDuration(l10n, totalMin);
+    final totalMin = minutesBetweenUtcMsClamp(session.startTs, nowMs);
+    final durationStr = formatTerminalSessionDuration(l10n, totalMin);
     final isExpanded = expandedEmployeeId == employee.id;
 
     return Padding(
@@ -643,9 +626,7 @@ class _DashboardTodayEmployeesState
                 ),
               ),
               error: (e, _) => Text(
-                l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred),
-                ),
+                l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
               ),
             ),
           ],
@@ -670,7 +651,7 @@ class _TodayEmployeeListRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final durationStr = _formatDuration(l10n, row.totalMin);
+    final durationStr = formatTerminalSessionDuration(l10n, row.totalMin);
     final isExpanded = expandedEmployeeId == row.employee.id;
 
     return Padding(
@@ -791,9 +772,7 @@ class _DashboardRecentActivity extends ConsumerWidget {
                 ),
               ),
               error: (e, _) => Text(
-                l10n.terminalFailedLoadEmployees(
-                  errorMessageForUser(e, l10n.commonErrorOccurred),
-                ),
+                l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
               ),
             ),
           ],

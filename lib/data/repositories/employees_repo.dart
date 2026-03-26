@@ -6,7 +6,9 @@ import '../../domain/entities/employee_info.dart';
 import '../../domain/entities/employee_starting_balance_snapshot.dart';
 import '../../domain/entities/employee_status.dart';
 import '../../domain/ports/employees_repo_port.dart';
+import '../../domain/ports/schedules_repo_port.dart';
 import '../db/app_db.dart';
+import '../mappers/employee_info_from_drift.dart';
 import '../../common/utils/pin_hash.dart';
 import '../../common/utils/utc_clock.dart';
 import 'repo_guard.dart';
@@ -18,9 +20,10 @@ String _statusToString(EmployeeStatus s) => switch (s) {
 };
 
 class EmployeesRepo implements IEmployeesRepo {
-  EmployeesRepo(this._db);
+  EmployeesRepo(this._db, this._schedulesRepo);
 
   final AppDb _db;
+  final ISchedulesRepo _schedulesRepo;
 
   @override
   Future<String> getSuggestedEmployeeCode() async {
@@ -92,40 +95,14 @@ class EmployeesRepo implements IEmployeesRepo {
   @override
   Stream<List<EmployeeInfo>> streamActiveEmployees() {
     return watchActiveEmployees().map(
-      (list) => list
-          .map(
-            (e) => EmployeeInfo(
-              id: e.id,
-              firstName: e.firstName,
-              lastName: e.lastName,
-              status: employeeStatusFromString(e.status),
-              usePin: e.usePin == 1,
-              policyAcknowledged: e.policyAcknowledged == 1,
-              hireDate: e.hireDate,
-              terminationDate: e.terminationDate,
-            ),
-          )
-          .toList(),
+      (list) => list.map(employeeInfoFromDrift).toList(),
     );
   }
 
   @override
   Stream<List<EmployeeInfo>> streamAllEmployees() {
     return watchAllEmployees().map(
-      (list) => list
-          .map(
-            (e) => EmployeeInfo(
-              id: e.id,
-              firstName: e.firstName,
-              lastName: e.lastName,
-              status: employeeStatusFromString(e.status),
-              usePin: e.usePin == 1,
-              policyAcknowledged: e.policyAcknowledged == 1,
-              hireDate: e.hireDate,
-              terminationDate: e.terminationDate,
-            ),
-          )
-          .toList(),
+      (list) => list.map(employeeInfoFromDrift).toList(),
     );
   }
 
@@ -171,18 +148,10 @@ class EmployeesRepo implements IEmployeesRepo {
               ),
             );
 
-        if (templateId != null) {
-          await _db
-              .into(_db.employeeScheduleAssignments)
-              .insert(
-                EmployeeScheduleAssignmentsCompanion(
-                  employeeId: Value(employeeId),
-                  templateId: Value(templateId),
-                  createdAt: Value(now),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-        }
+        await _schedulesRepo.setEmployeeTemplateAssignment(
+          employeeId: employeeId,
+          templateId: templateId,
+        );
 
         return employeeId;
       });
@@ -227,23 +196,10 @@ class EmployeesRepo implements IEmployeesRepo {
           ),
         );
 
-        if (templateId == null) {
-          await (_db.delete(
-            _db.employeeScheduleAssignments,
-          )..where((a) => a.employeeId.equals(id))).go();
-          return;
-        }
-
-        await _db
-            .into(_db.employeeScheduleAssignments)
-            .insert(
-              EmployeeScheduleAssignmentsCompanion(
-                employeeId: Value(id),
-                templateId: Value(templateId),
-                createdAt: Value(now),
-              ),
-              mode: InsertMode.insertOrReplace,
-            );
+        await _schedulesRepo.setEmployeeTemplateAssignment(
+          employeeId: id,
+          templateId: templateId,
+        );
       });
     });
   }
@@ -463,18 +419,10 @@ class EmployeesRepo implements IEmployeesRepo {
                     : const Value.absent(),
               ),
             );
-        if (templateId != null) {
-          await _db
-              .into(_db.employeeScheduleAssignments)
-              .insert(
-                EmployeeScheduleAssignmentsCompanion(
-                  employeeId: Value(employeeId),
-                  templateId: Value(templateId),
-                  createdAt: Value(now),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-        }
+        await _schedulesRepo.setEmployeeTemplateAssignment(
+          employeeId: employeeId,
+          templateId: templateId,
+        );
         return employeeId;
       });
     });
@@ -551,22 +499,10 @@ class EmployeesRepo implements IEmployeesRepo {
                 : const Value.absent(),
           ),
         );
-        if (templateId == null) {
-          await (_db.delete(
-            _db.employeeScheduleAssignments,
-          )..where((a) => a.employeeId.equals(id))).go();
-        } else {
-          await _db
-              .into(_db.employeeScheduleAssignments)
-              .insert(
-                EmployeeScheduleAssignmentsCompanion(
-                  employeeId: Value(id),
-                  templateId: Value(templateId),
-                  createdAt: Value(now),
-                ),
-                mode: InsertMode.insertOrReplace,
-              );
-        }
+        await _schedulesRepo.setEmployeeTemplateAssignment(
+          employeeId: id,
+          templateId: templateId,
+        );
       });
     });
   }

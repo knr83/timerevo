@@ -7,6 +7,7 @@ import '../core/employee_pin_status.dart';
 import '../core/pin_validation.dart';
 import '../core/starting_balance_period.dart';
 import '../common/utils/date_utils.dart';
+import 'absence_ymd_expansion.dart';
 import 'attendance_interval_resolver.dart';
 import 'entities/absence_with_employee_info.dart';
 import 'entities/employee_day_report_row.dart';
@@ -328,24 +329,7 @@ class EmployeeReportWithNormUseCase {
             dateToYmd(fromDate),
             dateToYmd(toDate),
           );
-      final set = <String>{};
-      for (final range in ranges) {
-        var d = DateTime(
-          range.dateFrom.year,
-          range.dateFrom.month,
-          range.dateFrom.day,
-        );
-        final end = DateTime(
-          range.dateTo.year,
-          range.dateTo.month,
-          range.dateTo.day,
-        );
-        while (!d.isAfter(end)) {
-          set.add(dateToYmd(d));
-          d = d.add(const Duration(days: 1));
-        }
-      }
-      absenceCoveredYmd[r.employeeId] = set;
+      absenceCoveredYmd[r.employeeId] = ymdSetFromApprovedAbsenceRanges(ranges);
     }
 
     final startingSnapshots = await _employeesRepo.getStartingBalanceSnapshots(
@@ -446,23 +430,7 @@ class EmployeeDayReportUseCase {
           fromYmd,
           toYmd,
         );
-    final absenceYmd = <String>{};
-    for (final range in ranges) {
-      var d = DateTime(
-        range.dateFrom.year,
-        range.dateFrom.month,
-        range.dateFrom.day,
-      );
-      final end = DateTime(
-        range.dateTo.year,
-        range.dateTo.month,
-        range.dateTo.day,
-      );
-      while (!d.isAfter(end)) {
-        absenceYmd.add(dateToYmd(d));
-        d = d.add(const Duration(days: 1));
-      }
-    }
+    final absenceYmd = ymdSetFromApprovedAbsenceRanges(ranges);
 
     final scheduleCache = <String, ResolvedSchedule>{};
 
@@ -681,24 +649,9 @@ class JournalDayOverviewUseCase {
     final absenceRangesList = await Future.wait(absenceFutures);
     for (var i = 0; i < employees.length; i++) {
       final empId = employees[i].id;
-      final set = <String>{};
-      for (final range in absenceRangesList[i]) {
-        var d = DateTime(
-          range.dateFrom.year,
-          range.dateFrom.month,
-          range.dateFrom.day,
-        );
-        final end = DateTime(
-          range.dateTo.year,
-          range.dateTo.month,
-          range.dateTo.day,
-        );
-        while (!d.isAfter(end)) {
-          set.add(dateToYmd(d));
-          d = d.add(const Duration(days: 1));
-        }
-      }
-      absenceByEmpYmd[empId] = set;
+      absenceByEmpYmd[empId] = ymdSetFromApprovedAbsenceRanges(
+        absenceRangesList[i],
+      );
     }
 
     final scheduleCache = <String, ResolvedSchedule>{};
@@ -874,24 +827,9 @@ class JournalIntervalOverviewUseCase {
     final absenceRangesList = await Future.wait(absenceFutures);
     for (var i = 0; i < employees.length; i++) {
       final empId = employees[i].id;
-      final set = <String>{};
-      for (final range in absenceRangesList[i]) {
-        var d = DateTime(
-          range.dateFrom.year,
-          range.dateFrom.month,
-          range.dateFrom.day,
-        );
-        final end = DateTime(
-          range.dateTo.year,
-          range.dateTo.month,
-          range.dateTo.day,
-        );
-        while (!d.isAfter(end)) {
-          set.add(dateToYmd(d));
-          d = d.add(const Duration(days: 1));
-        }
-      }
-      absenceByEmpYmd[empId] = set;
+      absenceByEmpYmd[empId] = ymdSetFromApprovedAbsenceRanges(
+        absenceRangesList[i],
+      );
     }
 
     final result = <JournalIntervalRow>[];
@@ -1179,7 +1117,7 @@ class WatchAbsencesUseCase {
 class EmployeesAdminUseCase {
   EmployeesAdminUseCase(this._employeesRepo, this._schedulesRepo);
   final IEmployeesRepo _employeesRepo;
-  final dynamic _schedulesRepo; // SchedulesRepo (no port yet)
+  final ISchedulesRepo _schedulesRepo;
 
   Future<EmployeeDetails?> getEmployeeDetails(int id) =>
       _employeesRepo.getEmployeeDetails(id);
@@ -1318,7 +1256,7 @@ class EmployeesAdminUseCase {
 /// Use case for schedule template CRUD and week editing.
 class SchedulesTemplatesUseCase {
   SchedulesTemplatesUseCase(this._schedulesRepo);
-  final dynamic _schedulesRepo; // SchedulesRepo
+  final ISchedulesRepo _schedulesRepo;
 
   Future<int> createTemplate(String name) =>
       _schedulesRepo.createTemplate(name);

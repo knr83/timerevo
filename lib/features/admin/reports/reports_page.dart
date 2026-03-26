@@ -1,12 +1,6 @@
-import 'dart:io';
-
-import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:pdf/pdf.dart';
-import 'package:pdf/widgets.dart' as pw;
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/tracking_start/tracking_start_settings_controller.dart'
@@ -14,26 +8,17 @@ import '../../../app/tracking_start/tracking_start_settings_controller.dart'
 import '../../../app/usecase_providers.dart';
 import '../../../core/tracking_start_range_clamp.dart';
 import '../../../common/pdf/employee_daily_pdf_export.dart';
-import 'package:timerevo/core/pdf/pdf_print_form_frame.dart';
-import '../../../common/pdf/time_report_pdf_suggested_filename.dart';
-import '../../../common/utils/date_utils.dart';
+import '../../../common/utils/duration_hm_format.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
-import '../../../core/error_message_helper.dart';
 import '../../../core/starting_balance_period.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_report_row_info.dart';
-
-String formatDurationMs(int ms, AppLocalizations l10n) {
-  final totalMinutes = (ms / 60000).floor();
-  final h = totalMinutes ~/ 60;
-  final m = totalMinutes % 60;
-  return l10n.durationHm(h, m);
-}
+import 'pdf/aggregate_reports_pdf_export.dart';
 
 String formatBalanceMs(int ms, AppLocalizations l10n) {
-  final s = formatDurationMs(ms.abs(), l10n);
+  final s = formatDurationHmFromMs(ms.abs(), l10n);
   return ms >= 0 ? '+$s' : '-$s';
 }
 
@@ -81,12 +66,14 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
       final ymd = trackingStartYmdFromWatch(next);
       final f = ref.read(reportFiltersProvider);
       final base = reportEffectiveRange(f);
-      final c = clampUtcRangeToTrackingStart(
-        fromUtcMs: base.fromUtcMs,
-        toUtcMs: base.toUtcMs,
+      final c = maybeClampUtcRangeIfUpdateNeeded(
+        resolvedFromUtcMs: base.fromUtcMs,
+        resolvedToUtcMs: base.toUtcMs,
+        storedFromUtcMs: f.fromUtcMs,
+        storedToUtcMs: f.toUtcMs,
         trackingStartYmd: ymd,
       );
-      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+      if (c != null) {
         ref.read(reportFiltersProvider.notifier).state = (
           scope: f.scope,
           fromUtcMs: c.fromUtcMs,
@@ -128,7 +115,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         ref.read(trackingStartSettingsProvider),
                       ),
                     );
-                    await _exportPdf(
+                    await exportAggregateReportsPdf(
                       context,
                       fromUtcMs: range.fromUtcMs,
                       toUtcMs: range.toUtcMs,
@@ -206,9 +193,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                           const Center(child: CircularProgressIndicator()),
                       error: (e, _) => Center(
                         child: Text(
-                          l10n.reportsFailedLoad(
-                            errorMessageForUser(e, l10n.commonErrorOccurred),
-                          ),
+                          l10n.reportsFailedLoad(l10n.commonErrorOccurred),
                         ),
                       ),
                     ),
@@ -286,11 +271,7 @@ class _EmployeeFilterDropdown extends ConsumerWidget {
         height: 56,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Text(
-        l10n.reportsFailedLoad(
-          errorMessageForUser(e, l10n.commonErrorOccurred),
-        ),
-      ),
+      error: (e, _) => Text(l10n.reportsFailedLoad(l10n.commonErrorOccurred)),
     );
   }
 }
@@ -366,7 +347,7 @@ class _ReportTable extends ConsumerWidget {
         rows: sorted
             .map((r) {
               final plannedText = r.anyDayHasSchedule
-                  ? formatDurationMs(r.normMs, l10n)
+                  ? formatDurationHmFromMs(r.normMs, l10n)
                   : l10n.reportsPlannedNoSchedule;
               return DataRow(
                 selected:
@@ -378,7 +359,7 @@ class _ReportTable extends ConsumerWidget {
                 },
                 cells: [
                   DataCell(Text(r.employeeName)),
-                  DataCell(Text(formatDurationMs(r.totalMs, l10n))),
+                  DataCell(Text(formatDurationHmFromMs(r.totalMs, l10n))),
                   DataCell(Text(plannedText)),
                   DataCell(balanceText(r.deltaMs, l10n, context)),
                 ],
@@ -468,7 +449,7 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                       fromUtcMs: r.fromUtcMs,
                       toUtcMs: r.toUtcMs,
                       sortColumnName: sortColumnIndex != null
-                          ? _sortColumnName(l10n, sortColumnIndex)
+                          ? aggregateReportSortColumnName(l10n, sortColumnIndex)
                           : null,
                       periodStartingBalanceMs: sbMs,
                       showSnack: (msg) => showAppSnack(context, msg),
@@ -514,13 +495,15 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                       rows: dayRows
                           .map((dr) {
                             final plannedText = dr.hasSchedule
-                                ? formatDurationMs(dr.normMs, l10n)
+                                ? formatDurationHmFromMs(dr.normMs, l10n)
                                 : l10n.reportsPlannedNoSchedule;
                             return DataRow(
                               cells: [
                                 DataCell(Text(dr.dateYmd)),
                                 DataCell(
-                                  Text(formatDurationMs(dr.workedMs, l10n)),
+                                  Text(
+                                    formatDurationHmFromMs(dr.workedMs, l10n),
+                                  ),
                                 ),
                                 DataCell(Text(plannedText)),
                                 DataCell(
@@ -535,276 +518,11 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(
-                child: Text(errorMessageForUser(e, l10n.commonErrorOccurred)),
-              ),
+              error: (e, _) => Center(child: Text(l10n.commonErrorOccurred)),
             ),
           ),
         ],
       ),
     );
-  }
-}
-
-String _sortColumnName(AppLocalizations l10n, int? sortColumnIndex) {
-  if (sortColumnIndex == null) return '';
-  switch (sortColumnIndex) {
-    case 0:
-      return l10n.reportsTableEmployee;
-    case 1:
-      return l10n.reportsTableWorked;
-    case 2:
-      return l10n.reportsTablePlanned;
-    case 3:
-      return l10n.reportsTableBalance;
-    default:
-      return '';
-  }
-}
-
-Future<void> _exportPdf(
-  BuildContext context, {
-  required int fromUtcMs,
-  required int toUtcMs,
-  required int? employeeId,
-  required List<EmployeeReportRowInfo> rows,
-  int? sortColumnIndex,
-  bool sortAscending = false,
-}) async {
-  final l10n = AppLocalizations.of(context);
-  final generatedAt = DateTime.now().toLocal();
-  final saveLocation = await getSaveLocation(
-    suggestedName: timeReportPdfSuggestedFileName(
-      fromUtcMs: fromUtcMs,
-      toUtcMs: toUtcMs,
-      generatedAt: generatedAt,
-    ),
-    acceptedTypeGroups: [
-      XTypeGroup(label: l10n.reportsPdfFileType, extensions: const ['pdf']),
-    ],
-  );
-  if (saveLocation == null) return;
-
-  try {
-    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
-    final fontBoldData = await rootBundle.load('assets/fonts/Roboto-Bold.ttf');
-    final theme = pw.ThemeData.withFont(
-      base: pw.Font.ttf(fontData),
-      bold: pw.Font.ttf(fontBoldData),
-    );
-    final pdf = pw.Document(theme: theme);
-
-    var sorted = List<EmployeeReportRowInfo>.from(rows);
-    if (sortColumnIndex != null) {
-      sorted.sort((a, b) {
-        int cmp;
-        switch (sortColumnIndex) {
-          case 0:
-            cmp = a.employeeName.compareTo(b.employeeName);
-            break;
-          case 1:
-            cmp = a.totalMs.compareTo(b.totalMs);
-            break;
-          case 2:
-            cmp = a.normMs.compareTo(b.normMs);
-            break;
-          case 3:
-            cmp = a.deltaMs.compareTo(b.deltaMs);
-            break;
-          default:
-            cmp = 0;
-        }
-        return sortAscending ? cmp : -cmp;
-      });
-    }
-
-    final employeeName = employeeId == null
-        ? l10n.sessionsEmployeeAll
-        : (rows.firstOrNull?.employeeName ?? l10n.sessionsEmployeeAll);
-
-    final fromStr = dateToYmd(
-      DateTime.fromMillisecondsSinceEpoch(fromUtcMs, isUtc: true).toLocal(),
-    );
-    final toStr = dateToYmd(
-      DateTime.fromMillisecondsSinceEpoch(toUtcMs, isUtc: true).toLocal(),
-    );
-    pdf.addPage(
-      pw.MultiPage(
-        pageFormat: PdfPageFormat.a4,
-        margin: pdfPrintFormPageMargin,
-        header: (pw.Context ctx) => pdfPrintFormRunningHeader(),
-        footer: pdfPrintFormFooterBuilder(
-          generatedAtLocal: generatedAt,
-          footerPage: l10n.reportsPdfFooterPage,
-        ),
-        build: (pw.Context ctx) {
-          final tableHeaderStyle = pw.TextStyle(
-            fontWeight: pw.FontWeight.bold,
-            fontSize: pdfPrintFormTableFontSize,
-          );
-          final tableCellStyle = const pw.TextStyle(
-            fontSize: pdfPrintFormTableFontSize,
-          );
-
-          final header = pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            mainAxisSize: pw.MainAxisSize.min,
-            children: [
-              pw.SizedBox(height: pdfPrintFormHeaderToTitleGap),
-              pw.Text(
-                l10n.reportsPdfTitle,
-                style: pdfPrintFormDocumentTitleStyle,
-              ),
-              pw.SizedBox(height: 6),
-              pw.Text(
-                l10n.reportsPdfPeriod(fromStr, toStr),
-                style: const pw.TextStyle(fontSize: 12),
-              ),
-              pw.SizedBox(height: 4),
-              pw.Text(
-                l10n.reportsPdfEmployee(employeeName),
-                style: const pw.TextStyle(fontSize: 11),
-              ),
-              if (sortColumnIndex != null) ...[
-                pw.SizedBox(height: 2),
-                pw.Text(
-                  l10n.reportsPdfSort(_sortColumnName(l10n, sortColumnIndex)),
-                  style: const pw.TextStyle(fontSize: 11),
-                ),
-              ],
-              pw.SizedBox(height: 8),
-            ],
-          );
-
-          final table = pw.Table(
-            border: pdfPrintFormTableBorderHorizontal(),
-            columnWidths: {
-              0: const pw.FlexColumnWidth(3),
-              1: const pw.FlexColumnWidth(1.5),
-              2: const pw.FlexColumnWidth(1.5),
-              3: const pw.FlexColumnWidth(1.5),
-            },
-            children: [
-              pw.TableRow(
-                repeat: true,
-                decoration: const pw.BoxDecoration(color: PdfColors.grey300),
-                children: [
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(6),
-                    child: pw.Text(
-                      l10n.reportsTableEmployee,
-                      style: tableHeaderStyle,
-                    ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(6),
-                    child: pw.Align(
-                      alignment: pw.Alignment.centerRight,
-                      child: pw.Text(
-                        l10n.reportsTableWorked,
-                        style: tableHeaderStyle,
-                      ),
-                    ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(6),
-                    child: pw.Align(
-                      alignment: pw.Alignment.centerRight,
-                      child: pw.Text(
-                        l10n.reportsTablePlanned,
-                        style: tableHeaderStyle,
-                      ),
-                    ),
-                  ),
-                  pw.Padding(
-                    padding: const pw.EdgeInsets.all(6),
-                    child: pw.Align(
-                      alignment: pw.Alignment.centerRight,
-                      child: pw.Text(
-                        l10n.reportsTableBalance,
-                        style: tableHeaderStyle,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              for (var i = 0; i < sorted.length; i++) ...[
-                pw.TableRow(
-                  decoration: pw.BoxDecoration(
-                    color: i.isOdd ? PdfColors.grey100 : PdfColors.white,
-                  ),
-                  children: [
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(6),
-                      child: pw.Text(
-                        sorted[i].employeeName,
-                        maxLines: 2,
-                        overflow: pw.TextOverflow.clip,
-                        style: tableCellStyle,
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(6),
-                      child: pw.Align(
-                        alignment: pw.Alignment.centerRight,
-                        child: pw.Text(
-                          formatDurationMs(sorted[i].totalMs, l10n),
-                          style: tableCellStyle,
-                        ),
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(6),
-                      child: pw.Align(
-                        alignment: pw.Alignment.centerRight,
-                        child: pw.Text(
-                          sorted[i].anyDayHasSchedule
-                              ? formatDurationMs(sorted[i].normMs, l10n)
-                              : l10n.reportsPlannedNoSchedule,
-                          style: tableCellStyle,
-                        ),
-                      ),
-                    ),
-                    pw.Padding(
-                      padding: const pw.EdgeInsets.all(6),
-                      child: pw.Align(
-                        alignment: pw.Alignment.centerRight,
-                        child: pdfPrintFormBalanceText(
-                          ms: sorted[i].deltaMs,
-                          absHmDuration: formatDurationMs(
-                            sorted[i].deltaMs.abs(),
-                            l10n,
-                          ),
-                          baseStyle: tableCellStyle,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          );
-
-          return [header, table];
-        },
-      ),
-    );
-
-    final bytes = await pdf.save();
-    await File(saveLocation.path).writeAsBytes(bytes);
-
-    if (context.mounted) {
-      showAppSnack(context, l10n.reportsExported);
-    }
-  } catch (e) {
-    if (context.mounted) {
-      showAppSnack(
-        context,
-        l10n.reportsFailedLoad(
-          errorMessageForUser(e, l10n.commonErrorOccurred),
-        ),
-        isError: true,
-      );
-    }
   }
 }

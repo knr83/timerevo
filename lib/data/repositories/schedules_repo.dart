@@ -42,19 +42,11 @@ class SchedulesRepo implements ISchedulesRepo {
     }
   }
 
-  Stream<List<ShiftScheduleTemplate>> watchTemplates({bool onlyActive = true}) {
-    final q = _db.select(_db.shiftScheduleTemplates);
-    if (onlyActive) {
-      q.where((t) => t.isActive.equals(1));
-    }
-    q.orderBy([(t) => OrderingTerm.asc(t.name)]);
-    return q.watch();
-  }
-
   /// Stream of schedule templates as domain types (id, name, weekly totals).
   ///
   /// Watches templates, days, and intervals so weekly minutes refresh when
   /// intervals change (not only when template metadata changes).
+  @override
   Stream<List<ScheduleTemplateInfo>> streamTemplateInfos({
     bool onlyActive = true,
   }) {
@@ -115,6 +107,7 @@ ORDER BY t.name ASC
     return a?.templateId;
   }
 
+  @override
   Future<int> createTemplate(String name) async {
     return guardRepoCall(() async {
       return _db.transaction(() async {
@@ -145,6 +138,7 @@ ORDER BY t.name ASC
     });
   }
 
+  @override
   Future<void> updateTemplateName({
     required int id,
     required String name,
@@ -156,6 +150,7 @@ ORDER BY t.name ASC
     });
   }
 
+  @override
   Future<void> setTemplateActive({
     required int id,
     required bool isActive,
@@ -170,6 +165,7 @@ ORDER BY t.name ASC
   }
 
   /// Returns true if any employee is assigned to this template.
+  @override
   Future<bool> hasAssignments(int templateId) async {
     final row =
         await (_db.select(_db.employeeScheduleAssignments)
@@ -181,6 +177,7 @@ ORDER BY t.name ASC
 
   static const _assignedCode = 'schedulesTemplateAssigned';
 
+  @override
   Future<void> deleteTemplate(int templateId) async {
     return guardRepoCall(() async {
       final assigned = await hasAssignments(templateId);
@@ -218,6 +215,7 @@ ORDER BY t.name ASC
     return watchTemplateWeek(templateId).first;
   }
 
+  @override
   Stream<Map<int, DaySchedule>> watchTemplateWeek(int templateId) {
     final d = _db.shiftScheduleTemplateDays;
     final i = _db.shiftScheduleTemplateIntervals;
@@ -260,6 +258,7 @@ ORDER BY t.name ASC
     });
   }
 
+  @override
   Future<void> saveTemplateDay({
     required int templateId,
     required int weekday,
@@ -310,6 +309,7 @@ ORDER BY t.name ASC
   }
 
   /// Saves the entire week in one transaction. On failure, no partial updates.
+  @override
   Future<void> saveTemplateWeek({
     required int templateId,
     required Map<int, DaySchedule> days,
@@ -362,6 +362,7 @@ ORDER BY t.name ASC
   }
 
   /// Creates a new template with the given week in one transaction.
+  @override
   Future<int> createTemplateWithWeek({
     required String name,
     required Map<int, DaySchedule> days,
@@ -432,7 +433,8 @@ ORDER BY t.name ASC
     });
   }
 
-  Future<void> assignDefaultTemplate({
+  @override
+  Future<void> setEmployeeTemplateAssignment({
     required int employeeId,
     required int? templateId,
   }) async {

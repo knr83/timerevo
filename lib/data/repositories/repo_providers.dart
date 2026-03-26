@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../domain/ports/schedules_repo_port.dart';
 import '../db/db_providers.dart';
 import 'absences_repo.dart';
 import 'app_settings_repo.dart';
@@ -24,7 +25,7 @@ final authRepoProvider = Provider<AuthRepo>((ref) {
 
 final employeesRepoProvider = Provider<EmployeesRepo>((ref) {
   final db = ref.watch(appDbProvider);
-  return EmployeesRepo(db);
+  return EmployeesRepo(db, ref.watch(schedulesRepoProvider));
 });
 
 final sessionsRepoProvider = Provider<SessionsRepo>((ref) {
@@ -37,7 +38,7 @@ final absencesRepoProvider = Provider<AbsencesRepo>((ref) {
   return AbsencesRepo(db);
 });
 
-final schedulesRepoProvider = Provider<SchedulesRepo>((ref) {
+final schedulesRepoProvider = Provider<ISchedulesRepo>((ref) {
   final db = ref.watch(appDbProvider);
   return SchedulesRepo(db);
 });

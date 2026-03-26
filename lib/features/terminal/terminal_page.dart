@@ -18,6 +18,8 @@ import '../../common/pdf/employee_daily_pdf_export.dart';
 import '../../common/utils/date_time_picker.dart';
 import '../../common/utils/date_utils.dart';
 import '../../common/utils/employee_display_name.dart';
+import '../../common/utils/is_past_working_day_end.dart';
+import '../../common/utils/terminal_session_duration_format.dart';
 import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
 import '../../common/widgets/app_snack.dart';
@@ -26,7 +28,6 @@ import '../../core/starting_balance_period.dart';
 import '../../core/tracking_start_range_clamp.dart';
 import '../../core/diagnostic_log.dart';
 import '../../core/employee_pin_status.dart';
-import '../../core/error_message_helper.dart';
 import '../../domain/entities/employee_display.dart';
 import '../../domain/entities/employee_info.dart';
 import '../../domain/entities/session_info.dart';
@@ -35,45 +36,25 @@ import '../../ui/legal/legal_links.dart';
 import 'employee_calendar_page.dart';
 import 'terminal_controller.dart';
 
-/// True when the current moment is past the end of the working day for the
-/// session (next calendar day, or same day but current time >= working hours end).
-bool _isPastWorkingDayEnd(SessionInfo open, int endMin) {
-  final sessionStartLocal = DateTime.fromMillisecondsSinceEpoch(
-    open.startTs,
-    isUtc: true,
-  ).toLocal();
-  final sessionDate = DateTime(
-    sessionStartLocal.year,
-    sessionStartLocal.month,
-    sessionStartLocal.day,
+void _appendTerminalDiagnosticUnawaited({
+  required DiagnosticEvent event,
+  String? errorType,
+}) {
+  unawaited(
+    DiagnosticLog.append(
+      DiagnosticLogEntry(
+        event: event,
+        ts: DateTime.now().toUtc().toIso8601String(),
+        errorType: errorType,
+      ),
+    ),
   );
-  final now = DateTime.now();
-  final today = DateTime(now.year, now.month, now.day);
-  final nowMin = now.hour * 60 + now.minute;
-  final isNextDay = today.isAfter(sessionDate);
-  final isSameDayPastEnd =
-      today.year == sessionDate.year &&
-      today.month == sessionDate.month &&
-      today.day == sessionDate.day &&
-      nowMin >= endMin;
-  return isNextDay || isSameDayPastEnd;
 }
 
-/// Minutes between start and end, truncating to minute boundaries.
-int _minutesBetweenUtcMs(int startUtcMs, int endUtcMs) {
-  final startMin = (startUtcMs / 60000).floor();
-  final endMin = (endUtcMs / 60000).floor();
-  return (endMin - startMin).clamp(0, 999999);
-}
-
-String _formatDuration(AppLocalizations l10n, int totalMin) {
-  if (totalMin <= 0) return l10n.terminalDurationLessThanOneMin;
-  final h = totalMin ~/ 60;
-  final m = totalMin % 60;
-  if (h == 0) return l10n.terminalDurationMinutesOnly(m);
-  if (m == 0) return l10n.terminalDurationHoursOnly(h);
-  return l10n.durationHm(h, m);
-}
+Color _clockSuccessBarrierColor(BuildContext context) =>
+    Theme.of(context).brightness == Brightness.light
+    ? Colors.black26
+    : Colors.black54;
 
 class TerminalPage extends ConsumerWidget {
   const TerminalPage({super.key});
@@ -130,9 +111,7 @@ class TerminalPage extends ConsumerWidget {
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
           child: Text(
-            l10n.terminalFailedLoadEmployees(
-              errorMessageForUser(e, l10n.commonErrorOccurred),
-            ),
+            l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
           ),
         ),
       ),
@@ -221,9 +200,7 @@ class _EmployeeSelector extends ConsumerWidget {
           context: context,
           builder: (ctx) => AlertDialog(
             content: Text(
-              l10n.terminalFailedLoadEmployees(
-                errorMessageForUser(err, l10n.commonErrorOccurred),
-              ),
+              l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
             ),
             actions: [
               TextButton(
@@ -489,7 +466,7 @@ class _TerminalActions extends ConsumerWidget {
         final isOpen = open != null;
         final openSession = open;
         final showCloseBlock =
-            openSession != null && _isPastWorkingDayEnd(openSession, endMin);
+            openSession != null && isPastWorkingDayEnd(openSession, endMin);
 
         if (showCloseBlock) {
           final session = openSession;
@@ -582,11 +559,7 @@ class _TerminalActions extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(
-          l10n.terminalFailedLoadEmployees(
-            errorMessageForUser(e, l10n.commonErrorOccurred),
-          ),
-        ),
+        child: Text(l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred)),
       ),
     );
   }
@@ -889,9 +862,9 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
         var totalMin = 0;
         for (final s in sessions) {
           if (s.id == widget.openSessionId) {
-            totalMin += _minutesBetweenUtcMs(s.startTs, nowMs);
+            totalMin += minutesBetweenUtcMsClamp(s.startTs, nowMs);
           } else if (s.endTs != null) {
-            totalMin += _minutesBetweenUtcMs(s.startTs, s.endTs!);
+            totalMin += minutesBetweenUtcMsClamp(s.startTs, s.endTs!);
           }
         }
 
@@ -938,7 +911,7 @@ class _TerminalTodaySessionsState extends State<_TerminalTodaySessions> {
               const SizedBox(height: 8),
               Text(
                 l10n.terminalTotalTodayWithValue(
-                  _formatDuration(l10n, totalMin),
+                  formatTerminalSessionDuration(l10n, totalMin),
                 ),
                 style: theme.textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
@@ -977,14 +950,14 @@ class _TerminalSessionRow extends StatelessWidget {
     final start = TimeFormat.formatTimeOnly(session.startTs);
     final String trailing;
     if (isOpen) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, nowMs),
+        minutesBetweenUtcMsClamp(session.startTs, nowMs),
       );
     } else if (session.endTs != null) {
-      trailing = _formatDuration(
+      trailing = formatTerminalSessionDuration(
         l10n,
-        _minutesBetweenUtcMs(session.startTs, session.endTs!),
+        minutesBetweenUtcMsClamp(session.startTs, session.endTs!),
       );
     } else {
       trailing = l10n.commonOngoing;
@@ -1139,21 +1112,14 @@ Future<void> _handleMyPdf(
   );
 }
 
-Future<void> _handleClockIn(
+/// Returns attendance mode and tolerance when settings are loaded; otherwise
+/// shows [l10n.terminalErrorAttendanceUnavailable] and returns null.
+({AttendanceMode mode, int toleranceMinutes})?
+_readAttendanceSettingsOrShowError(
   BuildContext context,
   WidgetRef ref,
-  int employeeId, {
-  String? note,
-}) async {
-  unawaited(
-    DiagnosticLog.append(
-      DiagnosticLogEntry(
-        event: DiagnosticEvent.terminalClockIn,
-        ts: DateTime.now().toUtc().toIso8601String(),
-      ),
-    ),
-  );
-  final l10n = AppLocalizations.of(context);
+  AppLocalizations l10n,
+) {
   final rawValue = ref.read(attendanceSettingsProvider).value;
   if (rawValue == null) {
     showAppSnack(
@@ -1161,9 +1127,21 @@ Future<void> _handleClockIn(
       l10n.terminalErrorAttendanceUnavailable,
       isError: true,
     );
-    return;
+    return null;
   }
-  final attendance = rawValue;
+  return rawValue;
+}
+
+Future<void> _handleClockIn(
+  BuildContext context,
+  WidgetRef ref,
+  int employeeId, {
+  String? note,
+}) async {
+  _appendTerminalDiagnosticUnawaited(event: DiagnosticEvent.terminalClockIn);
+  final l10n = AppLocalizations.of(context);
+  final attendance = _readAttendanceSettingsOrShowError(context, ref, l10n);
+  if (attendance == null) return;
   final workingHours =
       ref.read(workingHoursSettingsProvider).value ??
       (
@@ -1205,20 +1183,12 @@ Future<void> _handleClockIn(
     return;
   }
   if (result is ClockSaved) {
-    unawaited(
-      DiagnosticLog.append(
-        DiagnosticLogEntry(
-          event: DiagnosticEvent.terminalClockInSuccess,
-          ts: DateTime.now().toUtc().toIso8601String(),
-        ),
-      ),
+    _appendTerminalDiagnosticUnawaited(
+      event: DiagnosticEvent.terminalClockInSuccess,
     );
-    final barrierColor = Theme.of(context).brightness == Brightness.light
-        ? Colors.black26
-        : Colors.black54;
     await showDialog<void>(
       context: context,
-      barrierColor: barrierColor,
+      barrierColor: _clockSuccessBarrierColor(context),
       barrierDismissible: false,
       builder: (context) =>
           _ClockInSuccessDialog(message: l10n.terminalSuccessClockIn),
@@ -1228,7 +1198,9 @@ Future<void> _handleClockIn(
     }
     return;
   }
-  _showClockResult(context, result, isClockIn: true);
+  if (result case final ClockError err) {
+    _showClockError(context, err, isClockIn: true);
+  }
 }
 
 Future<void> _handleClockOut(
@@ -1237,25 +1209,10 @@ Future<void> _handleClockOut(
   int employeeId, {
   String? note,
 }) async {
-  unawaited(
-    DiagnosticLog.append(
-      DiagnosticLogEntry(
-        event: DiagnosticEvent.terminalClockOut,
-        ts: DateTime.now().toUtc().toIso8601String(),
-      ),
-    ),
-  );
+  _appendTerminalDiagnosticUnawaited(event: DiagnosticEvent.terminalClockOut);
   final l10nOut = AppLocalizations.of(context);
-  final rawValueOut = ref.read(attendanceSettingsProvider).value;
-  if (rawValueOut == null) {
-    showAppSnack(
-      context,
-      l10nOut.terminalErrorAttendanceUnavailable,
-      isError: true,
-    );
-    return;
-  }
-  final attendance = rawValueOut;
+  final attendance = _readAttendanceSettingsOrShowError(context, ref, l10nOut);
+  if (attendance == null) return;
   final result = await ref.read(clockOutUseCaseProvider)(
     employeeId,
     note: note,
@@ -1276,23 +1233,15 @@ Future<void> _handleClockOut(
     return;
   }
   if (result is ClockSaved) {
-    unawaited(
-      DiagnosticLog.append(
-        DiagnosticLogEntry(
-          event: DiagnosticEvent.terminalClockOutSuccess,
-          ts: DateTime.now().toUtc().toIso8601String(),
-        ),
-      ),
+    _appendTerminalDiagnosticUnawaited(
+      event: DiagnosticEvent.terminalClockOutSuccess,
     );
     final l10n = AppLocalizations.of(context);
     final overlay = Overlay.of(context);
-    final barrierColor = Theme.of(context).brightness == Brightness.light
-        ? Colors.black26
-        : Colors.black54;
     late OverlayEntry entry;
     entry = OverlayEntry(
       builder: (context) => ColoredBox(
-        color: barrierColor,
+        color: _clockSuccessBarrierColor(context),
         child: Center(
           child: _AnimatedCheckmarkSuccess(
             message: l10n.terminalSuccessClockOut,
@@ -1310,40 +1259,33 @@ Future<void> _handleClockOut(
     });
     return;
   }
-  _showClockResult(context, result, isClockIn: false);
+  if (result case final ClockError err) {
+    _showClockError(context, err, isClockIn: false);
+  }
 }
 
-void _showClockResult(
+/// Error snack for clock-in/out failures. Callers must only pass [ClockError]
+/// (success and note-required paths are handled before this).
+void _showClockError(
   BuildContext context,
-  ClockActionResult result, {
+  ClockError result, {
   required bool isClockIn,
 }) {
-  if (result is ClockError) {
-    unawaited(
-      DiagnosticLog.append(
-        DiagnosticLogEntry(
-          event: isClockIn
-              ? DiagnosticEvent.terminalClockInFail
-              : DiagnosticEvent.terminalClockOutFail,
-          ts: DateTime.now().toUtc().toIso8601String(),
-          errorType: result.kind.name,
-        ),
-      ),
-    );
-  }
+  _appendTerminalDiagnosticUnawaited(
+    event: isClockIn
+        ? DiagnosticEvent.terminalClockInFail
+        : DiagnosticEvent.terminalClockOutFail,
+    errorType: result.kind.name,
+  );
   final l10n = AppLocalizations.of(context);
-  final text = switch (result) {
-    ClockSaved() => l10n.terminalSaved,
-    ClockNeedsNote() => l10n.terminalNoteRequiredMessage,
-    ClockError(:final kind) => switch (kind) {
-      ClockErrorKind.sessionAlreadyOpen => l10n.terminalErrorSessionAlreadyOpen,
-      ClockErrorKind.noOpenSession => l10n.terminalErrorNoOpenSession,
-      ClockErrorKind.employeeInactive => l10n.employeeInactive,
-      ClockErrorKind.hasApprovedAbsence => l10n.terminalErrorHasApprovedAbsence,
-      ClockErrorKind.noScheduleForDay => l10n.terminalErrorNoScheduleForDay,
-    },
+  final text = switch (result.kind) {
+    ClockErrorKind.sessionAlreadyOpen => l10n.terminalErrorSessionAlreadyOpen,
+    ClockErrorKind.noOpenSession => l10n.terminalErrorNoOpenSession,
+    ClockErrorKind.employeeInactive => l10n.employeeInactive,
+    ClockErrorKind.hasApprovedAbsence => l10n.terminalErrorHasApprovedAbsence,
+    ClockErrorKind.noScheduleForDay => l10n.terminalErrorNoScheduleForDay,
   };
-  showAppSnack(context, text, isError: result is ClockError);
+  showAppSnack(context, text, isError: true);
 }
 
 String _reasonTextForNoteKind(AppLocalizations l10n, ClockNeedsNoteKind kind) {

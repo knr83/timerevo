@@ -1,7 +1,5 @@
 import 'package:drift/drift.dart';
 
-import '../../domain/entities/employee_info.dart';
-import '../../domain/entities/employee_status.dart';
 import '../../domain/entities/employee_report_row_info.dart';
 import '../../core/debug_session_log.dart';
 import '../../domain/entities/session_info.dart';
@@ -9,6 +7,7 @@ import '../../domain/entities/session_ref.dart';
 import '../../domain/entities/session_with_employee_info.dart';
 import '../../domain/ports/sessions_repo_port.dart';
 import '../db/app_db.dart';
+import '../mappers/employee_info_from_drift.dart';
 import '../../common/utils/date_utils.dart';
 import '../../core/domain_errors.dart';
 import '../../common/utils/utc_clock.dart';
@@ -96,22 +95,11 @@ class SessionsRepo implements ISessionsRepo {
     canceledAt: w.canceledAt,
   );
 
-  static EmployeeInfo _toEmployeeInfo(Employee e) => EmployeeInfo(
-    id: e.id,
-    firstName: e.firstName,
-    lastName: e.lastName,
-    status: employeeStatusFromString(e.status),
-    usePin: e.usePin == 1,
-    policyAcknowledged: e.policyAcknowledged == 1,
-    hireDate: e.hireDate,
-    terminationDate: e.terminationDate,
-  );
-
   static SessionWithEmployeeInfo _toSessionWithEmployeeInfo(
     SessionWithEmployee sw,
   ) => SessionWithEmployeeInfo(
     session: _toSessionInfo(sw.session),
-    employee: _toEmployeeInfo(sw.employee),
+    employee: employeeInfoFromDrift(sw.employee),
   );
 
   @override

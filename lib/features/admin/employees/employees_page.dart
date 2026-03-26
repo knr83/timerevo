@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/usecase_providers.dart';
 import '../../../common/utils/employee_display_name.dart';
-import '../../../core/error_message_helper.dart';
+import '../../../common/widgets/unsaved_changes_dialog.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_details.dart';
 import '../../../domain/entities/employee_info.dart';
@@ -14,58 +14,56 @@ import '../../../domain/entities/schedule_entities.dart';
 import '../admin_providers.dart';
 import 'employee_card_dialog.dart';
 
+/// Shared unsaved-changes flow for list navigation: dialog → optional save → apply transition.
+Future<void> _runEmployeeListUnsavedGuard({
+  required BuildContext context,
+  required WidgetRef ref,
+  required AppLocalizations l10n,
+  required void Function() applyTransition,
+}) async {
+  final guard = ref.read(employeeCardGuardProvider);
+  if (!guard.isDirty) {
+    applyTransition();
+    return;
+  }
+  final action = await showUnsavedChangesDialog(
+    context,
+    title: l10n.employeeUnsavedChangesTitle,
+    message: l10n.employeeUnsavedChangesMessage,
+    discardLabel: l10n.employeeDiscardChanges,
+  );
+  if (!context.mounted) return;
+  switch (action) {
+    case UnsavedChangesAction.save:
+      final ok = await guard.performSave?.call() ?? false;
+      if (context.mounted && ok) {
+        applyTransition();
+      }
+      break;
+    case UnsavedChangesAction.discard:
+      applyTransition();
+      break;
+    case UnsavedChangesAction.cancel:
+    case null:
+      break;
+  }
+}
+
 Future<void> _handleSelectEmployee(
   BuildContext context,
   WidgetRef ref,
   AppLocalizations l10n,
   int employeeId,
 ) async {
-  final guard = ref.read(employeeCardGuardProvider);
-  if (!guard.isDirty) {
-    ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
-    ref.read(isAddingNewProvider.notifier).state = false;
-    return;
-  }
-  final action = await showDialog<_EmployeeListGuardAction>(
+  await _runEmployeeListUnsavedGuard(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.employeeUnsavedChangesTitle),
-      content: Text(l10n.employeeUnsavedChangesMessage),
-      actions: [
-        TextButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
-          child: Text(l10n.commonCancel),
-        ),
-        TextButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.discard),
-          child: Text(l10n.employeeDiscardChanges),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
-          child: Text(l10n.commonSave),
-        ),
-      ],
-    ),
-  );
-  if (!context.mounted) return;
-  switch (action) {
-    case _EmployeeListGuardAction.save:
-      final ok = await guard.performSave?.call() ?? false;
-      if (context.mounted && ok) {
-        ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
-        ref.read(isAddingNewProvider.notifier).state = false;
-      }
-      break;
-    case _EmployeeListGuardAction.discard:
+    ref: ref,
+    l10n: l10n,
+    applyTransition: () {
       ref.read(selectedEmployeeIdProvider.notifier).state = employeeId;
       ref.read(isAddingNewProvider.notifier).state = false;
-      break;
-    case _EmployeeListGuardAction.cancel:
-    case null:
-      break;
-  }
+    },
+  );
 }
 
 Future<void> _handleSelectNewEmployee(
@@ -73,52 +71,15 @@ Future<void> _handleSelectNewEmployee(
   WidgetRef ref,
   AppLocalizations l10n,
 ) async {
-  final guard = ref.read(employeeCardGuardProvider);
-  if (!guard.isDirty) {
-    ref.read(selectedEmployeeIdProvider.notifier).state = null;
-    ref.read(isAddingNewProvider.notifier).state = true;
-    return;
-  }
-  final action = await showDialog<_EmployeeListGuardAction>(
+  await _runEmployeeListUnsavedGuard(
     context: context,
-    builder: (ctx) => AlertDialog(
-      title: Text(l10n.employeeUnsavedChangesTitle),
-      content: Text(l10n.employeeUnsavedChangesMessage),
-      actions: [
-        TextButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.cancel),
-          child: Text(l10n.commonCancel),
-        ),
-        TextButton(
-          onPressed: () =>
-              Navigator.of(ctx).pop(_EmployeeListGuardAction.discard),
-          child: Text(l10n.employeeDiscardChanges),
-        ),
-        FilledButton(
-          onPressed: () => Navigator.of(ctx).pop(_EmployeeListGuardAction.save),
-          child: Text(l10n.commonSave),
-        ),
-      ],
-    ),
-  );
-  if (!context.mounted) return;
-  switch (action) {
-    case _EmployeeListGuardAction.save:
-      final ok = await guard.performSave?.call() ?? false;
-      if (context.mounted && ok) {
-        ref.read(selectedEmployeeIdProvider.notifier).state = null;
-        ref.read(isAddingNewProvider.notifier).state = true;
-      }
-      break;
-    case _EmployeeListGuardAction.discard:
+    ref: ref,
+    l10n: l10n,
+    applyTransition: () {
       ref.read(selectedEmployeeIdProvider.notifier).state = null;
       ref.read(isAddingNewProvider.notifier).state = true;
-      break;
-    case _EmployeeListGuardAction.cancel:
-    case null:
-      break;
-  }
+    },
+  );
 }
 
 class EmployeesPage extends ConsumerWidget {
@@ -181,17 +142,11 @@ class EmployeesPage extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(
-          l10n.terminalFailedLoadEmployees(
-            errorMessageForUser(e, l10n.commonErrorOccurred),
-          ),
-        ),
+        child: Text(l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred)),
       ),
     );
   }
 }
-
-enum _EmployeeListGuardAction { cancel, discard, save }
 
 class _EmployeesList extends ConsumerWidget {
   const _EmployeesList({

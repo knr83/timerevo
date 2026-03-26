@@ -18,7 +18,6 @@ import '../../../common/widgets/app_snack.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../core/tracking_start_range_clamp.dart';
 import '../../../core/domain_errors.dart';
-import '../../../core/error_message_helper.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../core/journal_interval_projection.dart';
 import '../../../domain/entities/journal_day_overview_row.dart';
@@ -213,13 +212,12 @@ class SessionsPage extends ConsumerWidget {
     ref.listen(trackingStartSettingsProvider, (prev, next) {
       final ymd = trackingStartYmdFromWatch(next);
       final f = ref.read(_journalFiltersProvider);
-      if (f.fromUtcMs == null || f.toUtcMs == null) return;
-      final c = clampUtcRangeToTrackingStart(
-        fromUtcMs: f.fromUtcMs!,
-        toUtcMs: f.toUtcMs!,
+      final c = maybeClampCustomUtcRange(
+        fromUtcMs: f.fromUtcMs,
+        toUtcMs: f.toUtcMs,
         trackingStartYmd: ymd,
       );
-      if (c.fromUtcMs != f.fromUtcMs || c.toUtcMs != f.toUtcMs) {
+      if (c != null) {
         ref.read(_journalFiltersProvider.notifier).state = f.copyWith(
           fromUtcMs: c.fromUtcMs,
           toUtcMs: c.toUtcMs,
@@ -461,7 +459,7 @@ class SessionsPage extends ConsumerWidget {
                       error: (e, _) => Center(
                         child: Text(
                           l10n.sessionsFailedLoadSessions(
-                            errorMessageForUser(e, l10n.commonErrorOccurred),
+                            l10n.commonErrorOccurred,
                           ),
                         ),
                       ),
@@ -587,9 +585,7 @@ class _JournalDetailedTimelineContent extends ConsumerWidget {
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
             child: Text(
-              l10n.sessionsFailedLoadSessions(
-                errorMessageForUser(e, l10n.commonErrorOccurred),
-              ),
+              l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred),
             ),
           ),
         );
@@ -628,11 +624,7 @@ class _JournalTimelineContent extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(
-          l10n.sessionsFailedLoadSessions(
-            errorMessageForUser(e, l10n.commonErrorOccurred),
-          ),
-        ),
+        child: Text(l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred)),
       ),
     );
   }
@@ -739,7 +731,7 @@ Future<void> _confirmCancelJournalSession(
       'sessionCancelNotClosed' => l10n.sessionsCancelNotClosedError,
       'sessionCancelAlreadyCanceled' => l10n.sessionsCancelAlreadyCanceledError,
       'sessionCancelNotFound' => l10n.sessionsCancelNotFoundError,
-      _ => errorMessageForUser(e, l10n.commonErrorOccurred),
+      _ => l10n.commonErrorOccurred,
     };
     showAppSnack(context, msg);
   }
@@ -865,8 +857,6 @@ class _JournalTable extends ConsumerWidget {
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: DataTable(
-          sortColumnIndex: 1,
-          sortAscending: false,
           columnSpacing: 24,
           columns: [
             DataColumn(label: Text(l10n.sessionsTableEmployee)),
@@ -1298,10 +1288,7 @@ class _JournalTable extends ConsumerWidget {
                                 l10n.journalErrorOutsideEmployment,
                               'sessionUpdateCanceled' =>
                                 l10n.sessionsEditCanceledError,
-                              _ => errorMessageForUser(
-                                e,
-                                l10n.commonErrorOccurred,
-                              ),
+                              _ => l10n.commonErrorOccurred,
                             };
                             setState(() {});
                           }
