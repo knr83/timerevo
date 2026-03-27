@@ -436,7 +436,7 @@
   "schedulesDeleteBlockedAssignedTitle": "Cannot delete",
   "schedulesDeleteBlockedAssignedMessage": "This schedule is assigned to employees. Unassign it before deleting.",
   "schedulesRosterPdfTitle": "Work schedule roster",
-  "schedulesRosterPdfExportTooltip": "Export schedule roster (PDF)",
+  "schedulesRosterPdfExportTooltip": "Export schedule roster",
   "schedulesRosterPdfColumnEmployee": "Employee",
   "schedulesRosterPdfColumnWeeklyHours": "Weekly hours",
   "schedulesRosterPdfExported": "Exported.",
@@ -570,6 +570,7 @@
   "sessionsFilterTo": "To",
   "sessionsFilterAny": "Any",
   "sessionsNoSessions": "No sessions.",
+  "sessionsJournalEmptyHint": "Try another date range, status filter, or search.",
   "sessionsFailedLoadSessions": "Failed to load sessions: {error}",
   "@sessionsFailedLoadSessions": {
     "placeholders": {
@@ -664,6 +665,8 @@
   "journalTimelineStateExpectedNoShow": "Expected but no attendance",
   "journalTimelineStateNoData": "No data",
   "journalTimelinePickRangeHint": "Pick a date range for timeline view.",
+  "journalTimelineNoEntriesInPeriod": "No journal entries in this period.",
+  "journalTimelineNoSearchMatches": "No employees match your search.",
   "journalNavPrev": "Previous",
   "journalNavNext": "Next",
   "journalIntervalNow": "now",
@@ -683,6 +686,7 @@
 
   "reportsTitle": "Reports",
   "reportsNoData": "No data.",
+  "reportsNoDataHint": "Try another date range or employee filter.",
   "reportsFailedLoad": "Failed to load report: {error}",
   "@reportsFailedLoad": {
     "placeholders": {

@@ -11,10 +11,13 @@ import '../../../app/theme/theme_settings_controller.dart';
 import '../../../app/tracking_start/tracking_start_settings_controller.dart';
 import '../../../app/working_hours/working_hours_settings_controller.dart';
 import '../../../core/attendance_mode.dart';
+import '../../../common/form_layout.dart';
 import '../../../common/utils/backup_error_messages.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/time_format.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../common/widgets/success_animation_overlay.dart';
 import '../../../app/backup_providers.dart';
 import '../../../app/diagnostic_export_providers.dart';
@@ -124,10 +127,13 @@ class _AttendanceModeSection extends ConsumerWidget {
             final confirmed = await showDialog<bool>(
               context: context,
               builder: (ctx) => AlertDialog(
+                titlePadding: AppDialogChrome.titlePadding,
+                contentPadding: AppDialogChrome.contentPadding,
+                actionsPadding: AppDialogChrome.actionsPadding,
                 title: Text(l10n.settingsAttendanceModeChangeConfirmTitle),
                 content: Text(l10n.settingsAttendanceModeChangeConfirmMessage),
                 actions: [
-                  TextButton(
+                  OutlinedButton(
                     onPressed: () => Navigator.of(ctx).pop(false),
                     child: Text(l10n.commonCancel),
                   ),
@@ -202,7 +208,8 @@ class SettingsPage extends ConsumerWidget {
                     l10n.settingsTitle,
                     style: Theme.of(context).textTheme.headlineSmall,
                   ),
-                  const SizedBox(height: 12),
+                  const AdminPageHeaderDivider(),
+                  FormLayout.betweenFields,
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final dropdownWidth =
@@ -259,7 +266,7 @@ class SettingsPage extends ConsumerWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
+                  FormLayout.betweenFields,
                   LayoutBuilder(
                     builder: (context, constraints) {
                       final dropdownWidth =
@@ -316,7 +323,7 @@ class SettingsPage extends ConsumerWidget {
                       );
                     },
                   ),
-                  const SizedBox(height: 8),
+                  FormLayout.betweenFields,
                   Text(
                     l10n.settingsAttendanceModeLabel,
                     style: Theme.of(context).textTheme.titleSmall,
@@ -441,7 +448,7 @@ class SettingsPage extends ConsumerWidget {
                   const SizedBox(height: 8),
                   const _TrackingStartDateSection(),
                   const SizedBox(height: 24),
-                  ElevatedButton.icon(
+                  FilledButton.icon(
                     onPressed: () async {
                       final ok = await showDialog<bool>(
                         context: context,
@@ -454,8 +461,8 @@ class SettingsPage extends ConsumerWidget {
                     icon: const Icon(Symbols.lock, size: 20),
                     label: Text(l10n.adminChangePin),
                   ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
+                  FormLayout.betweenSections,
+                  FilledButton.icon(
                     onPressed: () async {
                       final result = await ref
                           .read(backupRestoreUseCaseProvider)
@@ -478,8 +485,8 @@ class SettingsPage extends ConsumerWidget {
                     icon: const Icon(Symbols.backup, size: 20),
                     label: Text(l10n.settingsCreateBackup),
                   ),
-                  const SizedBox(height: 12),
-                  ElevatedButton.icon(
+                  FormLayout.betweenSections,
+                  FilledButton.icon(
                     onPressed: () async {
                       final result = await ref
                           .read(backupRestoreUseCaseProvider)
@@ -503,7 +510,7 @@ class SettingsPage extends ConsumerWidget {
                     icon: const Icon(Symbols.restore, size: 20),
                     label: Text(l10n.settingsRestoreFromBackup),
                   ),
-                  const SizedBox(height: 12),
+                  FormLayout.betweenSections,
                   OutlinedButton.icon(
                     onPressed: () async {
                       unawaited(
@@ -631,7 +638,12 @@ class _TrackingStartDateSection extends ConsumerWidget {
         height: 40,
         child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
       ),
-      error: (_, _) => Text(l10n.commonErrorOccurred),
+      error: (_, _) => InlineRecoverableError(
+        message: l10n.commonErrorOccurred,
+        onRetry: () => ref.invalidate(trackingStartSettingsProvider),
+        retryLabel: l10n.initDbErrorRetry,
+        layout: InlineRecoverableErrorLayout.leading,
+      ),
     );
   }
 }

@@ -17,6 +17,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqlite3/sqlite3.dart';
 
+import '../../common/widgets/app_dialog_chrome.dart';
 import '../../core/backup_error_code.dart';
 import '../../core/diagnostic_log.dart';
 import '../../l10n/app_localizations.dart';
@@ -109,15 +110,19 @@ class BackupService {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.settingsRestoreConfirmTitle),
         content: Text(l10n.settingsRestoreConfirmMessage),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
+            style: AppDialogChrome.destructiveFilledStyle(ctx),
             child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
           ),
         ],
@@ -189,15 +194,19 @@ class BackupService {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.settingsRestoreConfirmTitle),
         content: Text(l10n.settingsRestoreConfirmMessage),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(MaterialLocalizations.of(ctx).cancelButtonLabel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
+            style: AppDialogChrome.destructiveFilledStyle(ctx),
             child: Text(MaterialLocalizations.of(ctx).okButtonLabel),
           ),
         ],

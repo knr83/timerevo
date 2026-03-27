@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/legacy.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/absences_providers.dart';
+import '../../../common/app_secondary_text.dart';
 import '../../../app/tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../common/widgets/date_range_filter_bar.dart';
@@ -13,7 +14,9 @@ import '../../../app/usecase_providers.dart';
 import '../../../common/utils/absence_domain_messages.dart';
 import '../../../common/utils/effective_utc_range_for_date_scope.dart';
 import '../../../common/utils/employee_display_name.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../core/domain_errors.dart';
 import '../../../core/tracking_start_range_clamp.dart';
 import '../../../domain/entities/absence_info.dart';
@@ -269,6 +272,7 @@ class AbsencesPage extends ConsumerWidget {
                   ),
                 ],
               ),
+              const AdminPageHeaderDivider(),
               if (employeesAsync.value != null &&
                   employeesAsync.value!.isEmpty) ...[
                 const SizedBox(height: 8),
@@ -291,12 +295,7 @@ class AbsencesPage extends ConsumerWidget {
                       Expanded(
                         child: Text(
                           l10n.sessionsNoEmployeesAvailable,
-                          style: TextStyle(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onErrorContainer,
-                            fontSize: 13,
-                          ),
+                          style: AppSecondaryText.onErrorContainerBody(context),
                         ),
                       ),
                     ],
@@ -366,7 +365,18 @@ class AbsencesPage extends ConsumerWidget {
                       );
                     },
                     loading: () => const SizedBox(width: 180, height: 56),
-                    error: (e, _) => Text(l10n.commonErrorOccurred),
+                    error: (e, _) => SizedBox(
+                      width: 220,
+                      child: InlineRecoverableError(
+                        message: l10n.sessionsFailedLoadEmployees(
+                          l10n.commonErrorOccurred,
+                        ),
+                        onRetry: () =>
+                            ref.invalidate(watchAllEmployeesProvider),
+                        retryLabel: l10n.initDbErrorRetry,
+                        layout: InlineRecoverableErrorLayout.leading,
+                      ),
+                    ),
                   ),
                   DropdownMenu<String?>(
                     key: ValueKey('status_${filters.status}'),
@@ -401,7 +411,20 @@ class AbsencesPage extends ConsumerWidget {
                 child: absencesAsync.when(
                   data: (rows) {
                     if (rows.isEmpty) {
-                      return Center(child: Text(l10n.absencesEmpty));
+                      return Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(l10n.absencesEmpty),
+                            const SizedBox(height: 8),
+                            Text(
+                              l10n.absencesEmptyHint,
+                              textAlign: TextAlign.center,
+                              style: AppSecondaryText.muted(context),
+                            ),
+                          ],
+                        ),
+                      );
                     }
                     final sort = ref.watch(_absencesSortProvider);
                     final employees = employeesAsync.value ?? [];
@@ -432,8 +455,13 @@ class AbsencesPage extends ConsumerWidget {
                   },
                   loading: () =>
                       const Center(child: CircularProgressIndicator()),
-                  error: (e, _) =>
-                      Center(child: Text(l10n.commonErrorOccurred)),
+                  error: (e, _) => Center(
+                    child: InlineRecoverableError(
+                      message: l10n.commonErrorOccurred,
+                      onRetry: () => ref.invalidate(_absencesProvider),
+                      retryLabel: l10n.initDbErrorRetry,
+                    ),
+                  ),
                 ),
               ),
             ],
@@ -633,15 +661,19 @@ class _AbsencesTable extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.absenceDelete),
         content: Text(l10n.absenceDeleteConfirm),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
+            style: AppDialogChrome.destructiveFilledStyle(ctx),
             child: Text(l10n.commonRemove),
           ),
         ],
@@ -674,10 +706,13 @@ class _AbsencesTable extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.absenceApprove),
         content: Text(l10n.absenceApproveConfirm),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.commonCancel),
           ),
@@ -719,6 +754,9 @@ class _AbsencesTable extends ConsumerWidget {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setState) => AlertDialog(
+          titlePadding: AppDialogChrome.titlePadding,
+          contentPadding: AppDialogChrome.contentPadding,
+          actionsPadding: AppDialogChrome.actionsPadding,
           title: Text(l10n.absenceReject),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -742,7 +780,7 @@ class _AbsencesTable extends ConsumerWidget {
             ],
           ),
           actions: [
-            TextButton(
+            OutlinedButton(
               onPressed: () => Navigator.pop(ctx, false),
               child: Text(l10n.commonCancel),
             ),
@@ -750,6 +788,7 @@ class _AbsencesTable extends ConsumerWidget {
               onPressed: reasonCtrl.text.trim().isEmpty
                   ? null
                   : () => Navigator.pop(ctx, true),
+              style: AppDialogChrome.destructiveFilledStyle(ctx),
               child: Text(l10n.commonSave),
             ),
           ],

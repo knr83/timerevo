@@ -934,8 +934,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get schedulesRosterPdfTitle => 'Сводное расписание работы';
 
   @override
-  String get schedulesRosterPdfExportTooltip =>
-      'Экспорт сводного расписания (PDF)';
+  String get schedulesRosterPdfExportTooltip => 'Экспорт сводного расписания';
 
   @override
   String get schedulesRosterPdfColumnEmployee => 'Сотрудник';
@@ -1236,6 +1235,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get sessionsNoSessions => 'Нет смен.';
 
   @override
+  String get sessionsJournalEmptyHint =>
+      'Попробуйте другой период, фильтр по статусу или поиск.';
+
+  @override
   String sessionsFailedLoadSessions(String error) {
     return 'Не удалось загрузить смены: $error';
   }
@@ -1462,6 +1465,14 @@ class AppLocalizationsRu extends AppLocalizations {
       'Выберите диапазон дат для вида по дням.';
 
   @override
+  String get journalTimelineNoEntriesInPeriod =>
+      'За этот период записей в журнале нет.';
+
+  @override
+  String get journalTimelineNoSearchMatches =>
+      'Нет сотрудников, подходящих под поиск.';
+
+  @override
   String get journalNavPrev => 'Назад';
 
   @override
@@ -1485,6 +1496,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reportsNoData => 'Нет данных.';
+
+  @override
+  String get reportsNoDataHint =>
+      'Попробуйте другой период или фильтр по сотруднику.';
 
   @override
   String reportsFailedLoad(String error) {

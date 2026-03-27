@@ -12,6 +12,7 @@ import '../../common/utils/date_utils.dart';
 import '../../common/utils/employee_display_name.dart';
 import '../../common/utils/terminal_session_duration_format.dart';
 import '../../common/utils/time_format.dart';
+import '../../common/widgets/app_dialog_chrome.dart';
 import '../../common/widgets/app_snack.dart';
 import '../../core/domain_errors.dart';
 import '../../domain/entities/absence_info.dart';
@@ -666,15 +667,19 @@ class _DayDetailBlock extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.absenceDelete),
         content: Text(l10n.absenceDeleteConfirm),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.pop(ctx, false),
             child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, true),
+            style: AppDialogChrome.destructiveFilledStyle(ctx),
             child: Text(l10n.commonRemove),
           ),
         ],

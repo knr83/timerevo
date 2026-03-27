@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_markdown_plus/flutter_markdown_plus.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
+
+import '../../common/widgets/app_snack.dart';
 
 /// A reusable screen that renders a bundled markdown document.
 class LegalDocPage extends StatelessWidget {
@@ -58,20 +60,13 @@ class LegalDocPage extends StatelessWidget {
       await Clipboard.setData(ClipboardData(text: text));
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.legalCopiedToClipboard),
-            duration: const Duration(seconds: 2),
-          ),
-        );
+        showAppSnack(context, l10n.legalCopiedToClipboard);
       }
     } catch (e, _) {
       debugPrint('[E] LegalDocPage _copyToClipboard: ${e.runtimeType}');
       if (context.mounted) {
         final l10n = AppLocalizations.of(context);
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text(l10n.legalFailedToCopy)));
+        showAppSnack(context, l10n.legalFailedToCopy, isError: true);
       }
     }
   }

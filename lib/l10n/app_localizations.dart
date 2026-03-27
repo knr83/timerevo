@@ -1765,7 +1765,7 @@ abstract class AppLocalizations {
   /// No description provided for @schedulesRosterPdfExportTooltip.
   ///
   /// In en, this message translates to:
-  /// **'Export schedule roster (PDF)'**
+  /// **'Export schedule roster'**
   String get schedulesRosterPdfExportTooltip;
 
   /// No description provided for @schedulesRosterPdfColumnEmployee.
@@ -2302,6 +2302,12 @@ abstract class AppLocalizations {
   /// **'No sessions.'**
   String get sessionsNoSessions;
 
+  /// No description provided for @sessionsJournalEmptyHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another date range, status filter, or search.'**
+  String get sessionsJournalEmptyHint;
+
   /// No description provided for @sessionsFailedLoadSessions.
   ///
   /// In en, this message translates to:
@@ -2716,6 +2722,18 @@ abstract class AppLocalizations {
   /// **'Pick a date range for timeline view.'**
   String get journalTimelinePickRangeHint;
 
+  /// No description provided for @journalTimelineNoEntriesInPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'No journal entries in this period.'**
+  String get journalTimelineNoEntriesInPeriod;
+
+  /// No description provided for @journalTimelineNoSearchMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'No employees match your search.'**
+  String get journalTimelineNoSearchMatches;
+
   /// No description provided for @journalNavPrev.
   ///
   /// In en, this message translates to:
@@ -2757,6 +2775,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No data.'**
   String get reportsNoData;
+
+  /// No description provided for @reportsNoDataHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Try another date range or employee filter.'**
+  String get reportsNoDataHint;
 
   /// No description provided for @reportsFailedLoad.
   ///

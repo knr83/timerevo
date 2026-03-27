@@ -4,6 +4,7 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../app/app_settings_providers.dart';
+import '../../common/widgets/app_dialog_chrome.dart';
 import '../../ui/legal/legal_doc_page.dart';
 import 'about/about_page.dart';
 import '../../app/auth/admin_auth_controller.dart';
@@ -136,6 +137,9 @@ class _AdminScaffoldState extends ConsumerState<_AdminScaffold> {
       context: context,
       barrierDismissible: true,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.legalNoticeWelcomeTitle),
         content: Text(l10n.legalNoticeWelcomeText),
         actions: [

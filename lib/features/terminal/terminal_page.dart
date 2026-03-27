@@ -14,6 +14,7 @@ import '../../app/tracking_start/tracking_start_settings_controller.dart'
 import '../../app/attendance/attendance_settings_controller.dart';
 import '../../app/working_hours/working_hours_settings_controller.dart';
 import '../../core/attendance_mode.dart';
+import '../../common/app_secondary_text.dart';
 import '../../common/pdf/employee_daily_pdf_export.dart';
 import '../../common/utils/date_time_picker.dart';
 import '../../common/utils/date_utils.dart';
@@ -22,7 +23,9 @@ import '../../common/utils/is_past_working_day_end.dart';
 import '../../common/utils/terminal_session_duration_format.dart';
 import '../../common/utils/time_format.dart';
 import '../../common/utils/utc_clock.dart';
+import '../../common/widgets/app_dialog_chrome.dart';
 import '../../common/widgets/app_snack.dart';
+import '../../common/widgets/inline_recoverable_error.dart';
 import '../../core/domain_errors.dart';
 import '../../core/starting_balance_period.dart';
 import '../../core/tracking_start_range_clamp.dart';
@@ -110,8 +113,10 @@ class TerminalPage extends ConsumerWidget {
         },
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (e, _) => Center(
-          child: Text(
-            l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
+          child: InlineRecoverableError(
+            message: l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
+            onRetry: () => ref.invalidate(terminalEmployeesProvider),
+            retryLabel: l10n.initDbErrorRetry,
           ),
         ),
       ),
@@ -162,6 +167,9 @@ class _EmployeeSelector extends ConsumerWidget {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
+            titlePadding: AppDialogChrome.titlePadding,
+            contentPadding: AppDialogChrome.contentPadding,
+            actionsPadding: AppDialogChrome.actionsPadding,
             content: Text(l10n.terminalPinNotSet),
             actions: [
               TextButton(
@@ -180,6 +188,9 @@ class _EmployeeSelector extends ConsumerWidget {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
+            titlePadding: AppDialogChrome.titlePadding,
+            contentPadding: AppDialogChrome.contentPadding,
+            actionsPadding: AppDialogChrome.actionsPadding,
             content: Text(l10n.terminalPinNotSet),
             actions: [
               TextButton(
@@ -199,6 +210,9 @@ class _EmployeeSelector extends ConsumerWidget {
         showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
+            titlePadding: AppDialogChrome.titlePadding,
+            contentPadding: AppDialogChrome.contentPadding,
+            actionsPadding: AppDialogChrome.actionsPadding,
             content: Text(
               l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
             ),
@@ -318,6 +332,9 @@ class _PinDialogContentState extends State<_PinDialogContent> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(widget.l10n.terminalPinPromptTitle),
       content: TextField(
         controller: _ctrl,
@@ -334,7 +351,7 @@ class _PinDialogContentState extends State<_PinDialogContent> {
         onSubmitted: (_) => _submit(),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _verifying ? null : _cancel,
           child: Text(widget.l10n.commonCancel),
         ),
@@ -397,6 +414,9 @@ class _PolicyAcknowledgmentDialogState
   Widget build(BuildContext context) {
     final l10n = widget.l10n;
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.terminalPolicyRequiredTitle),
       content: SingleChildScrollView(
         child: Column(
@@ -404,12 +424,12 @@ class _PolicyAcknowledgmentDialogState
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Text(l10n.terminalPolicyRequiredMessage),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppDialogChrome.fieldSpacing),
             LegalLinks(
               privacyTitle: l10n.settingsPrivacyPolicy,
               termsTitle: l10n.legalTerms,
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppDialogChrome.fieldSpacing),
             CheckboxListTile(
               value: _acknowledged,
               onChanged: (v) => setState(() => _acknowledged = v ?? false),
@@ -423,7 +443,7 @@ class _PolicyAcknowledgmentDialogState
         ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _saving ? null : () => Navigator.of(context).pop(false),
           child: Text(l10n.commonCancel),
         ),
@@ -748,20 +768,13 @@ class _TerminalActionButtons extends StatelessWidget {
         const SizedBox(height: 12),
         SizedBox(
           width: double.infinity,
-          child: FilledButton.tonal(
+          child: OutlinedButton.icon(
             onPressed: onMyPdf,
-            style: FilledButton.styleFrom(
+            icon: const Icon(Symbols.download, size: 20),
+            label: Text(l10n.terminalMyPdf),
+            style: OutlinedButton.styleFrom(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               minimumSize: const Size(0, 48),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                const Icon(Symbols.picture_as_pdf, size: 20),
-                const SizedBox(width: 8),
-                Text(l10n.terminalMyPdf),
-              ],
             ),
           ),
         ),
@@ -1012,6 +1025,9 @@ Future<({int fromUtcMs, int toUtcMs})?> _showMyPdfPeriodDialog(
   await showDialog<void>(
     context: context,
     builder: (ctx) => AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.reportsPeriodLabel),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1348,6 +1364,9 @@ class _MandatoryNoteDialogState extends State<_MandatoryNoteDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(widget.title),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -1361,7 +1380,7 @@ class _MandatoryNoteDialogState extends State<_MandatoryNoteDialog> {
               color: Theme.of(context).colorScheme.onSurfaceVariant,
             ),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppDialogChrome.fieldSpacing),
           TextField(
             controller: _controller,
             decoration: InputDecoration(
@@ -1375,7 +1394,7 @@ class _MandatoryNoteDialogState extends State<_MandatoryNoteDialog> {
         ],
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(null),
           child: Text(widget.cancelLabel),
         ),
@@ -1700,6 +1719,9 @@ class _UnclosedSessionTimePickerDialogState
     final l10n = widget.l10n;
     final cs = Theme.of(context).colorScheme;
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.terminalUnclosedSessionEndLabel),
       content: SizedBox(
         width: 360,
@@ -1721,10 +1743,7 @@ class _UnclosedSessionTimePickerDialogState
                     Expanded(
                       child: Text(
                         _validationError!,
-                        style: TextStyle(
-                          color: cs.onErrorContainer,
-                          fontSize: 13,
-                        ),
+                        style: AppSecondaryText.onErrorContainerBody(context),
                       ),
                     ),
                   ],
@@ -1747,7 +1766,7 @@ class _UnclosedSessionTimePickerDialogState
         ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(null),
           child: Text(l10n.commonCancel),
         ),

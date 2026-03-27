@@ -4,7 +4,9 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/usecase_providers.dart';
+import '../../../common/app_secondary_text.dart';
 import '../../../common/utils/employee_display_name.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../common/widgets/unsaved_changes_dialog.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_details.dart';
@@ -143,7 +145,11 @@ class EmployeesPage extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred)),
+        child: InlineRecoverableError(
+          message: l10n.terminalFailedLoadEmployees(l10n.commonErrorOccurred),
+          onRetry: () => ref.invalidate(watchAllEmployeesProvider),
+          retryLabel: l10n.initDbErrorRetry,
+        ),
       ),
     );
   }
@@ -163,92 +169,99 @@ class _EmployeesList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final l10n = AppLocalizations.of(context);
-    return Padding(
-      padding: AdminUi.pagePadding,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(
-                l10n.employeesTitle,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              const Spacer(),
-              IconButton(
-                onPressed: () => _handleSelectNewEmployee(context, ref, l10n),
-                icon: const Icon(Symbols.add),
-                tooltip: l10n.commonAdd,
-              ),
-            ],
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: EdgeInsets.fromLTRB(
+            AdminUi.pagePadding.left,
+            AdminUi.pagePadding.top,
+            AdminUi.pagePadding.right,
+            0,
           ),
-          const SizedBox(height: 8),
-          Expanded(
-            child: employees.isEmpty
-                ? Text(l10n.employeesNoEmployeesYet)
-                : ListView.builder(
-                    itemCount: employees.length,
-                    itemBuilder: (context, index) {
-                      final e = employees[index];
-                      final isSelected = e.id == selectedId && !isAddingNew;
-                      final isInactive = e.status != EmployeeStatus.active;
-                      return Opacity(
-                        opacity: isInactive ? 0.6 : 1,
-                        child: Card(
-                          child: MouseRegion(
-                            cursor: SystemMouseCursors.click,
-                            child: ListTile(
-                              selected: isSelected,
-                              leading: isInactive
-                                  ? Icon(
-                                      Symbols.person_off,
-                                      size: 20,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurfaceVariant,
-                                    )
-                                  : null,
-                              title: Text(
-                                EmployeeDisplayName.of(
-                                  EmployeeDisplay(
-                                    firstName: e.firstName,
-                                    lastName: e.lastName,
-                                  ),
-                                ),
-                                style: isInactive
-                                    ? TextStyle(
-                                        color: Theme.of(
-                                          context,
-                                        ).colorScheme.onSurfaceVariant,
-                                      )
-                                    : null,
-                              ),
-                              trailing: isSelected
-                                  ? const Icon(Symbols.chevron_right)
-                                  : null,
-                              onTap: () => _handleSelectEmployee(
-                                context,
-                                ref,
-                                l10n,
-                                e.id,
-                              ),
-                            ),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            l10n.employeesInactiveHiddenHint,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-              fontSize: 12,
+          child: AdminPageHeader(
+            title: l10n.employeesTitle,
+            trailing: IconButton(
+              onPressed: () => _handleSelectNewEmployee(context, ref, l10n),
+              icon: const Icon(Symbols.add),
+              tooltip: l10n.commonAdd,
             ),
           ),
-        ],
-      ),
+        ),
+        Expanded(
+          child: Padding(
+            padding: AdminUi.pagePadding,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: employees.isEmpty
+                      ? Text(l10n.employeesNoEmployeesYet)
+                      : ListView.builder(
+                          itemCount: employees.length,
+                          itemBuilder: (context, index) {
+                            final e = employees[index];
+                            final isSelected =
+                                e.id == selectedId && !isAddingNew;
+                            final isInactive =
+                                e.status != EmployeeStatus.active;
+                            return Opacity(
+                              opacity: isInactive ? 0.6 : 1,
+                              child: Card(
+                                child: MouseRegion(
+                                  cursor: SystemMouseCursors.click,
+                                  child: ListTile(
+                                    selected: isSelected,
+                                    leading: isInactive
+                                        ? Icon(
+                                            Symbols.person_off,
+                                            size: 20,
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurfaceVariant,
+                                          )
+                                        : null,
+                                    title: Text(
+                                      EmployeeDisplayName.of(
+                                        EmployeeDisplay(
+                                          firstName: e.firstName,
+                                          lastName: e.lastName,
+                                        ),
+                                      ),
+                                      style: isInactive
+                                          ? TextStyle(
+                                              color: Theme.of(
+                                                context,
+                                              ).colorScheme.onSurfaceVariant,
+                                            )
+                                          : null,
+                                    ),
+                                    trailing: isSelected
+                                        ? const Icon(Symbols.chevron_right)
+                                        : null,
+                                    onTap: () => _handleSelectEmployee(
+                                      context,
+                                      ref,
+                                      l10n,
+                                      e.id,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  l10n.employeesInactiveHiddenHint,
+                  style: AppSecondaryText.muted(context),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

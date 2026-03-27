@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../common/widgets/app_dialog_chrome.dart';
 import '../data/services/backup_service.dart';
 import '../l10n/app_localizations.dart';
 
@@ -38,6 +39,9 @@ class _RestoreCompletedGateState extends State<RestoreCompletedGate> {
           ? Colors.black54
           : Colors.black87,
       builder: (context) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.settingsRestoreCompletedTitle),
         content: Text(l10n.settingsRestoreCompletedMessage),
         actions: [

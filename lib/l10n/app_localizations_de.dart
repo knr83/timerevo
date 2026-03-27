@@ -937,8 +937,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get schedulesRosterPdfTitle => 'Arbeitszeitplan (Übersicht)';
 
   @override
-  String get schedulesRosterPdfExportTooltip =>
-      'Dienstplan als PDF exportieren';
+  String get schedulesRosterPdfExportTooltip => 'Dienstplan exportieren';
 
   @override
   String get schedulesRosterPdfColumnEmployee => 'Mitarbeiter';
@@ -1239,6 +1238,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get sessionsNoSessions => 'Keine Schichten.';
 
   @override
+  String get sessionsJournalEmptyHint =>
+      'Anderen Datumsbereich, Statusfilter oder Suchbegriff versuchen.';
+
+  @override
   String sessionsFailedLoadSessions(String error) {
     return 'Schichten konnten nicht geladen werden: $error';
   }
@@ -1469,6 +1472,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Wählen Sie einen Datumsbereich für die Zeitleistenansicht.';
 
   @override
+  String get journalTimelineNoEntriesInPeriod =>
+      'Keine Journaleinträge in diesem Zeitraum.';
+
+  @override
+  String get journalTimelineNoSearchMatches =>
+      'Keine Mitarbeitenden entsprechen Ihrer Suche.';
+
+  @override
   String get journalNavPrev => 'Zurück';
 
   @override
@@ -1492,6 +1503,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reportsNoData => 'Keine Daten.';
+
+  @override
+  String get reportsNoDataHint =>
+      'Anderen Datumsbereich oder Mitarbeitendenfilter versuchen.';
 
   @override
   String reportsFailedLoad(String error) {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../common/app_secondary_text.dart';
 import '../../../core/app_info.dart';
 import '../../../ui/legal/legal_links.dart';
 
@@ -21,12 +22,7 @@ class AboutPage extends ConsumerWidget {
             style: Theme.of(context).textTheme.headlineMedium,
           ),
           const SizedBox(height: 8),
-          Text(
-            appVersion,
-            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
+          Text(appVersion, style: AppSecondaryText.muted(context)),
           const SizedBox(height: 32),
           LegalLinks(
             privacyTitle: l10n.settingsPrivacyPolicy,

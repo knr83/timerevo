@@ -4,6 +4,7 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../common/app_secondary_text.dart';
 import 'absences/absences_page.dart';
 import 'employees/employees_page.dart';
 import 'reports/reports_page.dart';
@@ -82,10 +83,15 @@ class _AdminNavRail extends StatelessWidget {
     final unselectedLabelStyle =
         navTheme.unselectedLabelTextStyle ??
         theme.textTheme.labelMedium?.copyWith(color: cs.onSurfaceVariant) ??
+        AppSecondaryText.muted(context) ??
         TextStyle(color: cs.onSurfaceVariant, fontSize: 12);
     final selectedLabelStyle =
         navTheme.selectedLabelTextStyle ??
         theme.textTheme.labelMedium?.copyWith(
+          color: cs.primary,
+          fontWeight: FontWeight.w500,
+        ) ??
+        theme.textTheme.bodySmall?.copyWith(
           color: cs.primary,
           fontWeight: FontWeight.w500,
         ) ??

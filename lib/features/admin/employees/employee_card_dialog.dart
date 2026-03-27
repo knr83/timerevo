@@ -8,7 +8,9 @@ import 'package:phone_form_field/phone_form_field.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
 import '../../../app/locale/locale_settings_controller.dart';
+import '../../../common/app_secondary_text.dart';
 import '../../../app/usecase_providers.dart';
+import '../../../common/form_layout.dart';
 import '../../../common/input/starting_balance_input_formatter.dart';
 import '../../../common/pdf/employee_data_pdf_export.dart';
 import '../../../common/utils/employee_display_name.dart';
@@ -507,7 +509,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         title: Text(l10n.employeeStatusChangeConfirmTitle),
         content: Text(l10n.employeeStatusChangeConfirmMessage),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.commonCancel),
           ),
@@ -729,7 +731,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 ),
           automaticallyImplyLeading: !widget.embedded,
           actions: [
-            if (widget.existing != null)
+            if (widget.existing != null) ...[
               Tooltip(
                 message: l10n.employeeMarkForRemovalTooltip,
                 child: IconButton(
@@ -737,8 +739,8 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   onPressed: _markForRemoval,
                 ),
               ),
-            if (widget.existing != null)
-              TextButton(
+              const SizedBox(width: 8),
+              OutlinedButton.icon(
                 onPressed: () async {
                   await exportEmployeeDataPdf(
                     context,
@@ -753,8 +755,11 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                         showAppSnack(context, msg, isError: isError),
                   );
                 },
-                child: Text(l10n.employeeExportEmployeeData),
+                icon: const Icon(Symbols.download, size: 20),
+                label: Text(l10n.employeeExportEmployeeData),
               ),
+              const SizedBox(width: 8),
+            ],
             Padding(
               padding: const EdgeInsets.only(right: 4),
               child: FilledButton(
@@ -773,11 +778,11 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildGeneralTabContent(l10n),
-                  const SizedBox(height: 12),
+                  FormLayout.betweenSections,
                   _buildContactTabContent(l10n),
-                  const SizedBox(height: 12),
+                  FormLayout.betweenSections,
                   _buildTerminalAccessTabContent(l10n),
-                  const SizedBox(height: 12),
+                  FormLayout.betweenSections,
                   _buildAdditionalTabContent(l10n),
                 ],
               ),
@@ -801,8 +806,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
             children: [
               Text(
                 l10n.commonRequiredFieldsLegend,
-                style: TextStyle(
-                  fontSize: 12,
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),
               ),
@@ -1298,12 +1302,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                                 ? l10n.employeePinStatusSet
                                 : l10n.employeePinStatusNotSet,
                           ),
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.onSurfaceVariant,
-                          ),
+                          style: AppSecondaryText.muted(context),
                         ),
                         if (widget.existing != null) ...[
                           const SizedBox(width: 8),
@@ -1338,10 +1337,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                   padding: const EdgeInsets.only(top: 8, bottom: 12),
                   child: Text(
                     l10n.employeeTerminalAccessDisabled,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                    ),
+                    style: AppSecondaryText.muted(context),
                   ),
                 ),
               const SizedBox(height: 8),
@@ -1431,24 +1427,22 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                         ),
                       ),
                     ),
-                    style: TextStyle(
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 12,
                     ),
                   ),
                 ),
               Text(
                 dataRetentionPolicyText,
-                style: TextStyle(
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
-                  fontSize: 12,
                 ),
               ),
             ],
           ),
         ),
         if (widget.existing != null) ...[
-          const SizedBox(height: 12),
+          FormLayout.betweenSections,
           _SectionCard(
             title: l10n.employeeSectionAudit,
             icon: Symbols.history,
@@ -1463,10 +1457,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                       ),
                     ),
                   ),
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    fontSize: 13,
-                  ),
+                  style: AppSecondaryText.muted(context),
                 ),
                 if (widget.existing!.updatedAt != null) ...[
                   const SizedBox(height: 4),
@@ -1478,10 +1469,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
                         ),
                       ),
                     ),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                    ),
+                    style: AppSecondaryText.muted(context),
                   ),
                 ],
               ],
@@ -1514,7 +1502,7 @@ class _EmployeeCardDialogState extends ConsumerState<EmployeeCardDialog> {
         title: Text(l10n.employeeMarkForRemovalConfirmTitle),
         content: Text(l10n.employeeMarkForRemovalConfirmMessage),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.commonCancel),
           ),
@@ -1635,7 +1623,7 @@ class _SetPinDialogContentState extends State<_SetPinDialogContent> {
         onSubmitted: (_) => _submit(),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _saving ? null : () => Navigator.pop(context, null),
           child: Text(l10n.commonCancel),
         ),

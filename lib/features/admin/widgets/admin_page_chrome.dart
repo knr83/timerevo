@@ -9,19 +9,42 @@ abstract final class AdminUi {
 
   /// Max width for a single content lane on very wide viewports (dense admin UIs).
   static const double maxContentWidth = 1600;
+
+  /// Space between the title/actions row and the header divider (avoids visual collision).
+  static const double headerRowToDividerGap = 6;
+}
+
+/// Theme-aligned divider directly under a page header row (title + actions).
+///
+/// Uses [DividerTheme]; same appearance as the divider under [AdminPageHeader].
+/// Includes a small top gap so the line reads as a separator, not cutting the header.
+class AdminPageHeaderDivider extends StatelessWidget {
+  const AdminPageHeaderDivider({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(top: AdminUi.headerRowToDividerGap),
+      child: const Divider(height: 1),
+    );
+  }
 }
 
 /// Caps content width and top-left aligns it so headers, filters, and main area share one lane.
 class AdminContentWidth extends StatelessWidget {
-  const AdminContentWidth({super.key, required this.child});
+  const AdminContentWidth({super.key, required this.child, this.maxWidth});
 
   final Widget child;
 
+  /// When null, uses [AdminUi.maxContentWidth].
+  final double? maxWidth;
+
   @override
   Widget build(BuildContext context) {
+    final cap = maxWidth ?? AdminUi.maxContentWidth;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final w = math.min(constraints.maxWidth, AdminUi.maxContentWidth);
+        final w = math.min(constraints.maxWidth, cap);
         return Align(
           alignment: Alignment.topLeft,
           child: SizedBox(width: w, child: child),
@@ -57,7 +80,11 @@ class AdminPageHeader extends StatelessWidget {
             Expanded(
               child: Text(
                 title,
-                style: theme.textTheme.headlineSmall,
+                style:
+                    theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ) ??
+                    const TextStyle(fontSize: 22, fontWeight: FontWeight.w600),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -65,7 +92,7 @@ class AdminPageHeader extends StatelessWidget {
             ?trailing,
           ],
         ),
-        if (showBottomDivider) const Divider(height: 1),
+        if (showBottomDivider) const AdminPageHeaderDivider(),
       ],
     );
   }

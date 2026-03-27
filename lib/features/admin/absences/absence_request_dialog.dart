@@ -6,6 +6,7 @@ import '../../../app/absences_providers.dart';
 import '../../../common/utils/absence_domain_messages.dart';
 import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../core/domain_errors.dart';
 import '../../../domain/entities/absence_info.dart';
 import '../../../domain/entities/employee_display.dart';
@@ -194,6 +195,9 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
     final isEdit = widget.existing != null;
 
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(isEdit ? l10n.absenceEditTitle : l10n.absenceCreateTitle),
       content: Stack(
         children: [
@@ -233,7 +237,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                         });
                       },
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: AppDialogChrome.fieldSpacing),
                   ],
                   DropdownButtonFormField<String>(
                     initialValue: _type,
@@ -250,7 +254,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                     ],
                     onChanged: (v) => setState(() => _type = v ?? _type),
                   ),
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppDialogChrome.fieldSpacing),
                   Row(
                     children: [
                       Expanded(
@@ -318,7 +322,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
                       ),
                     ),
                   ],
-                  const SizedBox(height: 12),
+                  const SizedBox(height: AppDialogChrome.fieldSpacing),
                   TextField(
                     controller: _noteCtrl,
                     decoration: InputDecoration(
@@ -343,7 +347,7 @@ class _AbsenceRequestDialogState extends ConsumerState<AbsenceRequestDialog> {
         ],
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: Text(l10n.commonCancel),
         ),

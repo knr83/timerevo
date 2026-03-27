@@ -1,10 +1,9 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
+import '../../../common/app_secondary_text.dart';
 import '../../../app/tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../app/usecase_providers.dart';
@@ -15,6 +14,7 @@ import '../../../common/widgets/date_range_filter_bar.dart';
 import '../widgets/admin_page_chrome.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../core/starting_balance_period.dart';
 import '../../../domain/entities/employee_display.dart';
 import '../../../domain/entities/employee_report_row_info.dart';
@@ -22,25 +22,6 @@ import 'pdf/aggregate_reports_pdf_export.dart';
 
 /// Narrower than [AdminUi.maxContentWidth] so the Reports split feels tighter on wide desktops.
 const double _reportsMaxContentWidth = 1360;
-
-class _ReportsContentWidth extends StatelessWidget {
-  const _ReportsContentWidth({required this.child});
-
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final w = math.min(constraints.maxWidth, _reportsMaxContentWidth);
-        return Align(
-          alignment: Alignment.topLeft,
-          child: SizedBox(width: w, child: child),
-        );
-      },
-    );
-  }
-}
 
 String formatBalanceMs(int ms, AppLocalizations l10n) {
   final s = formatDurationHmFromMs(ms.abs(), l10n);
@@ -121,7 +102,8 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
     return Scaffold(
       body: Padding(
         padding: AdminUi.pagePadding,
-        child: _ReportsContentWidth(
+        child: AdminContentWidth(
+          maxWidth: _reportsMaxContentWidth,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -139,7 +121,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                     ),
                   ),
                   const SizedBox(width: 16),
-                  FilledButton.icon(
+                  OutlinedButton.icon(
                     onPressed: () async {
                       if (rows.isEmpty) return;
                       final range = reportClampedRange(
@@ -158,11 +140,12 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         sortAscending: _sortAscending,
                       );
                     },
-                    icon: const Icon(Symbols.download),
+                    icon: const Icon(Symbols.download, size: 20),
                     label: Text(l10n.reportsExportPdf),
                   ),
                 ],
               ),
+              const AdminPageHeaderDivider(),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -209,7 +192,20 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                       child: rowsAsync.when(
                         data: (_) {
                           if (rows.isEmpty) {
-                            return Center(child: Text(l10n.reportsNoData));
+                            return Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(l10n.reportsNoData),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.reportsNoDataHint,
+                                    textAlign: TextAlign.center,
+                                    style: AppSecondaryText.muted(context),
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                           return _ReportTable(
                             rows: rows,
@@ -226,8 +222,13 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Center(
-                          child: Text(
-                            l10n.reportsFailedLoad(l10n.commonErrorOccurred),
+                          child: InlineRecoverableError(
+                            message: l10n.reportsFailedLoad(
+                              l10n.commonErrorOccurred,
+                            ),
+                            onRetry: () =>
+                                ref.invalidate(watchReportWithNormProvider),
+                            retryLabel: l10n.initDbErrorRetry,
                           ),
                         ),
                       ),
@@ -254,9 +255,7 @@ class _ReportsPageState extends ConsumerState<ReportsPage> {
               const SizedBox(height: 8),
               Text(
                 l10n.reportsOnlyClosedHint,
-                style: TextStyle(
-                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                ),
+                style: AppSecondaryText.muted(context),
               ),
             ],
           ),
@@ -310,7 +309,15 @@ class _EmployeeFilterDropdown extends ConsumerWidget {
         height: 56,
         child: Center(child: CircularProgressIndicator()),
       ),
-      error: (e, _) => Text(l10n.reportsFailedLoad(l10n.commonErrorOccurred)),
+      error: (e, _) => SizedBox(
+        width: 220,
+        child: InlineRecoverableError(
+          message: l10n.reportsFailedLoad(l10n.commonErrorOccurred),
+          onRetry: () => ref.invalidate(watchActiveEmployeesProvider),
+          retryLabel: l10n.initDbErrorRetry,
+          layout: InlineRecoverableErrorLayout.leading,
+        ),
+      ),
     );
   }
 }
@@ -454,7 +461,7 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                TextButton(
+                OutlinedButton.icon(
                   onPressed: () async {
                     final filters = ref.read(reportFiltersProvider);
                     final r = reportClampedRange(
@@ -495,7 +502,8 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                           showAppSnack(context, msg, isError: isError),
                     );
                   },
-                  child: Text(l10n.reportsExportEmployeePdf),
+                  icon: const Icon(Symbols.download, size: 20),
+                  label: Text(l10n.reportsExportEmployeePdf),
                 ),
               ],
             ),
@@ -505,7 +513,20 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
             child: dayRowsAsync.when(
               data: (dayRows) {
                 if (dayRows.isEmpty) {
-                  return Center(child: Text(l10n.reportsNoData));
+                  return Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(l10n.reportsNoData),
+                        const SizedBox(height: 8),
+                        Text(
+                          l10n.reportsNoDataHint,
+                          textAlign: TextAlign.center,
+                          style: AppSecondaryText.muted(context),
+                        ),
+                      ],
+                    ),
+                  );
                 }
                 return SingleChildScrollView(
                   scrollDirection: Axis.vertical,
@@ -556,7 +577,13 @@ class _ReportsDetailsDrawer extends ConsumerWidget {
                 );
               },
               loading: () => const Center(child: CircularProgressIndicator()),
-              error: (e, _) => Center(child: Text(l10n.commonErrorOccurred)),
+              error: (e, _) => Center(
+                child: InlineRecoverableError(
+                  message: l10n.reportsFailedLoad(l10n.commonErrorOccurred),
+                  onRetry: () => ref.invalidate(watchEmployeeDayReportProvider),
+                  retryLabel: l10n.initDbErrorRetry,
+                ),
+              ),
             ),
           ),
         ],

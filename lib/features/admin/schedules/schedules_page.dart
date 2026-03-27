@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../app/schedules_providers.dart';
 import '../../../app/usecase_providers.dart';
 import '../../../core/domain_errors.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../common/widgets/unsaved_changes_dialog.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../widgets/admin_page_chrome.dart';
@@ -161,10 +163,14 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
             ),
             child: AdminPageHeader(
               title: l10n.schedulesTitle,
-              trailing: IconButton(
-                tooltip: l10n.schedulesRosterPdfExportTooltip,
-                icon: const Icon(Symbols.picture_as_pdf),
+              trailing: OutlinedButton.icon(
                 onPressed: () => exportScheduleRosterPdf(context, ref),
+                icon: const Icon(Symbols.download, size: 20),
+                label: Text(
+                  l10n.schedulesRosterPdfExportTooltip,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
             ),
           ),
@@ -209,8 +215,11 @@ class _SchedulesPageState extends ConsumerState<SchedulesPage> {
                 },
                 loading: () => const Center(child: CircularProgressIndicator()),
                 error: (e, _) => Center(
-                  child: Text(
-                    l10n.schedulesFailedLoad(l10n.commonErrorOccurred),
+                  child: InlineRecoverableError(
+                    message: l10n.schedulesFailedLoad(l10n.commonErrorOccurred),
+                    onRetry: () =>
+                        ref.invalidate(watchScheduleTemplatesProvider(false)),
+                    retryLabel: l10n.initDbErrorRetry,
                   ),
                 ),
               ),
@@ -304,6 +313,9 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.schedulesRenameTemplateTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
@@ -322,7 +334,7 @@ class _RenameScheduleDialogState extends ConsumerState<_RenameScheduleDialog> {
         ],
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(),
           child: Text(l10n.commonCancel),
         ),
@@ -524,6 +536,9 @@ class _WeekEditorContent extends ConsumerWidget {
       await showDialog<void>(
         context: context,
         builder: (ctx) => AlertDialog(
+          titlePadding: AppDialogChrome.titlePadding,
+          contentPadding: AppDialogChrome.contentPadding,
+          actionsPadding: AppDialogChrome.actionsPadding,
           title: Text(l10n.schedulesDeleteBlockedAssignedTitle),
           content: Text(l10n.schedulesDeleteBlockedAssignedMessage),
           actions: [
@@ -541,18 +556,19 @@ class _WeekEditorContent extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
+        titlePadding: AppDialogChrome.titlePadding,
+        contentPadding: AppDialogChrome.contentPadding,
+        actionsPadding: AppDialogChrome.actionsPadding,
         title: Text(l10n.schedulesDeleteScheduleTitle),
         content: Text(l10n.schedulesDeleteScheduleMessage),
         actions: [
-          TextButton(
+          OutlinedButton(
             onPressed: () => Navigator.of(ctx).pop(false),
             child: Text(l10n.commonCancel),
           ),
           FilledButton(
             onPressed: () => Navigator.of(ctx).pop(true),
-            style: FilledButton.styleFrom(
-              backgroundColor: Theme.of(ctx).colorScheme.error,
-            ),
+            style: AppDialogChrome.destructiveFilledStyle(ctx),
             child: Text(l10n.schedulesDeleteScheduleButton),
           ),
         ],
@@ -572,6 +588,9 @@ class _WeekEditorContent extends ConsumerWidget {
         await showDialog<void>(
           context: context,
           builder: (ctx) => AlertDialog(
+            titlePadding: AppDialogChrome.titlePadding,
+            contentPadding: AppDialogChrome.contentPadding,
+            actionsPadding: AppDialogChrome.actionsPadding,
             title: Text(l10n.schedulesDeleteBlockedAssignedTitle),
             content: Text(l10n.schedulesDeleteBlockedAssignedMessage),
             actions: [

@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
 import '../../../app/sessions_providers.dart';
+import '../../../common/app_secondary_text.dart';
 import '../../../app/tracking_start/tracking_start_settings_controller.dart'
     show trackingStartSettingsProvider, trackingStartYmdFromWatch;
 import '../../../app/usecase_providers.dart';
@@ -14,7 +15,9 @@ import '../../../common/utils/date_utils.dart';
 import '../../../common/utils/employee_display_name.dart';
 import '../../../common/utils/time_format.dart';
 import '../../../common/utils/utc_clock.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../common/widgets/app_snack.dart';
+import '../../../common/widgets/inline_recoverable_error.dart';
 import '../../../common/widgets/date_range_filter_bar.dart';
 import '../../../core/tracking_start_range_clamp.dart';
 import '../../../core/domain_errors.dart';
@@ -293,6 +296,7 @@ class SessionsPage extends ConsumerWidget {
                   ),
                 ],
               ),
+              const AdminPageHeaderDivider(),
               const SizedBox(height: 8),
               Wrap(
                 spacing: 8,
@@ -461,17 +465,32 @@ class SessionsPage extends ConsumerWidget {
                         data: (rows) {
                           final filtered = _applyClientFilters(rows, filters);
                           if (filtered.isEmpty) {
-                            return Center(child: Text(l10n.sessionsNoSessions));
+                            return Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text(l10n.sessionsNoSessions),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    l10n.sessionsJournalEmptyHint,
+                                    textAlign: TextAlign.center,
+                                    style: AppSecondaryText.muted(context),
+                                  ),
+                                ],
+                              ),
+                            );
                           }
                           return _JournalTable(rows: filtered);
                         },
                         loading: () =>
                             const Center(child: CircularProgressIndicator()),
                         error: (e, _) => Center(
-                          child: Text(
-                            l10n.sessionsFailedLoadSessions(
+                          child: InlineRecoverableError(
+                            message: l10n.sessionsFailedLoadSessions(
                               l10n.commonErrorOccurred,
                             ),
+                            onRetry: () => ref.invalidate(_journalProvider),
+                            retryLabel: l10n.initDbErrorRetry,
                           ),
                         ),
                       ),
@@ -583,8 +602,11 @@ class _JournalDetailedTimelineContent extends ConsumerWidget {
               rows,
               filters.searchQuery,
             );
+            if (rows.isEmpty) {
+              return Center(child: Text(l10n.journalTimelineNoEntriesInPeriod));
+            }
             if (filtered.isEmpty) {
-              return Center(child: Text(l10n.journalTimelinePickRangeHint));
+              return Center(child: Text(l10n.journalTimelineNoSearchMatches));
             }
             return JournalDetailedTimelineGrid(
               rows: filtered,
@@ -596,14 +618,24 @@ class _JournalDetailedTimelineContent extends ConsumerWidget {
           },
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (e, _) => Center(
-            child: Text(
-              l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred),
+            child: InlineRecoverableError(
+              message: l10n.sessionsFailedLoadSessions(
+                l10n.commonErrorOccurred,
+              ),
+              onRetry: () => ref.invalidate(_journalIntervalOverviewProvider),
+              retryLabel: l10n.initDbErrorRetry,
             ),
           ),
         );
       },
       loading: () => const Center(child: CircularProgressIndicator()),
-      error: (e, _) => Center(child: Text(l10n.journalTimelinePickRangeHint)),
+      error: (e, _) => Center(
+        child: InlineRecoverableError(
+          message: l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred),
+          onRetry: () => ref.invalidate(workingHoursSettingsProvider),
+          retryLabel: l10n.initDbErrorRetry,
+        ),
+      ),
     );
   }
 }
@@ -625,8 +657,11 @@ class _JournalTimelineContent extends ConsumerWidget {
     return overviewAsync.when(
       data: (rows) {
         final filtered = _filterDayOverviewBySearch(rows, filters.searchQuery);
+        if (rows.isEmpty) {
+          return Center(child: Text(l10n.journalTimelineNoEntriesInPeriod));
+        }
         if (filtered.isEmpty) {
-          return Center(child: Text(l10n.journalTimelinePickRangeHint));
+          return Center(child: Text(l10n.journalTimelineNoSearchMatches));
         }
         return JournalTimelineGrid(
           rows: filtered,
@@ -636,7 +671,11 @@ class _JournalTimelineContent extends ConsumerWidget {
       },
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (e, _) => Center(
-        child: Text(l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred)),
+        child: InlineRecoverableError(
+          message: l10n.sessionsFailedLoadSessions(l10n.commonErrorOccurred),
+          onRetry: () => ref.invalidate(_journalDayOverviewProvider),
+          retryLabel: l10n.initDbErrorRetry,
+        ),
       ),
     );
   }
@@ -715,15 +754,19 @@ Future<void> _confirmCancelJournalSession(
   final ok = await showDialog<bool>(
     context: context,
     builder: (ctx) => AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.sessionsCancelConfirmTitle),
       content: Text(l10n.sessionsCancelConfirmBody),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: () => Navigator.of(ctx).pop(false),
           child: Text(l10n.commonCancel),
         ),
         FilledButton(
           onPressed: () => Navigator.of(ctx).pop(true),
+          style: AppDialogChrome.destructiveFilledStyle(ctx),
           child: Text(l10n.sessionsCancelWorkSession),
         ),
       ],
@@ -1044,6 +1087,9 @@ class _JournalTable extends ConsumerWidget {
             final reasonEmpty = reasonCtrl.text.trim().isEmpty;
 
             return AlertDialog(
+              titlePadding: AppDialogChrome.titlePadding,
+              contentPadding: AppDialogChrome.contentPadding,
+              actionsPadding: AppDialogChrome.actionsPadding,
               title: Text(l10n.journalEditDialogTitle),
               content: SizedBox(
                 width: 520,
@@ -1071,11 +1117,8 @@ class _JournalTable extends ConsumerWidget {
                             Expanded(
                               child: Text(
                                 validationError!,
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onErrorContainer,
-                                  fontSize: 13,
+                                style: AppSecondaryText.onErrorContainerBody(
+                                  context,
                                 ),
                               ),
                             ),
@@ -1193,7 +1236,7 @@ class _JournalTable extends ConsumerWidget {
                 ),
               ),
               actions: [
-                TextButton(
+                OutlinedButton(
                   onPressed: () => Navigator.of(context).pop(false),
                   child: Text(l10n.commonCancel),
                 ),

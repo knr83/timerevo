@@ -3,6 +3,7 @@ import 'package:timerevo/l10n/app_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../app/usecase_providers.dart';
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../core/domain_errors.dart';
 import '../../../core/pin_validation.dart';
 
@@ -47,6 +48,9 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     return AlertDialog(
+      titlePadding: AppDialogChrome.titlePadding,
+      contentPadding: AppDialogChrome.contentPadding,
+      actionsPadding: AppDialogChrome.actionsPadding,
       title: Text(l10n.changePinTitle),
       content: SizedBox(
         width: 420,
@@ -62,7 +66,7 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
                 border: const OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppDialogChrome.fieldSpacing),
             TextField(
               controller: _newCtrl,
               obscureText: true,
@@ -72,7 +76,7 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
                 border: const OutlineInputBorder(),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: AppDialogChrome.fieldSpacing),
             TextField(
               controller: _confirmCtrl,
               obscureText: true,
@@ -83,7 +87,7 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
               ),
             ),
             if (_error != null) ...[
-              const SizedBox(height: 12),
+              const SizedBox(height: AppDialogChrome.fieldSpacing),
               Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
@@ -96,7 +100,7 @@ class _ChangePinDialogState extends ConsumerState<ChangePinDialog> {
         ),
       ),
       actions: [
-        TextButton(
+        OutlinedButton(
           onPressed: _isSaving ? null : () => Navigator.of(context).pop(false),
           child: Text(l10n.commonCancel),
         ),

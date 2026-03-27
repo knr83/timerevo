@@ -932,7 +932,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get schedulesRosterPdfTitle => 'Work schedule roster';
 
   @override
-  String get schedulesRosterPdfExportTooltip => 'Export schedule roster (PDF)';
+  String get schedulesRosterPdfExportTooltip => 'Export schedule roster';
 
   @override
   String get schedulesRosterPdfColumnEmployee => 'Employee';
@@ -1230,6 +1230,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sessionsNoSessions => 'No sessions.';
 
   @override
+  String get sessionsJournalEmptyHint =>
+      'Try another date range, status filter, or search.';
+
+  @override
   String sessionsFailedLoadSessions(String error) {
     return 'Failed to load sessions: $error';
   }
@@ -1455,6 +1459,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'Pick a date range for timeline view.';
 
   @override
+  String get journalTimelineNoEntriesInPeriod =>
+      'No journal entries in this period.';
+
+  @override
+  String get journalTimelineNoSearchMatches =>
+      'No employees match your search.';
+
+  @override
   String get journalNavPrev => 'Previous';
 
   @override
@@ -1478,6 +1490,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportsNoData => 'No data.';
+
+  @override
+  String get reportsNoDataHint => 'Try another date range or employee filter.';
 
   @override
   String reportsFailedLoad(String error) {

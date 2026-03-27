@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:timerevo/l10n/app_localizations.dart';
 
+import '../../../common/widgets/app_dialog_chrome.dart';
 import '../../../domain/entities/schedule_entities.dart';
 import '../../../common/utils/time_format.dart';
 
@@ -139,6 +140,9 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
       child: Focus(
         autofocus: true,
         child: AlertDialog(
+          titlePadding: AppDialogChrome.titlePadding,
+          contentPadding: AppDialogChrome.contentPadding,
+          actionsPadding: AppDialogChrome.actionsPadding,
           title: Text(title),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -179,7 +183,7 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
                 ],
               ),
               if (error != null) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: AppDialogChrome.fieldSpacing),
                 Text(
                   error,
                   style: TextStyle(color: Theme.of(context).colorScheme.error),
@@ -188,7 +192,7 @@ class _IntervalEditDialogState extends State<_IntervalEditDialog> {
             ],
           ),
           actions: [
-            TextButton(onPressed: _cancel, child: Text(l10n.commonCancel)),
+            OutlinedButton(onPressed: _cancel, child: Text(l10n.commonCancel)),
             FilledButton(
               onPressed: error != null ? null : _trySave,
               child: Text(l10n.commonSave),

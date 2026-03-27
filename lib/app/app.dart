@@ -16,6 +16,7 @@ import 'restore_completed_gate.dart';
 import 'locale/locale_settings_controller.dart';
 import 'theme/app_theme_builder.dart';
 import 'theme/theme_settings_controller.dart';
+import '../common/widgets/app_snack.dart';
 import '../core/diagnostic_log.dart';
 
 class App extends ConsumerWidget {
@@ -114,12 +115,9 @@ class App extends ConsumerWidget {
                             if (result.success &&
                                 result.needsRestart &&
                                 context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(
-                                    l10n.settingsRestoreScheduledRestart,
-                                  ),
-                                ),
+                              showAppSnack(
+                                context,
+                                l10n.settingsRestoreScheduledRestart,
                               );
                             }
                           },
